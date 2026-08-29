@@ -35,10 +35,10 @@
     </div>
     <h1>Modus<span class="lo">&#8209;Lisp</span></h1>
     <hr class="rule-fire">
-    <p class="standfirst">A personal computer written from scratch in Common Lisp: a kernel
-    that boots on real hardware with its own TCP/IP and SSH, and above it a desktop whose window
-    manager, text rasterizer, web engine, TLS stack and image codecs are all its own code. No FFI,
-    except in external tools.</p>
+    <p class="standfirst">A personal computer written from scratch in Common Lisp &mdash; a kernel
+    that boots on bare hardware, and above it a desktop, a browser, a text rasterizer, a TLS stack
+    and forty other libraries, each written as though the operating system underneath might not be
+    there. On the machine this is aimed at, it isn't.</p>
   </header>
 
   <section id="issues">
@@ -125,14 +125,47 @@
     <p class="more"><a href="issues/">The full archive &mdash; every issue back to March 2025 &rarr;</a></p>
   </section>
 
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow">three claims, and where to check them</span>
+      <h2>How it is built</h2>
+    </div>
+
+    <ul class="plain">
+      <li><strong>The compiler leaves no fingerprint of the machine that ran it.</strong> A 32-bit
+      image builds a 64-bit one that is bit-identical to the 64-bit build's, checked by five
+      SHA-256 comparisons across three architectures &mdash;
+      <a href="issues/2026-03-14/">&#8470;&nbsp;4</a>. The whole self-hosting loop runs with no host
+      Lisp in it at all &mdash; <a href="issues/2026-07-25/">&#8470;&nbsp;20</a>.</li>
+
+      <li><strong>Nothing is graded by the thing that wrote it.</strong> The Common Lisp is measured
+      against a conformance suite written by somebody with no stake in it, through a harness rebuilt
+      after it was caught losing 17,587 tests in silence
+      (<a href="issues/2026-04-18/">&#8470;&nbsp;6</a>). Fonts are checked against
+      <code>ttx</code> and HarfBuzz, the Bitcoin engine against Bitcoin Core's own compiled library
+      at zero divergence (<a href="issues/2026-06-20/">&#8470;&nbsp;15</a>), the video encoder
+      against libvpx, the SVG renderer against Chromium. New libraries build the oracle before they
+      build the feature (<a href="issues/2026-07-04/">&#8470;&nbsp;17</a>).</li>
+
+      <li><strong>One C library, in one file.</strong> Putting pixels on a hosted operating
+      system's screen means asking its window server, so
+      <a href="https://github.com/modus-lisp/glass-sdl">glass-sdl</a> binds libSDL2 &mdash; and that
+      is the only third-party native library the workspace links, alongside two POSIX calls where a
+      hosted Lisp has to ask the host. The other foreign code in the tree is oracles: Core's
+      library, Chromium, ffmpeg, linked so the implementations can be told they are wrong.</li>
+    </ul>
+  </section>
+
   <section id="workspace">
     <div class="sec-head">
       <span class="sec-eyebrow">42 repositories, one machine</span>
       <h2>The workspace</h2>
     </div>
-    <p>Each piece is a library in its own right, and every one of them is written the same
-    way: clean-room, in portable Common Lisp, with no foreign code underneath. They are listed
-    here roughly in the order the machine needs them.</p>
+    <p>Each piece is a library in its own right, clean-room and in portable Common Lisp, and each
+    is used by something else here rather than written to be admired. They are grouped by what they
+    are for; the dependencies run mostly downward, and occasionally sideways in ways worth
+    noticing &mdash; the B-tree under the Bitcoin node is also the B-tree under the filesystem
+    that a git repository lives in.</p>
 
     <div class="families">
 
@@ -159,8 +192,9 @@
           <dt><a href="https://github.com/modus-lisp/glass-mcclim">glass-mcclim</a></dt>
           <dd>McCLIM support kept outside glass, so glass need not know McCLIM exists.</dd>
           <dt><a href="https://github.com/modus-lisp/warp">warp</a></dt>
-          <dd>A presentation-based UI kit: views subscribe to result sets and redraw only
-          the deltas.</dd>
+          <dd>A delta protocol rather than a renderer: keyed, budgeted, staleness-annotated
+          updates over typed projections, with a separate encoding per consumer. A browser's DOM
+          and a stream of tokens are peer encodings; neither is privileged.</dd>
           <dt><a href="https://github.com/modus-lisp/warren">warren</a></dt>
           <dd>A Finder-style Miller-column file browser.</dd>
           <dt><a href="https://github.com/modus-lisp/loom">loom</a></dt>
@@ -191,7 +225,8 @@
           <dt><a href="https://github.com/modus-lisp/reed">reed</a></dt>
           <dd>Audio codecs &mdash; decoders for the formats a podcast arrives in.</dd>
           <dt><a href="https://github.com/modus-lisp/webp-pure">webp-pure</a></dt>
-          <dd>A WebP/VP8 decoder to RGB, with no libwebp beneath it.</dd>
+          <dd>A standalone WebP/VP8 decoder to RGB. pigment reaches for it; it stands
+          alone because a video codec's key-frame path is worth having on its own.</dd>
         </dl>
       </div>
 
@@ -199,7 +234,8 @@
         <h4>Sound &amp; tensors</h4>
         <dl>
           <dt><a href="https://github.com/modus-lisp/mill">mill</a></dt>
-          <dd>A tensor engine: strided copies, elementwise ops, the kernels the models need.</dd>
+          <dd>A tensor engine and neural-graph interpreter, extracted from chord once it
+          became clear the engine was not about speech.</dd>
           <dt><a href="https://github.com/modus-lisp/chord">chord</a></dt>
           <dd>Text to speech &mdash; an ONNX graph interpreter running on mill.</dd>
           <dt><a href="https://github.com/modus-lisp/stave">stave</a></dt>
@@ -211,7 +247,9 @@
         <h4>Network &amp; crypto</h4>
         <dl>
           <dt><a href="https://github.com/modus-lisp/seal">seal</a></dt>
-          <dd>A clean-room TLS 1.3 and 1.2 client &mdash; AES-GCM, ChaCha20-Poly1305.</dd>
+          <dd>A clean-room TLS 1.3 and 1.2 client, and since August the workspace's one
+          HTTP and WebSocket client &mdash; it absorbed four hand-rolled ones, including the last
+          library here that was reaching for OpenSSL.</dd>
           <dt><a href="https://github.com/modus-lisp/natrium">natrium</a></dt>
           <dd>Constant-time crypto: the NaCl/libsodium surface, dependency-free.</dd>
           <dt><a href="https://github.com/modus-lisp/secp256k1-fast">secp256k1-fast</a></dt>
@@ -237,15 +275,22 @@
         <h4>Storage &amp; formats</h4>
         <dl>
           <dt><a href="https://github.com/modus-lisp/pagetree">pagetree</a></dt>
-          <dd>A copy-on-write B+tree key/value store &mdash; crash-safe, no mmap.</dd>
+          <dd>A copy-on-write B+tree key/value store &mdash; crash-safe, no mmap. The
+          substrate under both the Bitcoin node's UTXO set and the filesystem below.</dd>
           <dt><a href="https://github.com/modus-lisp/cabinet">cabinet</a></dt>
-          <dd>A hierarchical filesystem built on pagetree.</dd>
+          <dd>A hierarchical filesystem &mdash; inodes, directories and contents in one
+          pagetree keyspace. It exists so that things which expect a filesystem can run where
+          there is no filesystem.</dd>
           <dt><a href="https://github.com/modus-lisp/cairn">cairn</a></dt>
-          <dd>git from scratch: the object model, packfiles, the index.</dd>
+          <dd>git from scratch &mdash; object model, packfiles, index, merge, and both
+          transports, validated against real git. It can keep a repository inside a cabinet, which
+          is how kiln clones this whole organisation with no git binary in the image.</dd>
           <dt><a href="https://github.com/modus-lisp/dist">dist</a></dt>
           <dd>A self-hosted Quicklisp distribution for these libraries.</dd>
           <dt><a href="https://github.com/modus-lisp/cram">cram</a></dt>
-          <dd>DEFLATE and zlib, with <code>Z_SYNC_FLUSH</code> for streaming.</dd>
+          <dd>DEFLATE and zlib, with <code>Z_SYNC_FLUSH</code> for streaming. The
+          workspace's compression: scribe, glass, pigment and cairn all dropped third-party codecs
+          for it.</dd>
           <dt><a href="https://github.com/modus-lisp/zstd-pure">zstd-pure</a></dt>
           <dd>Zstandard, compressor and decompressor.</dd>
           <dt><a href="https://github.com/modus-lisp/brotli-pure">brotli-pure</a></dt>
@@ -261,7 +306,8 @@
           <dt><a href="https://github.com/modus-lisp/operandi-gui">operandi-gui</a></dt>
           <dd>That agent as a warp app: a chat window, standalone or phone-reachable.</dd>
           <dt><a href="https://github.com/modus-lisp/skep">skep</a></dt>
-          <dd>A Nostr agent workspace.</dd>
+          <dd>An agent workspace over Nostr, interoperable with an existing agent
+          protocol and proven against its real client rather than a mock.</dd>
           <dt><a href="https://github.com/modus-lisp/cl-consensus">cl-consensus</a></dt>
           <dd>A clean-room Bitcoin consensus engine and full node.</dd>
         </dl>
