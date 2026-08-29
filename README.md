@@ -51,8 +51,9 @@ $ bin/week --list | tail -3
  25  2026-08-29  22 Aug–28 Aug 2026    88 commits
 ```
 
-The number of an issue therefore never changes as the backfill fills in behind it. №25 was
-published first; №1 is a single commit in March 2025.
+The number of an issue therefore never changes. №25 was published first; №1 is a single commit
+in March 2025. **The archive is complete** — all 25 weeks of the project have an issue — so the
+next one to write is simply the next Saturday.
 
 ## Adding an issue
 
@@ -60,9 +61,10 @@ published first; №1 is a single commit in March 2025.
    turn out to matter. The subjects in this workspace are written to be read, but the *why* is
    almost always in the body.
 
-   Backfill goes **forward**, oldest first. An issue should only know what came before it, which
-   is also the reader's position; written backwards you end up explaining early code in terms of
-   what it later became, and inventing significance the week did not have yet.
+   The backfill was written **forward**, oldest first, and any future one should be. An issue
+   should only know what came before it, which is also the reader's position; written backwards
+   you end up explaining early code in terms of what it later became, and inventing significance
+   the week did not have yet. №17–№25 predate that rule and do contain forward references.
 2. `cp -r issues/2026-08-29 issues/2026-09-05` and rewrite it. Change `<title>`, the `og:` tags,
    the kicker, the headline, the standfirst, the tally and the ledger. The stylesheet needs no
    changes — every class an issue uses already exists.

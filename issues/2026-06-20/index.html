@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Zero divergence — This Week in Modus №15</title>
+<meta name="description" content="This Week in Modus, 13–19 June 2026: a second and third repository appear, a from-scratch Bitcoin consensus engine agrees exactly with Core's own compiled library, and Modus builds a page-pinning collector. 227 commits across 3 repos.">
+<meta property="og:title" content="Zero divergence — This Week in Modus №15">
+<meta property="og:description" content="13–19 June 2026: a from-scratch Bitcoin consensus engine agrees exactly with Core's own compiled library, and Modus builds a page-pinning collector.">
+<meta property="og:type" content="article">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..700&family=Newsreader:opsz,wght@6..72,300..600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../../assets/crier.css">
+</head>
+<body>
+<div class="page">
+
+  <div class="sitebar">
+    <a class="brand" href="../../">crier</a>
+    <nav><a href="../../#issues">Issues</a><a href="https://github.com/modus-lisp">GitHub</a></nav>
+  </div>
+
+  <header class="mast">
+    <div class="kicker">
+      <span>This Week in Modus &mdash; &#8470;&nbsp;15</span>
+      <span>&middot;</span>
+      <span>13&ndash;19 June 2026</span>
+      <span>&middot;</span>
+      <span><b>227 commits</b> &middot; 3 repos</span>
+    </div>
+    <h1>Zero<br><span class="lo">divergence</span></h1>
+    <hr class="rule-fire">
+    <p class="standfirst">For fourteen issues this has been the story of one repository. This week
+    there are three: a from-scratch Bitcoin consensus engine that agrees exactly with Bitcoin
+    Core&rsquo;s own compiled library, the curve implementation underneath it, and Modus itself
+    building a collector that can let foreign code hold a pointer into the heap.</p>
+
+    <div class="tally">
+      <div><span class="n">227</span><span class="l">Commits</span></div>
+      <div><span class="n">3</span><span class="l">Repos moved</span></div>
+      <div><span class="n">221</span><span class="l">Source files</span></div>
+      <div><span class="n">+20k</span><span class="l">Lines added</span></div>
+      <div><span class="n">11.6&times;</span><span class="l">Faster verify</span></div>
+    </div>
+  </header>
+
+  <div class="ledger-wrap">
+    <table class="ledger">
+      <thead><tr><th>Repo</th><th class="num">Commits</th><th></th><th class="num" colspan="2">Lines</th><th>Focus</th></tr></thead>
+      <tbody>
+        <tr><td class="repo">modus</td><td class="num">186</td><td class="barcell"><span class="bar" style="width:100%"></span></td><td class="add">+11,339</td><td class="del">&minus;2,743</td><td class="what">a mostly-copying, page-pinning GC</td></tr>
+        <tr><td class="repo">cl-consensus</td><td class="num">27</td><td class="barcell"><span class="bar" style="width:14.5%"></span></td><td class="add">+7,067</td><td class="del">&minus;1,105</td><td class="what">born; differential-tested against Core</td></tr>
+        <tr><td class="repo">secp256k1-fast</td><td class="num">14</td><td class="barcell"><span class="bar" style="width:7.5%"></span></td><td class="add">+1,632</td><td class="del">&minus;233</td><td class="what">born; Jacobian coordinates, Shamir's trick</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>cl-consensus</em> &nbsp;/&nbsp; 16&ndash;19 June &nbsp;/&nbsp; 27 commits</span>
+      <h2>Agreeing with Core, exactly</h2>
+    </div>
+
+    <p>A Bitcoin consensus engine is the one kind of program where being <em>nearly</em> right is
+    worse than being obviously wrong. A node that disagrees with the network about whether a
+    script is valid does not fail loudly; it follows a different chain. So the interesting question
+    for a from-scratch implementation is not &ldquo;do the tests pass&rdquo; but &ldquo;does it
+    agree, on every input, with the implementation everyone else is running&rdquo;.</p>
+
+    <p>The answer this week is a differential harness that calls into Core&rsquo;s own compiled
+    library over a foreign interface and compares verdicts &mdash; first against
+    <code>libbitcoinconsensus</code>, which found two bugs immediately, then upgraded to the newer
+    <code>libbitcoinkernel</code> so the comparison stays current. On top of that, a fuzzer for
+    taproot witnesses and a harness driving Core&rsquo;s own script test vectors.</p>
+
+    <div class="callout">
+      <p>Full BIP-342 tapscript &mdash; zero divergence against Core on the
+      <code>script_assets</code> vectors.</p>
+      <span class="src">cl-consensus &mdash; 1212345</span>
+    </div>
+
+    <p>Getting there means implementing the parts of Bitcoin that exist only because of history.
+    Legacy signature hashing has to delete the signature from the script it is signing, and has to
+    truncate the script at the last executed <code>OP_CODESEPARATOR</code> &mdash; two rules that
+    make no sense in isolation and that consensus depends on exactly. Both landed this week, along
+    with a running log of which specific blocks in the chain forced which consensus fix, which is
+    the most useful document a project like this can keep.</p>
+
+    <p>The rest is throughput, because a node that is correct and too slow to sync is not a node:
+    script verification fanned across cores in the style Core itself uses, structural checks
+    parallelised across a batch, UTXO lookups prefetched, verification moved off the critical path
+    of the download, block download pipelined behind a background fetcher, and the UTXO set moved
+    onto a disk-backed store with a memory-mapped slot table and an atomic marker.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>secp256k1-fast</em> &nbsp;/&nbsp; 17 June &nbsp;/&nbsp; 14 commits</span>
+      <h2>11.6&times;, from two ideas</h2>
+    </div>
+
+    <p>The curve arithmetic split into its own repository and got two textbook optimisations, both
+    worth exactly what the textbook says. Working in Jacobian coordinates avoids a modular inverse
+    on every point addition &mdash; 7.5 times faster verification. Shamir&rsquo;s trick computes
+    the two scalar multiplications a signature check needs simultaneously rather than separately,
+    for another 1.55. Together, 11.6 times faster than where the week started, and cl-consensus
+    migrated onto the shared implementation the day after.</p>
+
+    <p>A benchmark landed alongside them that estimates initial block download time from the
+    measured cost of a verification, which is the honest way to justify optimisation work: not
+    &ldquo;this is faster&rdquo; but &ldquo;this is the difference between syncing and not&rdquo;.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>modus</em> &nbsp;/&nbsp; 16&ndash;18 June &nbsp;/&nbsp; mcgc stages 1&ndash;4</span>
+      <h2>A collector that lets go</h2>
+    </div>
+
+    <p>A copying collector moves objects, which is what makes it fast and what makes it impossible
+    to hand a pointer to anything outside the Lisp. Modus wants to do input and output, and
+    eventually to call foreign code, so it needs somewhere an object can sit still.</p>
+
+    <p>The answer is a mostly-copying collector in the Bartlett style: the heap is divided into
+    four-kilobyte pages, most objects are copied as usual, and a page that something is holding a
+    pointer into is <em>pinned</em> &mdash; left where it is and treated as part of the new space.
+    It went in over four staged commits, each gated: a metadata region, then a bitmap marking where
+    objects start, then validation of conservative root candidates against that bitmap, then a
+    page-pool allocator and the collector itself, and finally pinning.</p>
+
+    <p>Stage four is a four-bug chain, and the commits name each link: a register clobbered during
+    lazy initialisation, an instruction encoded with the wrong extension bit while rebuilding the
+    free list, a free-run allocator picking the last available run instead of the largest so
+    survivors overflowed it, and pin counts addressed at the wrong scale. There is also a revert
+    in the middle &mdash; back to the last verified-working collector body &mdash; and a
+    <em>fifth</em> bug found afterwards that this dispatch has met before under another name:
+    the gray-object scan walked from object starts and skipped a stale page tail, which the commit
+    labels, accurately, as layout fragility.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>modus</em> &nbsp;/&nbsp; 15&ndash;16 June</span>
+      <h2>And the standard, still</h2>
+    </div>
+    <p>Underneath the collector, the conformance grind continued at its usual pace and in its usual
+    places. <code>type-of</code> was a stub returning NIL and is now implemented.
+    <code>fboundp</code> and <code>fdefinition</code> learned that macros and special operators
+    count. <code>eval-when</code> respects <code>:execute</code>-only at non-top-level.
+    <code>macrolet</code> got a correct expander with <code>&amp;whole</code> and
+    <code>&amp;environment</code>. Complex numbers reached the functions that had been ignoring
+    them &mdash; <code>signum</code>, <code>cis</code>, <code>phase</code>, <code>eql</code>.
+    The pretty printer got real logical blocks. <code>setf</code> places stopped being evaluated
+    twice by the modify macros. And the generic function protocol gained the argument checking the
+    standard requires: call arity, keyword validation, method-to-generic-function congruence, and
+    the rule that <code>call-next-method</code> with different arguments must still apply to the
+    same methods.</p>
+    <p>One diagnosis note is worth quoting because it corrects an earlier one: a cluster of
+    <code>warn</code> failures had been attributed to a compiler closure-capture bug, and turned
+    out to be runtime signal state left dirty between tests.</p>
+  </section>
+
+  <footer>
+    <p><strong>Method.</strong> Commits by <em>author</em> date, 13 to 19 June 2026, across the git
+    repositories in the modus-lisp workspace &mdash; at this point, three. Speedups and divergence
+    results are the ones the commits report. Line counts exclude generated build artefacts.
+    Produced with <code>bin/week 2026-06-20 --log</code>.</p>
+    <p><a href="../../">&larr; All issues</a></p>
+  </footer>
+
+</div>
+</body>
+</html>

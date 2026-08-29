@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The suite, unmodified — This Week in Modus №12</title>
+<meta name="description" content="This Week in Modus, 23–29 May 2026: Modus gains enough runtime macro machinery to load the ANSI test files as they are, rather than as rewritten for it — and AArch64 discovers that NIL and fixnum zero were the same bit pattern. 111 commits.">
+<meta property="og:title" content="The suite, unmodified — This Week in Modus №12">
+<meta property="og:description" content="23–29 May 2026: Modus loads the ANSI test files as they are rather than as rewritten for it, and AArch64 finds that NIL and fixnum zero were the same bit pattern.">
+<meta property="og:type" content="article">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..700&family=Newsreader:opsz,wght@6..72,300..600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../../assets/crier.css">
+</head>
+<body>
+<div class="page">
+
+  <div class="sitebar">
+    <a class="brand" href="../../">crier</a>
+    <nav><a href="../../#issues">Issues</a><a href="https://github.com/modus-lisp">GitHub</a></nav>
+  </div>
+
+  <header class="mast">
+    <div class="kicker">
+      <span>This Week in Modus &mdash; &#8470;&nbsp;12</span>
+      <span>&middot;</span>
+      <span>23&ndash;29 May 2026</span>
+      <span>&middot;</span>
+      <span><b>111 commits</b> &middot; 1 repo</span>
+    </div>
+    <h1>The suite,<br><span class="lo">unmodified</span></h1>
+    <hr class="rule-fire">
+    <p class="standfirst">Every ANSI test Modus had run so far had been preprocessed on the way
+    in. This week it gained enough runtime macro machinery to load the files as they are &mdash;
+    and on AArch64, discovered that NIL and the fixnum zero had been the same bit pattern all
+    along.</p>
+
+    <div class="tally">
+      <div><span class="n">111</span><span class="l">Commits</span></div>
+      <div><span class="n">22</span><span class="l">Source files</span></div>
+      <div><span class="n">+11k</span><span class="l">Lines added</span></div>
+      <div><span class="n">~150</span><span class="l">Files loaded as written</span></div>
+    </div>
+  </header>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>modus</em> &nbsp;/&nbsp; 25 May &nbsp;/&nbsp; 032b2bc</span>
+      <h2>Loading a file nobody rewrote</h2>
+    </div>
+
+    <p>There has been an asterisk on every pass rate in this dispatch so far. The ANSI suite
+    defines its tests with a macro, and Modus could not define macros at runtime, so the test
+    files were being rewritten before Modus ever saw them &mdash; a bridge on the host side
+    turning <code>deftest</code> forms into something the implementation could already compile.
+    That grades a translation, not the original.</p>
+
+    <p>Removing the asterisk took three insights that arrived together, after three earlier
+    attempts had regressed the suite badly enough to be reverted &mdash; by 1,749 tests, and then
+    by 2,860.</p>
+
+    <ul class="plain">
+      <li><strong>The macro could not be written with backquote.</strong> The host Lisp&rsquo;s
+      backquote expands into its own internal forms, which Modus&rsquo;s evaluator has no reason
+      to understand. Building the macro body out of explicit <code>list</code> and
+      <code>quote</code> calls sidesteps a dependency nobody had noticed taking.</li>
+      <li><strong>It had to be defined at runtime, not compile time.</strong> A global
+      compile-time <code>deftest</code> macro broke everything &mdash; that was all three failed
+      attempts. Defining it by evaluating a <code>defmacro</code> during initialisation affects
+      only later evaluation, leaving already-compiled call sites alone.</li>
+      <li><strong>The reader stopped at the first line.</strong> The suite&rsquo;s files open with
+      an Emacs mode line, and the whitespace skipper had no clause for a semicolon comment. The
+      very first form of every file misparsed.</li>
+    </ul>
+
+    <p>With those, one unmodified file loads. Then three more, then seventeen more cons files,
+    then whole directories &mdash; symbols, strings, numbers, iteration, sequences, conditions
+    &mdash; about 150 files of the real suite, read as written. The machinery underneath it is
+    the interesting part: a runtime macro table that extracts all seventy of the compiler&rsquo;s
+    macros at boot, runtime <code>defun</code> callable from <code>eval</code>, runtime
+    <code>loop</code>, <code>block</code>, <code>return-from</code>, <code>tagbody</code> and
+    <code>go</code>, and <code>macrolet</code> in the evaluator.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>modus</em> &nbsp;/&nbsp; 29 May &nbsp;/&nbsp; 7713045</span>
+      <h2>NIL was zero</h2>
+    </div>
+
+    <p>On the AArch64 builds, the register holding NIL had been initialised to raw zero. A fixnum
+    zero is also zero. So <code>(eq 0 nil)</code> was true, <code>(null 0)</code> was true, and
+    every place in the standard where zero is a legitimate value and NIL means &ldquo;not
+    supplied&rdquo; became ambiguous.</p>
+
+    <div class="callout">
+      <p><code>:count 0</code> truncating early. <code>:end 0</code> returning the whole sequence.
+      Slot index zero misrouting in CLOS. <code>documentation</code> returning 0 instead of NIL.
+      One catalogue of symptoms, one cause.</p>
+      <span class="src">modus &mdash; 7713045</span>
+    </div>
+
+    <p>Moving NIL to the same distinguished value x64 uses fixed the class. Two commits either
+    side of it change internal sentinels from NIL to &minus;1 for the same reason &mdash; in the
+    sequence functions and in CLOS slot lookup &mdash; because an &ldquo;absent&rdquo; marker that
+    can collide with a legitimate value is a bug waiting for the right input, and those two were
+    worth 146 and 140 tests respectively.</p>
+
+    <p>That work sat on top of a new platform: a hosted Linux/AArch64 target, with its own ELF
+    wrapper, entry stub, syscall helpers and cross-compiler dispatch. Being able to run the suite
+    on ARM without emulating a whole machine took Linux/AArch64 from 61.4% to 67.4% over two days,
+    with IEEE float opcodes for that architecture worth another 210 tests.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>modus</em> &nbsp;/&nbsp; 25 May &nbsp;/&nbsp; 3aa4de9</span>
+      <h2>Not layout either, for the third time</h2>
+    </div>
+
+    <p>Adding <code>macrolet</code> lost 253 tests, in the pattern that by now everybody
+    recognises. It was not a layout shift. Every shard was re-running the entire suite-loading
+    probe block &mdash; about 150 files, five to ten seconds &mdash; and adding
+    <code>macrolet</code> pushed the total past a ten-minute per-shard wall-clock cap, so the
+    tests at the tail of each shard never ran.</p>
+
+    <p>The diagnosis is a nice piece of method: compare which test identifiers went missing before
+    and after, notice they are all at the ends of shards rather than clustered by feature, run one
+    of them directly, and watch it pass. Three times now &mdash; a docstring in
+    <a href="../2026-05-09/">&#8470;&nbsp;9</a>, a code-generation bug in
+    <a href="../2026-05-23/">&#8470;&nbsp;11</a>, a timeout here &mdash; something has looked like
+    layout fragility and been something ordinary underneath.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>modus</em> &nbsp;/&nbsp; 26&ndash;27 May</span>
+      <h2>LOOP, and a class precedence list that was wrong</h2>
+    </div>
+    <p>Roughly twenty commits went into <code>loop</code>, which is less a macro than a language:
+    destructuring in <code>with</code> and in <code>being the hash-keys</code>, chained
+    <code>with &hellip; and</code> bindings parsed as parallel rather than sequential,
+    <code>of-type</code> honoured so a typed accumulator starts at 0.0 rather than 0,
+    <code>loop-finish</code>, <code>finally</code> skipped when the body returns, a named loop
+    suppressing the implicit block that would otherwise swallow the return, and program errors
+    signalled for duplicate iteration variables and for accumulator clauses that cannot coexist.</p>
+    <p>And the class precedence list was being computed by depth-first search with duplicates
+    removed, which gives the wrong order for diamond inheritance: with D inheriting from B and C,
+    both inheriting A, it produced D&nbsp;B&nbsp;A&nbsp;C &mdash; putting A ahead of C, so
+    C&rsquo;s slot initialisers lost to A&rsquo;s. The standard specifies C3 linearization, and
+    that is now what it does. The commit notes that the shard score did not move, because an
+    unrelated crash upstream was still pre-stamping the range that would have shown it &mdash;
+    a fix landing correctly with no number to show for it, recorded anyway.</p>
+  </section>
+
+  <footer>
+    <p><strong>Method.</strong> Commits by <em>author</em> date, 23 to 29 May 2026, across the git
+    repositories in the modus-lisp workspace &mdash; at this point, one. Percentages are the ones
+    the commits report, on the hosted Linux/AArch64 build. Line counts exclude generated build
+    artefacts. Produced with <code>bin/week 2026-05-30 --log</code>.</p>
+    <p><a href="../../">&larr; All issues</a></p>
+  </footer>
+
+</div>
+</body>
+</html>

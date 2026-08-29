@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The frontier is a form number — This Week in Modus №14</title>
+<meta name="description" content="This Week in Modus, 6–12 June 2026: Modus starts loading real ASDF one form at a time and uses where it stops as its measure of progress, while five garbage-collector roots turn out never to have been scanned. 113 commits.">
+<meta property="og:title" content="The frontier is a form number — This Week in Modus №14">
+<meta property="og:description" content="6–12 June 2026: Modus loads real ASDF one form at a time and uses where it stops as its measure of progress, while five GC roots turn out never to have been scanned.">
+<meta property="og:type" content="article">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..700&family=Newsreader:opsz,wght@6..72,300..600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../../assets/crier.css">
+</head>
+<body>
+<div class="page">
+
+  <div class="sitebar">
+    <a class="brand" href="../../">crier</a>
+    <nav><a href="../../#issues">Issues</a><a href="https://github.com/modus-lisp">GitHub</a></nav>
+  </div>
+
+  <header class="mast">
+    <div class="kicker">
+      <span>This Week in Modus &mdash; &#8470;&nbsp;14</span>
+      <span>&middot;</span>
+      <span>6&ndash;12 June 2026</span>
+      <span>&middot;</span>
+      <span><b>113 commits</b> &middot; 1 repo</span>
+    </div>
+    <h1>The frontier is<br>a form <span class="lo">number</span></h1>
+    <hr class="rule-fire">
+    <p class="standfirst">A conformance suite tells you what fraction of a standard you have. It
+    does not tell you whether real software will load. So Modus started reading actual ASDF, one
+    top-level form at a time, and treating the number of the form it dies on as the thing to
+    improve.</p>
+
+    <div class="tally">
+      <div><span class="n">113</span><span class="l">Commits</span></div>
+      <div><span class="n">26</span><span class="l">Source files</span></div>
+      <div><span class="n">+20k</span><span class="l">Lines added</span></div>
+      <div><span class="n">88.08%</span><span class="l">ANSI, by Friday</span></div>
+    </div>
+  </header>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>modus</em> &nbsp;/&nbsp; 10&ndash;12 June &nbsp;/&nbsp; the gauntlet</span>
+      <h2>The frontier is a form number</h2>
+    </div>
+
+    <p>ASDF is the system definition facility every Common Lisp library expects to exist. It is
+    also a large, old, deliberately portable piece of Lisp that leans on the standard in places
+    nobody writing a fresh implementation would think to visit. Vendoring it and feeding it to
+    <code>load</code> gives a single number: how many top-level forms go in before something
+    breaks.</p>
+
+    <p>The week starts at form 11 and ends with the file reading end to end &mdash; a frontier of
+    243 &mdash; and the intermediate stops are a tour of the standard&rsquo;s corners. Form 11 was
+    a re-export problem: the standard symbols were not marked external at the tail of boot, so
+    <code>cl:&amp;rest</code> could not be referred to from another package. Forms 34, 36 and 40
+    needed <code>define-condition</code> in the evaluator, not just in the compiler. Forms 43 and
+    44 were masking errors rather than reporting them. Form 54 was a reader bug. Form 55 was a
+    garbage collection fault, narrowed to a missing root for a lexical local.</p>
+
+    <p>What makes the gauntlet worth running alongside a test suite is exactly that shape. A test
+    suite is thousands of small independent questions and gives you a percentage; a real file is
+    one long dependent chain, and it fails at the first thing you got wrong. The two measure
+    different properties, and this week the project ran both, side by side, with a README in the
+    vendored directory tracking the frontier as it moved.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>modus</em> &nbsp;/&nbsp; 10&ndash;12 June &nbsp;/&nbsp; e0ea20c, edabf05, a3b11e9, c9c6278</span>
+      <h2>Five things the collector could not see</h2>
+    </div>
+
+    <p>The gauntlet found garbage collection bugs faster than the test suite ever had, and the
+    reason is structural: loading a real file keeps a great deal of live state across many
+    allocations, which is precisely the condition under which a missing root shows up. Four
+    landed in three days.</p>
+
+    <ul class="plain">
+      <li><strong>The keyword and package tables were not roots.</strong> Every keyword and every
+      package lived in tables the collector never scanned, so a collection during runtime
+      evaluation could move them out from under everything. Described in the commit as the number
+      one cause of faults in that path.</li>
+      <li><strong>The multiple-value area was not a root.</strong> Values beyond the first, in
+      flight between a producer and its consumer, were invisible.</li>
+      <li><strong>The conservative stack scan ran off the end.</strong> A missing bound on where
+      from-space stops meant handler-heavy code could corrupt the heap.</li>
+      <li><strong>Object copying had no bounds guard</strong>, and allocation could overshoot the
+      end of the mapped heap, so a sixteen-megabyte guard band now sits between the allocation
+      check and the edge.</li>
+    </ul>
+
+    <p>Each is a one-line entry in a status file with an ANSI figure beside it &mdash; 15,251,
+    then 15,262, then 15,323, then 15,350 &mdash; which is what makes them findable at all. A
+    collector bug that costs a hundred tests looks like a hundred unrelated feature gaps until
+    something narrows it.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>modus</em> &nbsp;/&nbsp; 10&ndash;12 June &nbsp;/&nbsp; bands 2, 3 and 4</span>
+      <h2>86.66% to 88.08%</h2>
+    </div>
+
+    <p>The suite work ran in bands, and each commit records where the number stood. The largest
+    single jump is <code>defgeneric</code>, which went from 13 of 55 tests in its file to 52
+    &mdash; a proper implementation of the standard&rsquo;s semantics for it, plus the dispatch
+    fixes that fell out. Adjustable arrays got reshaping at rank two and above, displacement
+    offsets honoured when copying, and multi-dimensional array literals in the reader. The
+    transcendental functions from <a href="../2026-05-23/">&#8470;&nbsp;11</a>, which had been
+    computed as scaled rationals for portability, gained native IEEE implementations on the
+    architectures that have floating point &mdash; with the rational path still there for the ones
+    that do not.</p>
+
+    <p>CLOS kept filling in: initialisation forms evaluated in the right lexical environment,
+    initargs feeding several slots at once, <code>with-slots</code> and
+    <code>with-accessors</code> writing back through <code>setf</code>, <code>slot-missing</code>
+    honouring <code>eql</code> specializers, and a class keeping its identity when redefined
+    rather than becoming a new one.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>modus</em> &nbsp;/&nbsp; 11&ndash;12 June &nbsp;/&nbsp; fa197aa, 616bbb9</span>
+      <h2>Two reader bugs worth naming</h2>
+    </div>
+    <ul class="plain">
+      <li><strong>Interning collided on case.</strong> Two names that hash the same but differ in
+      case were being treated as the same symbol. The symbol table is keyed by a hash, and a hash
+      is not an identity &mdash; the same lesson as
+      <a href="../2026-04-25/">&#8470;&nbsp;7</a>&rsquo;s subtags, arriving from a different
+      direction.</li>
+      <li><strong>Comments desynchronised dotted lists.</strong> The whitespace scan inside a list
+      had no clause for a semicolon comment, so a comment sitting between a dot and the tail threw
+      the parse off. That was the ASDF gauntlet&rsquo;s form 54 &mdash; a real file, containing a
+      comment in a place no hand-written test would have put one.</li>
+    </ul>
+    <p>Which is the argument for the gauntlet in one paragraph.</p>
+  </section>
+
+  <footer>
+    <p><strong>Method.</strong> Commits by <em>author</em> date, 6 to 12 June 2026, across the git
+    repositories in the modus-lisp workspace &mdash; at this point, one. ANSI figures and
+    percentages are the ones the commits report. Line counts exclude generated build artefacts.
+    Produced with <code>bin/week 2026-06-13 --log</code>.</p>
+    <p><a href="../../">&larr; All issues</a></p>
+  </footer>
+
+</div>
+</body>
+</html>

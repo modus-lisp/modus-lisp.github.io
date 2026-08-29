@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A node, and something to keep it in — This Week in Modus №16</title>
+<meta name="description" content="This Week in Modus, 20–26 June 2026: cl-consensus becomes a whole Bitcoin node with a wallet, pagetree arrives and immediately becomes its UTXO store, and Modus rebuilds the numeric tower around real float types. 124 commits across 4 repos.">
+<meta property="og:title" content="A node, and something to keep it in — This Week in Modus №16">
+<meta property="og:description" content="20–26 June 2026: cl-consensus becomes a whole Bitcoin node with a wallet, pagetree arrives and becomes its UTXO store, and the numeric tower gets real float types.">
+<meta property="og:type" content="article">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..700&family=Newsreader:opsz,wght@6..72,300..600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../../assets/crier.css">
+</head>
+<body>
+<div class="page">
+
+  <div class="sitebar">
+    <a class="brand" href="../../">crier</a>
+    <nav><a href="../../#issues">Issues</a><a href="https://github.com/modus-lisp">GitHub</a></nav>
+  </div>
+
+  <header class="mast">
+    <div class="kicker">
+      <span>This Week in Modus &mdash; &#8470;&nbsp;16</span>
+      <span>&middot;</span>
+      <span>20&ndash;26 June 2026</span>
+      <span>&middot;</span>
+      <span><b>124 commits</b> &middot; 4 repos</span>
+    </div>
+    <h1>A node, and something<br>to keep it <span class="lo">in</span></h1>
+    <hr class="rule-fire">
+    <p class="standfirst">The consensus engine became a whole node &mdash; reorgs, peer discovery,
+    relay, a mempool with real policy, and a wallet that can spend to taproot. A new repository
+    appeared holding a copy-on-write B-tree, and within four days it was the node&rsquo;s UTXO
+    store. This is the first week the workspace behaves like a workspace.</p>
+
+    <div class="tally">
+      <div><span class="n">124</span><span class="l">Commits</span></div>
+      <div><span class="n">4</span><span class="l">Repos moved</span></div>
+      <div><span class="n">89</span><span class="l">Source files</span></div>
+      <div><span class="n">+18k</span><span class="l">Lines added</span></div>
+      <div><span class="n">7&ndash;20&times;</span><span class="l">Faster sorted writes</span></div>
+    </div>
+  </header>
+
+  <div class="ledger-wrap">
+    <table class="ledger">
+      <thead><tr><th>Repo</th><th class="num">Commits</th><th></th><th class="num" colspan="2">Lines</th><th>Focus</th></tr></thead>
+      <tbody>
+        <tr><td class="repo">cl-consensus</td><td class="num">41</td><td class="barcell"><span class="bar" style="width:100%"></span></td><td class="add">+7,468</td><td class="del">&minus;588</td><td class="what">a full node, and a wallet</td></tr>
+        <tr><td class="repo">modus</td><td class="num">72</td><td class="barcell"><span class="bar" style="width:100%"></span></td><td class="add">+4,983</td><td class="del">&minus;857</td><td class="what">the numeric tower, N1 to N5</td></tr>
+        <tr><td class="repo">pagetree</td><td class="num">10</td><td class="barcell"><span class="bar cool" style="width:24.4%"></span></td><td class="add">+5,023</td><td class="del">&minus;400</td><td class="what">born; a copy-on-write B+tree</td></tr>
+        <tr><td class="repo">secp256k1-fast</td><td class="num">1</td><td class="barcell"><span class="bar cool" style="width:2.4%"></span></td><td class="add">+120</td><td class="del">&minus;14</td><td class="what">&nbsp;</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>pagetree &nbsp;cl-consensus</em> &nbsp;/&nbsp; 21&ndash;25 June</span>
+      <h2>Four days from scaffold to production</h2>
+    </div>
+
+    <p>On Sunday a repository appears containing a design and a skeleton for a copy-on-write
+    B+tree key-value store in pure Common Lisp. On Monday it is a working store with commit-atomic
+    free-page reclamation. On Tuesday it gets a compact overflow encoding, a page cache with a
+    clock eviction policy, allocation-free lookups &mdash; about thirteen times faster reads
+    &mdash; and batched sorted writes, seven to twenty times faster than applying them one at a
+    time. On Wednesday, a bottom-up bulk loader that builds a tree in linear time from sorted
+    input.</p>
+
+    <p>And on the same Tuesday, cl-consensus put its UTXO set behind an interface with two
+    implementations and made pagetree one of them &mdash; digest-equivalent to the existing store,
+    checked against a real block download rather than a unit test, with a migration tool for
+    converting an existing database and a streaming build path for deep backlogs.</p>
+
+    <p>That is the first time in this dispatch that a library has been written for one project and
+    consumed by another within the same week, and it is the pattern that will define the workspace
+    from here. A B+tree is a general thing. A UTXO set is a specific thing that needs one. Keeping
+    them apart means the tree can be used again, and means its correctness is somebody&rsquo;s job
+    rather than a footnote in a node.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>cl-consensus</em> &nbsp;/&nbsp; 20&ndash;26 June &nbsp;/&nbsp; 41 commits</span>
+      <h2>From follower to citizen</h2>
+    </div>
+
+    <p>Last week&rsquo;s engine could validate the chain. This week it joins the network. The
+    progression is explicit in the commit subjects, phase by phase: an inbound listener that serves
+    headers, then block storage and serving blocks on request, then announcing new blocks to
+    inbound peers, then accepting and relaying transactions with an orphan pool. Peer discovery
+    over the address protocol with DNS seeds and an address manager, and a download that pulls
+    from several discovered public nodes at once and re-requests whatever stalls.</p>
+
+    <p>Reorganisation &mdash; the part that separates a node from a downloader &mdash; landed as a
+    persistent undo store wired into the live download path, with best-chain activation proven
+    equivalent to the existing logic, the store bounded so it prunes below the reorg window, and a
+    regression gate that mines a real reorg on a private network rather than simulating one.</p>
+
+    <p>The mempool grew the policy that makes it a mempool rather than a list: a fee floor, dust
+    rules, replace-by-fee, ancestor and descendant links, eviction under pressure, expiry, and
+    persistence across restarts. And then a wallet, in three phases &mdash; encodings and
+    hierarchical key derivation, address tracking and balances, and building, signing and handing
+    back a transaction ready to broadcast &mdash; extended the same week to taproot key-path
+    spends, multi-leaf script trees, mnemonic generation and an encrypted seed at rest.</p>
+
+    <p>The week ends in release preparation: a licence, a changelog, an inventory of what has
+    actually been verified and how, environment-specific defaults scrubbed out of the source, a
+    single entry point that runs the node, an offline gate suite, and a fuzzer for the parsers with
+    bounded allocation on untrusted input. Which is the difference between code that works on the
+    machine it was written on and software.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>modus</em> &nbsp;/&nbsp; 24&ndash;26 June &nbsp;/&nbsp; N1 to N5</span>
+      <h2>Floats that know what they are</h2>
+    </div>
+
+    <p>Modus spent the week on the numeric tower, in five numbered stages, and the theme is type
+    identity. A float had been a float; the standard has four of them, and code can ask which one
+    it is holding, print it with the right exponent marker, and rely on an operation on a
+    single-float returning a single-float rather than quietly widening.</p>
+
+    <p>So: distinct subtags for the float types, <code>typep</code> and <code>type-of</code> and
+    <code>subtypep</code> answering correctly about them, the reader producing genuine
+    single-floats, typed literals, per-type exponent markers in the printer, and format contagion
+    preserved through arithmetic, transcendentals and coercion. Then the fixed-format float
+    directive, with digit reduction under a width constraint and precision taken from the
+    value&rsquo;s own type. Then <code>logbitp</code> at huge indices, <code>1+</code> and
+    <code>1-</code> going through checked arithmetic so they promote on overflow instead of
+    wrapping, and complex numbers completed &mdash; square roots and logarithms of negatives
+    returning complex results, with the contagion rules that go with them.</p>
+
+    <p>One commit in the middle is a good example of what this stage of a project costs: a
+    single-float&rsquo;s new subtag collided with the one already used for compiled modules, and
+    had to move. And the bignum work has a cluster of its own &mdash; shifts corrupting values
+    above 124 bits, bit operations routed to the general engine when either side is a bignum, and
+    a documented compiler limitation where an inline shift can corrupt a bignum pointer.</p>
+
+    <div class="callout">
+      <p>Crash-triage guidance: default away from &ldquo;GC fragility&rdquo;.</p>
+      <span class="src">modus &mdash; 2da37ee</span>
+    </div>
+
+    <p>That is a note to the project&rsquo;s future self, and it is the right lesson from the last
+    two months. When something crashed, the first hypothesis had been the garbage collector or the
+    code layout, and it was almost always something ordinary and findable instead &mdash; a
+    docstring, a timeout, a keyword parser, a subtag collision. Writing the correction down where
+    the next session will read it is the cheapest fix in this entire backfill.</p>
+  </section>
+
+  <footer>
+    <p><strong>Method.</strong> Commits by <em>author</em> date, 20 to 26 June 2026, across the git
+    repositories in the modus-lisp workspace &mdash; at this point, four. Speedups are the ones the
+    commits report. Line counts exclude generated build artefacts. Produced with
+    <code>bin/week 2026-06-27 --log</code>.</p>
+    <p><a href="../../">&larr; All issues</a></p>
+  </footer>
+
+</div>
+</body>
+</html>
