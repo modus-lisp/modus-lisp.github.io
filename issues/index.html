@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Archive — crier</title>
+<meta name="description" content="Every issue of This Week in Modus, back to the project's first working week in March 2025.">
+<meta property="og:title" content="The Archive — crier">
+<meta property="og:description" content="Every issue of This Week in Modus, back to the project's first working week in March 2025.">
+<meta property="og:type" content="website">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..700&family=Newsreader:opsz,wght@6..72,300..600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../assets/crier.css">
+</head>
+<body>
+<div class="page">
+
+  <div class="sitebar">
+    <a class="brand" href="../">crier</a>
+    <nav><a href="./">Issues</a><a href="https://github.com/modus-lisp">GitHub</a></nav>
+  </div>
+
+  <header class="mast">
+    <div class="kicker">
+      <span>This Week in Modus</span>
+      <span>&middot;</span>
+      <span>every issue</span>
+    </div>
+    <h1>The<br><span class="lo">Archive</span></h1>
+    <hr class="rule-fire">
+    <p class="standfirst">What moved, across every repository in the workspace, and why it was hard.
+    Numbering runs from the project's first working week, so &#8470;&nbsp;1 is in March 2025 and the
+    count is the number of weeks that have had commits in them. Every week has an issue.</p>
+  </header>
+
+  <section>
+    <h3 class="month">August 2026</h3>
+    <ol class="issues">
+      <li>
+        <a href="2026-08-29/">
+          <span class="no">&#8470;&nbsp;25<br>29 Aug 26</span>
+          <span class="it">The Pi Zero answers the doorbell</span>
+          <span class="dek">A real OpenSSH client logs in to bare-metal Modus on Pi Zero 2 W silicon, then downloads a library and runs it &mdash; and the desktop above it learns its own name and its own resolution. 97 commits.</span>
+        </a>
+      </li>
+      <li>
+        <a href="2026-08-22/">
+          <span class="no">&#8470;&nbsp;24<br>22 Aug 26</span>
+          <span class="it">The stack learns to leave home</span>
+          <span class="dek">kiln and glass-sdl appear, the CL stack runs a REPL on real Pi Zero silicon, one HTTP client replaces four, and half a dozen repos stop assuming whose home directory they are in. 136 commits.</span>
+        </a>
+      </li>
+      <li>
+        <a href="2026-08-15/">
+          <span class="no">&#8470;&nbsp;23<br>15 Aug 26</span>
+          <span class="it">Two packages, one variable</span>
+          <span class="dek">Nine of Modus's name-keyed registries turn out to be blind to packages, one of them mis-dispatching in silence; the build starts checking itself; and alexandria finishes at 230/230. 273 commits.</span>
+        </a>
+      </li>
+      <li>
+        <a href="2026-08-08/">
+          <span class="no">&#8470;&nbsp;22<br>8 Aug 26</span>
+          <span class="it">Speech, both ways</span>
+          <span class="dek">A text-to-speech engine, a speech recognizer, and a desktop that types what it hears into whichever window has focus. Underneath, the JIT stops falling back to the interpreter. 218 commits.</span>
+        </a>
+      </li>
+      <li>
+        <a href="2026-08-01/">
+          <span class="no">&#8470;&nbsp;21<br>1 Aug 26</span>
+          <span class="it">629 bytes of desktop</span>
+          <span class="dek">A VP8 encoder written from the RFC goes from its first entropy coder to Safari decoding a live Lisp desktop, in four days. Also a PDF renderer, three audio decoders, and Acid3 at 100/100. 294 commits.</span>
+        </a>
+      </li>
+    </ol>
+    <h3 class="month">July 2026</h3>
+    <ol class="issues">
+      <li>
+        <a href="2026-07-25/">
+          <span class="no">&#8470;&nbsp;20<br>25 Jul 26</span>
+          <span class="it">Modus compiles Modus</span>
+          <span class="dek">The SBCL-free self-hosting cycle closes, held up at the last by one uninitialised counter. weft lands 256 spec sections, a VNC drag goes from 18 fps to 76, and a Lisp desktop appears in a browser tab. 414 commits.</span>
+        </a>
+      </li>
+      <li>
+        <a href="2026-07-18/">
+          <span class="no">&#8470;&nbsp;19<br>18 Jul 26</span>
+          <span class="it">Ten repositories in seven days</span>
+          <span class="dek">glass, cairn, conch, natrium, cram, cabinet, operandi and three more are created in one week &mdash; and immediately start depending on each other. 291 commits.</span>
+        </a>
+      </li>
+      <li>
+        <a href="2026-07-11/">
+          <span class="no">&#8470;&nbsp;18<br>11 Jul 26</span>
+          <span class="it">Two things deleted</span>
+          <span class="dek">Modus removes its tree-walking evaluator and keeps the bytecode one; cl-tor removes OpenSSL, five days after seal was born, and starts hosting an onion service. 233 commits.</span>
+        </a>
+      </li>
+      <li>
+        <a href="2026-07-04/">
+          <span class="no">&#8470;&nbsp;17<br>4 Jul 26</span>
+          <span class="it">Build the oracle first</span>
+          <span class="dek">Ten repositories appear &mdash; a web engine that finishes at Acid3 100/100, a JavaScript engine at 88% of test262, a text rasterizer with hinting &mdash; and every one of them starts by building the thing that will grade it. 437 commits.</span>
+        </a>
+      </li>
+    </ol>
+    <h3 class="month">June 2026</h3>
+    <ol class="issues">
+      <li>
+        <a href="2026-06-27/">
+          <span class="no">&#8470;&nbsp;16<br>27 Jun 26</span>
+          <span class="it">A node, and something to keep it in</span>
+          <span class="dek">cl-consensus becomes a whole Bitcoin node with a wallet, pagetree arrives and is its UTXO store four days later, and Modus rebuilds the numeric tower around real float types. 124 commits.</span>
+        </a>
+      </li>
+      <li>
+        <a href="2026-06-20/">
+          <span class="no">&#8470;&nbsp;15<br>20 Jun 26</span>
+          <span class="it">Zero divergence</span>
+          <span class="dek">A from-scratch Bitcoin consensus engine agrees exactly with Core's own compiled library on the taproot vectors, and Modus builds a collector that can let foreign code hold a pointer into the heap. 227 commits.</span>
+        </a>
+      </li>
+      <li>
+        <a href="2026-06-13/">
+          <span class="no">&#8470;&nbsp;14<br>13 Jun 26</span>
+          <span class="it">The frontier is a form number</span>
+          <span class="dek">Modus starts loading real ASDF one form at a time and treats where it stops as the thing to improve, while five garbage-collector roots turn out never to have been scanned. 113 commits.</span>
+        </a>
+      </li>
+      <li>
+        <a href="2026-06-06/">
+          <span class="no">&#8470;&nbsp;13<br>6 Jun 26</span>
+          <span class="it">A Lisp that loads</span>
+          <span class="dek">Modus becomes an image that reads Lisp rather than a compiler that emits a program. Symbols learn which package they belong to, integers lose their size limit, and the layout cascade stops reproducing. 173 commits.</span>
+        </a>
+      </li>
+    </ol>
+    <h3 class="month">May 2026</h3>
+    <ol class="issues">
+      <li>
+        <a href="2026-05-30/">
+          <span class="no">&#8470;&nbsp;12<br>30 May 26</span>
+          <span class="it">The suite, unmodified</span>
+          <span class="dek">Enough runtime macro machinery to load the ANSI files as they are rather than as rewritten &mdash; and on AArch64, the discovery that NIL and the fixnum zero had been the same bit pattern. 111 commits.</span>
+        </a>
+      </li>
+      <li>
+        <a href="2026-05-23/">
+          <span class="no">&#8470;&nbsp;11<br>23 May 26</span>
+          <span class="it">An object system, and a number system</span>
+          <span class="dek">CLOS stops being a set of stubs and becomes a real protocol, and the numeric tower gets IEEE floats, complex numbers and transcendentals computed as exact rationals. 87 commits.</span>
+        </a>
+      </li>
+      <li>
+        <a href="2026-05-16/">
+          <span class="no">&#8470;&nbsp;10<br>16 May 26</span>
+          <span class="it">Every wedge root-caused</span>
+          <span class="dek">The bare-metal harness removes every one of its pre-stamped failure ranges by bisecting each wedge to its cause &mdash; 1,602 passing to 5,529, and no band-aids left. 111 commits.</span>
+        </a>
+      </li>
+      <li>
+        <a href="2026-05-09/">
+          <span class="no">&#8470;&nbsp;9<br>9 May 26</span>
+          <span class="it">The bug was a docstring</span>
+          <span class="dek">Two weeks of layout fragility root-caused to docstrings being compiled into function prologues &mdash; and the ANSI suite ported to bare metal, where there is no fork to isolate it with. 62 commits.</span>
+        </a>
+      </li>
+      <li>
+        <a href="2026-05-02/">
+          <span class="no">&#8470;&nbsp;8<br>2 May 26</span>
+          <span class="it">A heuristic is a bug you haven't hit yet</span>
+          <span class="dek">Tests that pass or fail depending on where the code sits in memory, a fuzzer built to catch them, and three type predicates that had never checked anything &mdash; they had been ruling things out. 159 commits.</span>
+        </a>
+      </li>
+    </ol>
+    <h3 class="month">April 2026</h3>
+    <ol class="issues">
+      <li>
+        <a href="2026-04-25/">
+          <span class="no">&#8470;&nbsp;7<br>25 Apr 26</span>
+          <span class="it">Lost: none</span>
+          <span class="dek">The harness stops losing tests entirely, and the reason so many were crashing turns out to be that closures and symbols had the same shape &mdash; so calling one could call the other. 82 commits.</span>
+        </a>
+      </li>
+      <li>
+        <a href="2026-04-18/">
+          <span class="no">&#8470;&nbsp;6<br>18 Apr 26</span>
+          <span class="it">Counting what actually ran</span>
+          <span class="dek">A Common Lisp runtime built in layers, a copying collector in x64 assembly, a reported 99.994% on the ANSI suite &mdash; and then the discovery that 17,587 of those tests had never run. 107 commits.</span>
+        </a>
+      </li>
+      <li>
+        <a href="2026-04-11/">
+          <span class="no">&#8470;&nbsp;5<br>11 Apr 26</span>
+          <span class="it">Somebody else's tests</span>
+          <span class="dek">Modus stops grading itself and wires up Paul Dietz's ANSI suite, symbols become real objects with identity, the compiler learns to emit Linux binaries, and three documented limitations turn out not to exist. 50 commits.</span>
+        </a>
+      </li>
+    </ol>
+    <h3 class="month">March 2026</h3>
+    <ol class="issues">
+      <li>
+        <a href="2026-03-14/">
+          <span class="no">&#8470;&nbsp;4<br>14 Mar 26</span>
+          <span class="it">The Fixpoint of Theseus</span>
+          <span class="dek">Five SHA-256 comparisons prove the compiler leaves no fingerprint of the machine that ran it: a 32-bit image builds a 64-bit one bit-identical to the 64-bit build. Then Movitz is deleted. 3 commits.</span>
+        </a>
+      </li>
+      <li>
+        <a href="2026-03-07/">
+          <span class="no">&#8470;&nbsp;3<br>7 Mar 26</span>
+          <span class="it">A Pi with no SD card</span>
+          <span class="dek">Modus leaves the emulator: real Pi Zero 2 W silicon, booted over USB, reached by SSH across a USB Ethernet gadget it implements itself. The compiler compiles its own 759 functions. 3 commits.</span>
+        </a>
+      </li>
+    </ol>
+    <h3 class="month">February 2026</h3>
+    <ol class="issues">
+      <li>
+        <a href="2026-02-28/">
+          <span class="no">&#8470;&nbsp;2<br>28 Feb 26</span>
+          <span class="it">Nine architectures in four commits</span>
+          <span class="dek">Work resumes after eleven months, and not where it stopped. A 64-bit rewrite with actors and SMP, a kernel that recompiles itself from source it carries inside, and a portable bytecode ISA with nine backends. 4 commits.</span>
+        </a>
+      </li>
+    </ol>
+    <h3 class="month">March 2025</h3>
+    <ol class="issues">
+      <li>
+        <a href="2025-03-15/">
+          <span class="no">&#8470;&nbsp;1<br>15 Mar 25</span>
+          <span class="it">A quick hack, on Movitz</span>
+          <span class="dek">The first commit is a prototype: 29,000 lines of Modus on 55,000 lines of somebody else's bare-metal Lisp, booting under QEMU into a REPL with TLS and SSH. It answered its question and was abandoned ten days after filing. 1 commit.</span>
+        </a>
+      </li>
+    </ol>
+  </section>
+
+  <footer>
+    <p>Every claim comes out of the commit log; the method note at the foot of an issue says what
+    was measured and what was left out. <a href="../">Back to the front page</a> &middot;
+    <a href="https://github.com/modus-lisp/modus-lisp.github.io">Source</a></p>
+  </footer>
+
+</div>
+</body>
+</html>

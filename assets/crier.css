@@ -387,6 +387,17 @@ ol.issues .dek { grid-column: 2; color: var(--ink-soft); font-weight: 300; max-w
   ol.issues .dek { grid-column: 1; }
 }
 
+p.more {
+  font-family: var(--mono);
+  font-size: 13px;
+  letter-spacing: .04em;
+  margin-top: 26px;
+  padding-top: 18px;
+  border-top: 1px solid var(--hair);
+}
+p.more a { text-decoration: none; }
+p.more a:hover { text-decoration: underline; }
+
 p.backfill {
   font-family: var(--mono);
   font-size: 12px;

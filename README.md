@@ -16,7 +16,8 @@ explained.
 
 | | |
 |---|---|
-| `index.html` | The front page: what the project is, the issue index, a map of all 42 repositories. |
+| `index.html` | The front page: what the project is, the newest and oldest issues, a map of all 42 repositories. |
+| `issues/index.html` | The archive — every issue, grouped by month. |
 | `issues/YYYY-MM-DD/index.html` | One issue of **This Week in Modus** — what moved, across every repo, and why it was hard. The date is the Saturday that closes the week. |
 | `bin/week` | Everything an issue is made of: the ledger, and every commit subject grouped by repo. |
 | `assets/crier.css` | The whole design system. Tokens, then chrome, then prose. There is no second stylesheet. |
@@ -73,7 +74,9 @@ next one to write is simply the next Saturday.
 2. `cp -r issues/2026-08-29 issues/2026-09-05` and rewrite it. Change `<title>`, the `og:` tags,
    the kicker, the headline, the standfirst, the tally and the ledger. The stylesheet needs no
    changes — every class an issue uses already exists.
-3. Add one `<li>` to `ol.issues` in `index.html`, newest first.
+3. Add one `<li>` to the top of the **Latest** list in `index.html`, and drop the oldest entry
+   out of that list so it stays at five. The "From the beginning" list below it never changes.
+4. Add the same `<li>` to `issues/index.html`, under its month heading.
 
 ## House rules for the writing
 
