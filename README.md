@@ -80,6 +80,11 @@ published first; №1 is a single commit in March 2025.
   happens before the allocation.
 - **The reader is a stranger.** Not everyone reading knows what a seat, a shard, or a
   constant vector is. Say it in the sentence rather than linking away.
+- **A gap in the numbers is not necessarily a gap in the work — and vice versa.** №1 sits
+  eleven months before №2 because its *author* date is March 2025; its *committer* date is
+  February 2026, because the repository was created on the way back from a break. The gap was
+  real, and the log alone would not have shown it. Check `%cd` against `%ad` before drawing a
+  conclusion from a date, and ask a human when the repository cannot answer.
 - **Length follows the week.** №17 is 437 commits and runs six sections; №1 is one commit and
   runs three paragraphs. A single-repo week gets no ledger table, because a one-row table is
   furniture. Nothing here is printed and nothing is sold against it, so there is no length to

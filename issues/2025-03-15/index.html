@@ -70,19 +70,38 @@
     you should be able to read every layer eventually has to own the bottom one too. When work
     resumes in February 2026, it does not resume here.</p>
 
-    <h3>The gap</h3>
+    <h3>The gap, and how nearly it hides</h3>
 
-    <p>Three hundred and forty-nine days pass before the next commit. This dispatch numbers its
-    issues by weeks that have commits in them, so &#8470;&nbsp;2 is the last week of February
-    2026 &mdash; the gap is a single line in the archive and about a year in life. Nothing in the
-    repository explains it, and this is a weekly that reports what the commit log says, so
-    neither will we.</p>
+    <p>Three hundred and forty-nine days pass before the next commit. The project was shelved,
+    and picked up again the following February. That much is simply what happened &mdash; but it
+    is worth saying that the commit log does not really show it, and a careless reading of this
+    repository would report the opposite.</p>
+
+    <p>A git commit carries two timestamps: when the work was written, and when it was recorded.
+    On this one they are eleven months apart, and on everything after it they agree:</p>
+
+    <div class="console">
+      <span class="cap">modus &mdash; git log --format='%ad / %cd'</span>
+<pre>abd9648   author 2025-03-11   committer <span class="ret">2026-02-13</span>   Modus: bare-metal Lisp OS on Movitz
+89f6713   author 2026-02-23   committer 2026-02-23   Modus64: native 64-bit Lisp OS</pre>
+    </div>
+
+    <p>This repository was made on the way back. The older system was carried into it as a first
+    commit, dated to when it was written rather than when it was filed, and ten days later the
+    rewrite in <a href="../2026-02-28/">&#8470;&nbsp;2</a> began. Read by committer date, there is
+    no pause here at all &mdash; just ten busy days in February. Read by author date, which is
+    what this dispatch uses and what the numbering above follows, the year is visible.</p>
+
+    <p>Both readings are honest about the file they came from and only one is honest about the
+    project, which is the whole argument for preferring author dates &mdash; and a standing
+    reminder that a gap between two issue numbers is a gap in a log, and a log is not the work.</p>
   </section>
 
   <footer>
     <p><strong>Method.</strong> Commits by <em>author</em> date, 8 to 14 March 2025, across the
     git repositories in the modus-lisp workspace &mdash; at this point, one. The commit itself
-    reports 216 changed files; the 210 above excludes generated build artefacts. Produced with
+    reports 216 changed files; the 210 above excludes generated build artefacts. Its committer
+    date is 2026-02-13; see &ldquo;The gap&rdquo; above. Produced with
     <code>bin/week 2025-03-15 --log</code>.</p>
     <p><a href="../../">&larr; All issues</a></p>
   </footer>
