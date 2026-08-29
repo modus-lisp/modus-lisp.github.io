@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Ten repositories in seven days — This Week in Modus №19</title>
-<meta name="description" content="This Week in Modus, 11–17 July 2026: ten repositories are created in one week — glass, cairn, conch, natrium, cram, cabinet, operandi and more — and they immediately start depending on each other. 291 commits across 19 repos.">
+<meta name="description" content="This Week in Modus, 11–17 July 2026: ten repositories are created — a VNC desktop, a git implementation, an SSH client and server, a crypto suite, a filesystem — and by Friday they are standing on each other.">
 <meta property="og:title" content="Ten repositories in seven days — This Week in Modus №19">
-<meta property="og:description" content="11–17 July 2026: ten repositories are created in one week — glass, cairn, conch, natrium, cram, cabinet, operandi — and immediately start depending on each other.">
+<meta property="og:description" content="11–17 July 2026: ten repositories are created in one week, and by Friday they are standing on each other.">
 <meta property="og:type" content="article">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -31,10 +31,10 @@
     </div>
     <h1>Ten repositories<br>in seven <span class="lo">days</span></h1>
     <hr class="rule-fire">
-    <p class="standfirst">This is the week the workspace became a workspace. Ten repositories
-    were created &mdash; a VNC desktop, a git implementation, an SSH client and server, a crypto
-    suite, a DEFLATE codec, a filesystem, an agent, a package distribution &mdash; and by
-    Friday they had started depending on each other.</p>
+    <p class="standfirst">A crypto suite on Sunday. An SSH client on Tuesday. A git implementation
+    on Wednesday. A filesystem, a compression codec, a package distribution, an agent and a VNC
+    desktop on Thursday. What makes it a week rather than a list is that by Friday they are
+    standing on each other &mdash; and on a B-tree written a month ago for something else entirely.</p>
 
     <div class="tally">
       <div><span class="n">291</span><span class="l">Commits</span></div>
@@ -70,36 +70,41 @@
   <section>
     <div class="sec-head">
       <span class="sec-eyebrow">the workspace &nbsp;/&nbsp; 10 first commits</span>
-      <h2>Ten repositories in seven days</h2>
+      <h2>Each one needs the last</h2>
     </div>
 
-    <p>Sunday: <span class="mono">natrium</span>. Tuesday: <span class="mono">conch</span>.
-    Wednesday: <span class="mono">cairn</span>. Thursday:
-    <span class="mono">cabinet</span>, <span class="mono">cram</span>,
-    <span class="mono">dist</span>, <span class="mono">operandi</span>, and a framebuffer called
-    <span class="mono">scry</span> that was renamed <span class="mono">glass</span> before the
-    day was out. Friday: <span class="mono">cl-frpc</span> and
-    <span class="mono">webrtc-data</span>.</p>
+    <p>The order is the story. <span class="mono">natrium</span> lands on Sunday as a hashing
+    floor, then a random number generator, then an authenticated cipher, then key agreement, then
+    signatures &mdash; the whole NaCl primitive set by that evening, made constant-time on Monday.
+    <span class="mono">conch</span> appears on Tuesday and takes its crypto from natrium rather
+    than writing its own; by Thursday it has public-key authentication, command execution, file
+    transfer and a server. And <span class="mono">seal</span>, eight days old, deletes its own
+    symmetric and curve implementations in favour of natrium&rsquo;s the same week.</p>
 
-    <p>What makes it a week rather than a list is the order. natrium is a hashing floor, then a
-    CSPRNG, then ChaCha20-Poly1305, then X25519, then Ed25519 &mdash; the NaCl set, completed on
-    Sunday and made constant-time on Monday. conch appears on Tuesday and takes its crypto from
-    natrium; by Thursday it has publickey auth, exec, scp, SFTP and a server.
-    <span class="mono">seal</span>, which already existed, deleted its own symmetric and curve
-    code and delegated to natrium the same week. cairn borrows SHA-1 from seal and gets
-    git-over-SSH from conch. cabinet is a filesystem built on <span class="mono">pagetree</span>,
-    and cairn immediately learns to keep a repository inside one.</p>
+    <p>Then the chain that has been four weeks in the building.
+    <a href="../2026-06-27/">&#8470;&nbsp;16</a> introduced <span class="mono">pagetree</span>, a
+    copy-on-write B+tree, and made it the Bitcoin node&rsquo;s UTXO store within four days. This
+    week <span class="mono">cabinet</span> becomes a filesystem &mdash; inodes, directories and
+    file contents in one keyspace &mdash; on top of that tree. And
+    <span class="mono">cairn</span>, the from-scratch git, learns to keep an entire repository
+    inside a cabinet.</p>
 
     <div class="callout">
-      <p>Route cairn&rsquo;s git store through a small backend protocol, so the same cairn can
-      keep a repository on the host filesystem or inside a cabinet, which lives in a single
-      pagetree file. This is what lets cairn run where there is no host filesystem at all.</p>
+      <p>Route cairn&rsquo;s git store through a small backend protocol, so the same cairn can keep
+      a repository on the host filesystem or inside a cabinet, which lives in a single pagetree
+      file. This is what lets cairn run where there is no host filesystem at all.</p>
       <span class="src">cairn &mdash; bc06808</span>
     </div>
 
-    <p>That last clause is the whole project in one line. Every library here is written as though
-    the operating system underneath it might not be there &mdash; because the point is that
-    eventually it will not be.</p>
+    <p>That last clause is the project&rsquo;s whole argument in one line, and it is the reason a
+    B-tree written for a Bitcoin node matters to a version control system. Every library here is
+    written as though the operating system underneath might not be there, because the destination
+    &mdash; the bare-metal machine of <a href="../2026-03-07/">&#8470;&nbsp;3</a> &mdash; is a place
+    where it is not.</p>
+
+    <p>A related discipline shows up in a one-line cairn commit that drops a shell-out to
+    <code>nproc</code>: nothing in the core chain may spawn a process. On a hosted Linux that is a
+    stylistic preference. On the target it is the difference between running and not.</p>
   </section>
 
   <section>
@@ -108,26 +113,27 @@
       <h2>A framebuffer on Thursday, a desktop on Friday</h2>
     </div>
 
-    <p>It starts as &ldquo;a framebuffer + VNC/RFB server in pure Common Lisp&rdquo;, gains
-    dirty-region tracking, Hextile (about 88&times; smaller than raw) and ZRLE over a persistent
-    cram stream, and is renamed. Then Friday happens.</p>
+    <p>It begins as &ldquo;a framebuffer and a VNC/RFB server in pure Common Lisp&rdquo; under a
+    different name, gains dirty-region tracking, a lossless tile encoding about eighty-eight times
+    smaller than raw, and a compressed encoding riding <span class="mono">cram</span>&rsquo;s
+    stream &mdash; which was written the same morning. Then it is renamed glass. Then Friday
+    happens.</p>
 
     <p>A McCLIM backend, modelled on the X framebuffer one: CLIM applications render into a glass
-    framebuffer and are served over RFB, with keyboard and pointer coming back from the VNC
-    client &mdash; no X, no FFI. Resize in both directions, and stock McCLIM apps running
-    unmodified. A compositor for menus, dialogs and pop-ups. Real keyboard focus, so the Listener
-    REPL evaluates over VNC. A mini OPEN LOOK window manager. Then the window manager stopped
-    using McCLIM for its own chrome, because glass now owns text through
+    framebuffer and are served over the wire, with keyboard and pointer coming back from the VNC
+    client &mdash; no X, no foreign code. Resize in both directions, stock CLIM applications
+    running unmodified, a compositor for menus and pop-ups, real keyboard focus so the Listener
+    evaluates over the network, and a small OPEN LOOK window manager. Then the window manager stops
+    using McCLIM for its own decoration, because glass now owns text through
     <span class="mono">scribe</span>.</p>
 
-    <p>And then a terminal emulator, which arrives essentially complete: a real pty, ANSI, a
-    scribe glyph grid, UTF-8 with wide characters and fallback fonts, colour emoji through
-    scribe&rsquo;s COLR support and its bundled Twemoji, a hardened VT with 256 colours, the
-    alternate screen and cursor operations so that htop and vim work, mouse reporting with a real
-    controlling tty, tabs, and Sixel graphics for inline bitmaps. The root menu that opens on a
-    right-click offers a browser window, an image viewer, a terminal, McCLIM&rsquo;s calculator,
-    and &mdash; from Genera&rsquo;s lineage &mdash; the Clouseau object inspector and a graphical
-    debugger.</p>
+    <p>And then a terminal emulator, which arrives essentially complete: a real pty, ANSI escapes,
+    a scribe glyph grid, UTF-8 with wide characters and fallback fonts, colour emoji through
+    scribe&rsquo;s layered-glyph support, a hardened VT with 256 colours and the alternate screen so
+    that <code>htop</code> and <code>vim</code> work, mouse reporting with a controlling terminal,
+    tabs, and inline bitmap graphics. The root menu offers a browser window, an image viewer, a
+    terminal, a calculator, and &mdash; from the Lisp machine lineage this project keeps reaching
+    for &mdash; an object inspector and a graphical debugger.</p>
   </section>
 
   <section>
@@ -136,22 +142,25 @@
       <h2>git, read then written then served</h2>
     </div>
 
-    <p>Wednesday: read a repository &mdash; SHA-1, DEFLATE, loose objects, refs, log &mdash; then
-    packfiles with delta-compressed objects, then clone over smart HTTP, then checkout, then the
-    write side, at which point real git accepts the commits it produces. Then status and diff
-    matching git&rsquo;s three-way output, push over SSH, fetch and fast-forward pull, a real
+    <p>Wednesday: read a repository &mdash; hashes, compression, loose objects, refs, log &mdash;
+    then packfiles with delta-compressed objects, then clone over the smart HTTP transport, then
+    checkout, then the write side, at which point real git accepts the commits it produces. Then
+    status and diff matching git&rsquo;s output, push over SSH, fetch and fast-forward pull, a
     three-way merge with a pluggable conflict resolver, recursive merge over multiple merge bases
     for criss-cross histories, delta compression in written packs within a few percent of
-    git&rsquo;s own, push over smart HTTP, and SHA-256 repositories, git-validated.</p>
+    git&rsquo;s own, and repositories using the newer hash function, git-validated.</p>
 
-    <p>Thursday was the part that matters for a machine with no Unix underneath it: the storage
-    backend seam described above, a worktree backend so a full working tree lives in a cabinet,
-    a direct pagetree backend where a commit and a push are one transaction, and cairn&rsquo;s
-    own git server speaking upload-pack and receive-pack over SSH. Two performance fixes on the
-    way: streaming index-pack for bounded memory, which fixed cloning large repositories out of
-    memory, and a parallel resolve that made index-pack about eight times faster. And a small
-    one with a large principle behind it &mdash; the <code>nproc</code> shell-out was dropped,
-    because nothing in the core chain may spawn a process.</p>
+    <p>The acceptance criterion in almost every one of those subjects is agreement with the real
+    implementation rather than an internal test passing &mdash; the same standard
+    <a href="../2026-06-20/">&#8470;&nbsp;15</a> held itself to against Bitcoin Core and
+    <a href="../2026-07-04/">&#8470;&nbsp;17</a> against <code>ttx</code> and HarfBuzz.</p>
+
+    <p>Thursday is the part that matters for a machine with no Unix underneath: the storage backend
+    seam, a worktree backend so a full working tree lives in a cabinet, a direct pagetree backend
+    where a commit and a push are one transaction, and cairn&rsquo;s own git server speaking the
+    upload and receive protocols over SSH &mdash; over <span class="mono">conch</span>, two days
+    old. Two performance fixes on the way: streaming pack indexing for bounded memory, which fixed
+    cloning large repositories out of memory, and a parallel resolve about eight times faster.</p>
   </section>
 
   <section>
@@ -160,22 +169,26 @@
       <h2>A CLI that compiles without SBCL</h2>
     </div>
 
-    <p>The two workstreams that would close the self-hosting cycle the following week both took
-    their shape here. The runtime JIT came up in five stages &mdash; the x64 translator baked into
-    the evaluator image as dead code, then real forms compiled end to end against an interpreter
-    oracle, then native call relocation for out-of-module calls, then a constant pool with
-    GC-durable literal patching, then wiring into production evaluation behind a flag.</p>
+    <p>Modus has been self-hosting in one sense since <a href="../2026-02-28/">&#8470;&nbsp;2</a>,
+    where a running image compiled its successor from source embedded in its own binary, and
+    <a href="../2026-03-14/">&#8470;&nbsp;4</a> proved the compiler leaves no fingerprint of the
+    machine that ran it. But the toolchain that produced those images still started from a host
+    Lisp. This week a <code>modus</code> binary appeared with the entire x64 build pipeline baked
+    into it, compiling Lisp to a native Linux executable in-image, with SBCL needed only to seed
+    the CLI once.</p>
 
-    <p>The other produced a <code>modus</code> binary with the whole x64 build toolchain baked
-    into it, so it compiles Lisp to a native Linux ELF entirely in-image &mdash; SBCL needed only
-    to seed the CLI once. What stood between that and self-hosting was reading: the compiler could
-    not yet read its own sources in-image. A lenient missing-package recovery for
-    <code>modus.*</code> qualifiers took the skipped forms from 204 to zero.</p>
+    <p>What stood between that and true self-hosting was reading. The compiler could not read its
+    own sources inside the image &mdash; a lenient recovery for missing package qualifiers took the
+    skipped forms from 204 to zero. A compiler that cannot parse itself is not self-hosting no
+    matter how good its code generation is, which is a thing that only becomes obvious when you
+    try.</p>
 
-    <p>Underneath, byte-packed specialized arrays, a garbage-collector check before every object,
-    array and string allocation &mdash; which fixed losing the root of a large bignum &mdash; and
-    a build taxonomy written down for the first time, with the shared ANSI gate harness extracted
-    so the x64 and aarch64 pairs stop drifting apart.</p>
+    <p>In parallel, the runtime JIT came up in five staged pieces, each landing inert before
+    anything called it: the translator baked into the evaluator image as dead code, real forms
+    compiled end to end against an interpreter oracle, native call relocation for calls leaving a
+    module, a constant pool with literal patching that survives collection, and finally the wiring
+    into production evaluation behind a flag. The oracle in step two is the same in-image
+    differential gate <a href="../2026-07-04/">&#8470;&nbsp;17</a> used to flip evaluators.</p>
   </section>
 
   <section>
@@ -184,21 +197,22 @@
       <h2>Tables, baselines, and a browser with tabs</h2>
     </div>
 
-    <p>weft spent 105 commits in the least glamorous corners of CSS, which is also where the
-    difference between a renderer and a browser lives: table height distributed across rows, a
-    cell that never shrinks below its content, <code>calc(% + px)</code> column widths, flex item
-    margins on both axes and in both directions, min and max clamping on flex, grid and table
-    containers, <code>position: sticky</code> including percentage insets and the right containing
-    block, and a run of line-box work &mdash; text painted on the baseline, atomic inlines
-    baseline-aligned, the strut descent kept under a tall one.</p>
+    <p>weft spent 105 commits in the least glamorous corners of CSS, which is where the difference
+    between a renderer and a browser lives: table height distributed across rows, a cell that never
+    shrinks below its content, mixed-unit column widths, flex item margins on both axes and in both
+    directions, minimum and maximum clamping on flex, grid and table containers,
+    <code>position: sticky</code> with the right containing block, and a run of line-box work
+    &mdash; text painted on the baseline, atomic inlines aligned to it, the strut descent kept
+    under a tall one.</p>
 
-    <p><span class="mono">loom</span> turned into something you could use: per-tab sessions with
-    distinct browsing contexts, a per-context cookie jar threaded through the render (workers
-    included), a tab bar with a pinned engine-status tab, a thread per connection so one render
-    cannot freeze the service, and each navigation bound to the tab that started it. Bounded
-    waits arrived for web fonts and image prefetch, so a slow asset degrades the page instead of
-    stalling it. And by Friday loom had a glass backend &mdash; the browser driven over VNC, with
-    no SDL and no FFI anywhere in the path.</p>
+    <p><span class="mono">loom</span> turned into something usable: per-tab sessions with distinct
+    browsing contexts, a per-context cookie jar threaded through the render, a tab bar with a
+    pinned engine-status tab, a thread per connection so one render cannot freeze the service, and
+    each navigation bound to the tab that began it. Bounded waits for web fonts and image
+    prefetching, so a slow asset degrades a page rather than stalling it. And by Friday loom had a
+    glass backend &mdash; the browser driven over VNC, with no SDL and no foreign code anywhere in
+    the path, one week after <a href="../2026-07-11/">&#8470;&nbsp;18</a> replaced its SDL bindings
+    by hand.</p>
   </section>
 
   <section>
@@ -207,28 +221,28 @@
       <h2>The rest of it</h2>
     </div>
     <ul class="plain">
-      <li><span class="mono">operandi</span> arrived as a Lisp-native ReAct agent loop and grew an
-      interactive REPL with streaming and tool rendering the same day. Its launcher went from
-      about 16 seconds to 60 milliseconds by dumping a core.</li>
-      <li><span class="mono">cram</span> was a DEFLATE compressor on Thursday morning and a full
-      codec by the afternoon, with dynamic Huffman blocks and per-block type selection. cairn
-      dropped chipz and salza2 for it before the week ended.</li>
-      <li><span class="mono">webrtc-data</span> went from an SDP and STUN foundation to a working
-      data channel in a day, each rung verified against aiortc rather than against itself:
-      ICE completed, DTLS connected, then SCTP and DCEP carrying messages.</li>
+      <li><span class="mono">operandi</span> arrived as a Lisp-native agent loop and grew an
+      interactive REPL with streaming and tool rendering the same day. Its launcher went from about
+      sixteen seconds to sixty milliseconds by dumping a core.</li>
+      <li><span class="mono">cram</span> was a compressor on Thursday morning and a full codec by
+      the afternoon. cairn dropped its two third-party compression libraries for it before the week
+      ended, and glass&rsquo;s encoder was built on it from the start.</li>
+      <li><span class="mono">webrtc-data</span> went from a signalling and NAT-traversal foundation
+      to a working data channel in a day, each rung verified against an established implementation
+      rather than against itself.</li>
       <li><span class="mono">dist</span> began publishing the workspace as a Quicklisp
       distribution, which is how any of this becomes installable by anyone else.</li>
-      <li><span class="mono">cl-transport</span> gained an inbound side symmetric to its outbound
-      dial, and <span class="mono">cl-frpc</span> appeared to reverse-proxy through it &mdash; the
-      first answer to &ldquo;how does a box behind NAT get reached at all&rdquo;.</li>
+      <li><span class="mono">cl-frpc</span> appeared to reverse-proxy through
+      <span class="mono">cl-transport</span>&rsquo;s new inbound side &mdash; the first answer to
+      &ldquo;how does a machine behind NAT get reached at all&rdquo;, which is a question a desktop
+      you can connect to is about to need.</li>
     </ul>
   </section>
 
   <footer>
-    <p><strong>Method.</strong> Commits by <em>author</em> date, 11 to 17 July inclusive, across
-    the 42 git repositories in the modus-lisp workspace. Line counts exclude generated
-    acceptance-gate artefacts and committed scratch dumps. Produced with
-    <code>bin/week 2026-07-18 --log</code>.</p>
+    <p><strong>Method.</strong> Commits by <em>author</em> date, 11 to 17 July 2026, across the 42
+    git repositories in the modus-lisp workspace. Line counts exclude generated acceptance-gate
+    artefacts and committed scratch dumps. Produced with <code>bin/week 2026-07-18 --log</code>.</p>
     <p><a href="../../">&larr; All issues</a></p>
   </footer>
 

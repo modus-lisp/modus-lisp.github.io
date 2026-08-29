@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>A browser in a week — This Week in Modus №17</title>
-<meta name="description" content="This Week in Modus, 27 June – 3 July 2026: weft goes from a URL parser to Acid3 100/100, shuttle reaches 88% of test262, and scribe, gesso, stencil and loom complete a browser stack. 437 commits across 14 repos.">
-<meta property="og:title" content="A browser in a week — This Week in Modus №17">
-<meta property="og:description" content="27 June – 3 July 2026: weft goes from a URL parser to Acid3 100/100, shuttle reaches 88% of test262, and a whole browser stack appears.">
+<title>Build the oracle first — This Week in Modus №17</title>
+<meta name="description" content="This Week in Modus, 27 June – 3 July 2026: ten repositories appear, including a web engine that reaches Acid3 100/100 and a JavaScript engine that reaches 88% of test262 — and every one of them starts by building the thing that will grade it.">
+<meta property="og:title" content="Build the oracle first — This Week in Modus №17">
+<meta property="og:description" content="27 June – 3 July 2026: a web engine, a JavaScript engine and a text rasterizer appear in seven days, and all three start the same way.">
 <meta property="og:type" content="article">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -29,12 +29,12 @@
       <span>&middot;</span>
       <span><b>437 commits</b> &middot; 14 of 42 repos</span>
     </div>
-    <h1>A browser<br>in a <span class="lo">week</span></h1>
+    <h1>Build the<br>oracle <span class="lo">first</span></h1>
     <hr class="rule-fire">
-    <p class="standfirst">On Sunday there was a URL parser. By Friday there was a web engine at
-    Acid3 100/100, a JavaScript engine passing 88% of test262, a text rasterizer with hinting, a
-    2D graphics library, an SVG renderer, and a window you could click in. Ten repositories,
-    seven days.</p>
+    <p class="standfirst">Ten repositories appeared this week, among them a web engine that
+    finished at Acid3 100/100, a JavaScript engine that finished at 88% of test262, and a text
+    rasterizer with hinting. All three began the same way, and it is the way the last three months
+    taught this project to begin.</p>
 
     <div class="tally">
       <div><span class="n">437</span><span class="l">Commits</span></div>
@@ -51,11 +51,11 @@
       <tbody>
         <tr><td class="repo">weft</td><td class="num">181</td><td class="barcell"><span class="bar" style="width:100%"></span></td><td class="add">+149,098</td><td class="del">&minus;15,631</td><td class="what">born; URL parser to Acid3 100/100</td></tr>
         <tr><td class="repo">shuttle</td><td class="num">80</td><td class="barcell"><span class="bar" style="width:44.2%"></span></td><td class="add">+39,785</td><td class="del">&minus;2,450</td><td class="what">born; 12.4% to 88% of test262</td></tr>
-        <tr><td class="repo">modus</td><td class="num">66</td><td class="barcell"><span class="bar" style="width:36.5%"></span></td><td class="add">+4,379</td><td class="del">&minus;772</td><td class="what">WS3: the evaluator flip</td></tr>
+        <tr><td class="repo">modus</td><td class="num">66</td><td class="barcell"><span class="bar" style="width:36.5%"></span></td><td class="add">+4,379</td><td class="del">&minus;772</td><td class="what">production eval changes hands</td></tr>
         <tr><td class="repo">scribe</td><td class="num">58</td><td class="barcell"><span class="bar" style="width:32%"></span></td><td class="add">+45,140</td><td class="del">&minus;664</td><td class="what">born; outlines, shaping, hinting</td></tr>
         <tr><td class="repo">cl-tor</td><td class="num">10</td><td class="barcell"><span class="bar" style="width:5.5%"></span></td><td class="add">+2,214</td><td class="del">&minus;179</td><td class="what">born; curl through Tor works</td></tr>
         <tr><td class="repo">cl-consensus</td><td class="num">9</td><td class="barcell"><span class="bar cool" style="width:5%"></span></td><td class="add">+449</td><td class="del">&minus;74</td><td class="what">peer manager, archival backfill</td></tr>
-        <tr><td class="repo">secp256k1-fast</td><td class="num">9</td><td class="barcell"><span class="bar cool" style="width:5%"></span></td><td class="add">+568</td><td class="del">&minus;54</td><td class="what">secret ops go constant-time</td></tr>
+        <tr><td class="repo">secp256k1-fast</td><td class="num">9</td><td class="barcell"><span class="bar cool" style="width:5%"></span></td><td class="add">+568</td><td class="del">&minus;54</td><td class="what">constant-time secret operations</td></tr>
         <tr><td class="repo">brotli-pure</td><td class="num">5</td><td class="barcell"><span class="bar" style="width:2.8%"></span></td><td class="add">+1,658</td><td class="del">&minus;74</td><td class="what">born; RFC 7932, both directions</td></tr>
         <tr><td class="repo">zstd-pure</td><td class="num">5</td><td class="barcell"><span class="bar" style="width:2.8%"></span></td><td class="add">+1,232</td><td class="del">&minus;63</td><td class="what">born; Huffman + FSE</td></tr>
         <tr><td class="repo">gesso</td><td class="num">4</td><td class="barcell"><span class="bar" style="width:2.2%"></span></td><td class="add">+996</td><td class="del">&minus;31</td><td class="what">born; 2D vector graphics on scribe</td></tr>
@@ -69,38 +69,80 @@
 
   <section>
     <div class="sec-head">
+      <span class="sec-eyebrow">the method &nbsp;/&nbsp; 28&ndash;29 June</span>
+      <h2>Build the oracle first</h2>
+    </div>
+
+    <p>Here are the opening commits of two separate repositories, written a day apart, by a project
+    that has spent three months learning what happens when you grade your own work.</p>
+
+    <div class="console">
+      <span class="cap">weft &mdash; 28 June, and scribe &mdash; 29 June</span>
+<pre>weft: start a self-sovereign web engine — P0 WHATWG URL parser
+P0 encoding: kernel + UTF-8 decoder + <span class="ret">differential oracle</span> + worker stubs
+P0 encoding: 7 decoders built by a parallel agent swarm
+P0 encoding complete: 11/11 charsets
+
+scribe: scaffold + gamma-correct linear-light compositing
+scribe: adopt SWARM — sfnt kernel + <span class="ret">ttx oracle</span> + W1 table wave</pre>
+    </div>
+
+    <p>In both cases the second or third commit is not a feature. It is the thing that will decide
+    whether the features are right: a differential oracle for character encodings in one, the
+    <code>ttx</code> font dumper in the other. Only then do the workers fan out, each taking one
+    decoder or one table, looping against the oracle until it stops improving.</p>
+
+    <p>That order is the accumulated lesson of this dispatch so far. <a href="../2026-04-11/">&#8470;&nbsp;5</a>
+    adopted somebody else&rsquo;s test suite so the implementation could not grade itself.
+    <a href="../2026-04-18/">&#8470;&nbsp;6</a> discovered that a suite is worthless if the harness
+    counting it can lose 17,587 tests without saying so. <a href="../2026-05-02/">&#8470;&nbsp;8</a>
+    built a fuzzer as an instrument rather than chase a bug that moved when observed.
+    <a href="../2026-06-13/">&#8470;&nbsp;14</a> pointed a real library at the implementation and
+    used the form it died on as the measure. <a href="../2026-06-20/">&#8470;&nbsp;15</a> called
+    into Bitcoin Core&rsquo;s own compiled library and compared verdicts.</p>
+
+    <p>What is new here is that the oracle now comes before the code, and that it makes fanning
+    work out possible at all. Nobody can supervise seven parallel character-set decoders by
+    reading them. An oracle can.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
       <span class="sec-eyebrow"><em>weft</em> &nbsp;/&nbsp; 181 commits, from nothing</span>
       <h2>A URL parser on Sunday, Acid3 on Friday</h2>
     </div>
 
-    <p>The first commit is titled &ldquo;start a self-sovereign web engine&rdquo; and contains a
-    WHATWG URL parser. The second raises its conformance from 97.2% to 97.7% by handling spaces
-    in an opaque path before the query and fragment. The third is where the week&rsquo;s method
-    shows up for the first time:</p>
+    <p>The first commit is a WHATWG URL parser at 97.2% conformance. The second raises it to 97.7%
+    by handling spaces in an opaque path before the query and fragment. Then character encoding
+    &mdash; kernel, oracle, workers &mdash; reaching all 36 decoders the specification lists,
+    including the Chinese, Japanese and Korean sets that need real tables. Then the HTML tokenizer,
+    which lands at 100% of the html5lib suite in a single commit.</p>
+
+    <p>Tree construction is where the week&rsquo;s texture shows. HTML&rsquo;s parsing algorithm is
+    a pile of special cases accumulated over thirty years, and there is no way to be clever about
+    it &mdash; only to implement each rule and watch the number move:</p>
 
     <div class="console">
-      <span class="cap">weft &mdash; 28 June, four commits in a row</span>
-<pre>P0 encoding: kernel + UTF-8 decoder + differential oracle + worker stubs
-P0 encoding: 7 decoders built by a parallel agent swarm
-P0 encoding complete: 11/11 charsets (CJK via refined swarm)
-P0 encoding: full WHATWG decoder set (36 charsets)</pre>
+      <span class="cap">weft &mdash; the tree builder, in order</span>
+<pre>DOM node kernel + core tree construction
+raw-text/RCDATA reentrancy (script/style/title/textarea)   <span class="ret">173 → 187</span>
+stray &lt;/p&gt; synthesizes empty &lt;p&gt;; dd/dt auto-close          <span class="ret">187 → 190</span>
+TABLE insertion modes + foster parenting                   <span class="ret">190 → 212</span>
+scope bounds, foster setf bug, pre/textarea newline        <span class="ret">224 → 246</span>
+frameset modes + form pointer + button scope               <span class="ret">246 → 261</span>
+adoption agency algorithm + active formatting elements     <span class="ret">261 → 281</span></pre>
     </div>
 
-    <p>A kernel and an oracle first, then workers fanned out against the oracle, then a mop-up
-    pass for whatever the fleet could not close. It is the same shape as the WPT swarm that would
-    drive weft&rsquo;s forms work three weeks later in
-    <a href="../2026-07-25/">&#8470;&nbsp;20</a>, and it explains how 181 commits happen in seven
-    days. It also explains the line counts: most of what landed is vendored conformance corpora
-    &mdash; tokenizer vectors, URL test data, character tables &mdash; checked in so a gate can
-    run offline.</p>
+    <p>That is the same ratchet the ANSI suite produced in <a href="../2026-04-11/">&#8470;&nbsp;5</a>
+    and the same per-commit accounting as <a href="../2026-05-02/">&#8470;&nbsp;8</a>, arriving in
+    a brand-new repository on its second day, because by now it is simply how work is done here.</p>
 
-    <p>From encoding the week ran through the HTML tokenizer and tree builder, the CSS cascade,
-    layout, painting, then scripting: the DOM bound to a JavaScript engine, hit-testing, box-tree
-    rendering, viewport scroll and UI event dispatch, canvas gradients with alpha compositing,
-    and <code>&lt;img src=svg&gt;</code>. The last Acid3 cluster closed on Friday &mdash; a
-    NodeIterator mutation case and XHTML frame scripts &mdash; taking it from 98 to 100. And one
-    commit in the middle deserves a mention for taste alone: the Big5 table was rewritten as a
-    data literal instead of fourteen thousand <code>setf</code> statements.</p>
+    <p>From there the week runs through the CSS cascade, layout and painting into scripting: the
+    DOM bound to a JavaScript engine, hit testing, box-tree rendering, viewport scrolling and event
+    dispatch, canvas gradients with alpha compositing, and SVG in an <code>&lt;img&gt;</code>. The
+    last Acid3 cluster closes on Friday &mdash; a <code>NodeIterator</code> mutation case and
+    scripts inside XHTML frames &mdash; taking it from 98 to 100. And one commit purely for taste:
+    the Big5 table rewritten as a data literal instead of fourteen thousand assignment statements.</p>
   </section>
 
   <section>
@@ -109,18 +151,22 @@ P0 encoding: full WHATWG decoder set (36 charsets)</pre>
       <h2>12.4%, then 88%</h2>
     </div>
 
-    <p>shuttle started on Tuesday as a skeleton &mdash; a value model, a bytecode VM, and the
-    seam through which a host binds its objects. Control flow and a test262 harness followed the
-    same day, which produced the first real number: 12.4% of 47,058 tests. The commits after
-    that read as a ratchet, each one recording where the count stood, and the history rows are
-    kept in the repository so the curve is auditable rather than remembered. It closed the week
-    at 41,404 of 47,058 &mdash; 87.99%.</p>
+    <p>shuttle starts on Tuesday as a skeleton &mdash; a value model, a bytecode virtual machine,
+    and the seam through which a host binds its own objects. Control flow and a test262 runner
+    follow the same day, which produces the first honest number: 12.4% of 47,058 tests. It closes
+    the week at 41,404, or 87.99%.</p>
 
-    <p>Getting there meant building the standard library rather than the language: property
-    introspection and abstract operations, Symbol, regular expressions, BigInt, and &mdash;
-    because test262 does not grade on charm &mdash; Intl collators, segmenters and display names.
-    The last commits of the week point back at the DOM: exported host-binding predicates and a
-    microtask drain, which is what weft needed to run scripts on a real event loop.</p>
+    <p>The commits in between record where the count stood, and those history rows are kept in the
+    repository rather than remembered &mdash; the same instinct as the status lines in
+    <a href="../2026-06-13/">&#8470;&nbsp;14</a>, and for the same reason: a number that only exists
+    in somebody&rsquo;s memory cannot be checked and cannot be regressed against.</p>
+
+    <p>Most of that climb is not the language but the library around it: property introspection and
+    the abstract operations the specification is written in, <code>Symbol</code>, regular
+    expressions, BigInt, and &mdash; because test262 does not grade on charm &mdash; the
+    internationalisation collators, segmenters and display names. The last commits of the week turn
+    back toward weft, exporting the host-binding predicates and a microtask drain, which is what a
+    DOM needs to run scripts on a real event loop.</p>
   </section>
 
   <section>
@@ -129,82 +175,91 @@ P0 encoding: full WHATWG decoder set (36 charsets)</pre>
       <h2>Everything under the pixels</h2>
     </div>
 
-    <p><span class="mono">scribe</span> began on Monday with a scaffold and gamma-correct
-    linear-light compositing &mdash; the right order for a rasterizer, since blending in the
-    wrong space is the kind of mistake that is invisible until it is everywhere. It adopted the
-    same swarm method, with an sfnt kernel and <code>ttx</code> as the oracle, and by that
-    evening had the metric, naming and cmap tables green, glyf outlines, an analytic rasterizer,
-    and CFF/Type2 cubic charstrings with flex. By Friday: OpenType shaping with cached lookup
-    indices, hinting including a light Y-only mode that grid-fits vertically while keeping
-    fractional horizontal positions, bounded glyph caches, and a premultiplied RGBA canvas.</p>
+    <p>scribe opens with gamma-correct linear-light compositing, which is the right thing to get
+    right first: blending in the wrong colour space is invisible until it is everywhere. By that
+    evening it has the metric, naming and character-map tables green against <code>ttx</code>,
+    outlines from the TrueType tables, an analytic rasterizer, and cubic charstrings with flex from
+    the Compact Font Format.</p>
 
-    <p>Friday added the three pieces that turn a rasterizer into a browser.
-    <span class="mono">gesso</span> is 2D vector graphics on top of scribe&rsquo;s coverage
-    contract &mdash; paths, strokes, gradients, an RGBA canvas &mdash; and its second commit
-    fixes stroke join squares whose winding was cancelling them out under a non-zero fill.
-    <span class="mono">stencil</span> parses SVG and renders it on gesso.
-    <span class="mono">loom</span> is a window: an SDL2 shell over weft with DOM input, launched
-    with a four-gigabyte heap and a large control stack, because &mdash; as its own commit
-    message puts it &mdash; the JS engine recurses deep.</p>
+    <p>What is striking is how the later commits describe themselves. Shaping is
+    &ldquo;=&nbsp;HarfBuzz&rdquo;. Variable fonts and advance-width variations are
+    &ldquo;=&nbsp;fontTools instancer&rdquo;. The claim is not that a feature exists but that it
+    agrees with the reference implementation, which is exactly the form of
+    <a href="../2026-06-20/">&#8470;&nbsp;15</a>&rsquo;s zero divergence against Bitcoin Core. By
+    Friday: WOFF and WOFF2 decompression that is outline-exact, hinting, stem darkening, a
+    high-resolution demo comparing one-times and two-times rendering, and bounded glyph caches.</p>
+
+    <p>Friday also brings the three pieces that turn a rasterizer into a browser.
+    <span class="mono">gesso</span> is 2D vector graphics standing on scribe&rsquo;s coverage
+    contract, and its second commit fixes stroke joins whose winding was cancelling them out under
+    a non-zero fill. <span class="mono">stencil</span> parses SVG and renders it through gesso.
+    <span class="mono">loom</span> is a window &mdash; an SDL shell over weft with DOM input,
+    launched with a four-gigabyte heap and a large control stack because, as the commit says, the
+    JavaScript engine recurses deep.</p>
   </section>
 
   <section>
     <div class="sec-head">
       <span class="sec-eyebrow"><em>modus</em> &nbsp;/&nbsp; 66 commits &nbsp;/&nbsp; WS3</span>
-      <h2>The flip</h2>
+      <h2>Production eval changes hands</h2>
     </div>
 
-    <p>While the browser was being built, Modus was changing how it runs Lisp at all. The
-    bytecode evaluator had to reach parity with the tree-walker before it could replace it, and
-    the week is a list of the places parity was missing: <code>catch</code> and <code>throw</code>
-    through the interpreter&rsquo;s setjmp/longjmp, closures that capture and mutate, secondary
-    values across the runtime-call bridge, higher-order calls with a function object,
-    <code>defstruct</code>, <code>handler-case</code> catching a signalled condition, CLOS
-    initarg validation and compiler macros, <code>defgeneric</code> options, method combinations,
-    and top-level <code>defun</code> persistence &mdash; the keystone, because ASDF needs it.</p>
+    <p>While all that was being built, Modus quietly changed how it runs Lisp. It has had two
+    evaluators since <a href="../2026-04-18/">&#8470;&nbsp;6</a> built a tree-walking interpreter as
+    one of its layers, alongside the path that compiles to bytecode and interprets that. Two
+    evaluators means every semantic fix lands twice, and the one that misses it is the one somebody
+    hits.</p>
 
-    <p>Two pieces of process are worth more than the fixes. An in-image differential gate runs the
-    same form through both evaluators and compares, so parity is measured rather than asserted;
-    and the flip itself was made reversible behind a switch that is byte-clean when off, so the
-    default could move and move back. It moved on Friday: production <code>eval</code> and
-    <code>load</code> became compile-to-bytecode. Compile caching made repeated forms about
-    twenty times faster, which is what made that affordable. The tree-walker survived one more
-    week; <a href="../2026-07-11/">&#8470;&nbsp;18</a> is its obituary.</p>
+    <p>This week the bytecode path reached parity and became the default. Getting there is a list
+    of the places parity was missing: <code>catch</code> and <code>throw</code> through the
+    interpreter&rsquo;s own jump mechanism, closures that capture and mutate, secondary values
+    across the runtime-call bridge, higher-order calls with a function object,
+    <code>defstruct</code>, <code>handler-case</code> catching a signalled condition, CLOS initarg
+    validation and compiler macros, and top-level <code>defun</code> persistence &mdash; the
+    keystone, because ASDF needs it and <a href="../2026-06-13/">&#8470;&nbsp;14</a> had made ASDF
+    the frontier.</p>
+
+    <p>Two pieces of method matter more than the fixes. An in-image differential gate runs the same
+    form through both evaluators and compares, so parity is measured rather than asserted. And the
+    flip itself is reversible behind a switch that is byte-identical when off, so the default can
+    move and move back. Compile caching, worth about twenty times on repeated forms, is what makes
+    running production evaluation through a compiler affordable at all.</p>
   </section>
 
   <section>
     <div class="sec-head">
       <span class="sec-eyebrow">also this week &nbsp;/&nbsp; four more new repositories</span>
-      <h2>Compression, Tor, and Nostr</h2>
+      <h2>Compression, Tor, Nostr, and a timing probe</h2>
     </div>
     <ul class="plain">
-      <li><span class="mono">brotli-pure</span> and <span class="mono">zstd-pure</span> both
-      appeared on Sunday and both went to full codecs &mdash; RFC 7932 decompression and an
-      entropy-coding encoder for the first, Huffman and FSE for the second. Brotli is not
-      optional decoration: it is what WOFF2 web fonts arrive compressed with, which scribe needs
-      and weft needs.</li>
-      <li><span class="mono">cl-tor</span> went from three-hop circuit construction to streams
-      and a SOCKS5 proxy &mdash; curl through Tor works &mdash; then consensus signature
-      validation with weighted, exit-aware path selection, SENDME flow control, guard persistence,
-      and relay-family and /16 path constraints. A week later it would be hosting an onion
-      service of its own.</li>
-      <li><span class="mono">cl-nostr</span> arrived as a from-scratch Nostr client, and
-      <span class="mono">secp256k1-fast</span> made its secret operations constant-time &mdash;
-      which both cl-nostr and cl-consensus recorded by rewriting their disclaimers rather than
-      quietly benefiting.</li>
-      <li><span class="mono">cl-consensus</span> grew a parallel peer dialer with correct
-      read-loop ownership, a self-healing follow loop with archival backfill, and a bounded wait
-      on header sync so that a silent peer cannot hang the node.</li>
+      <li><span class="mono">brotli-pure</span> and <span class="mono">zstd-pure</span> both appear
+      on Sunday and both reach full codecs the same day. Brotli is not decoration: it is what WOFF2
+      web fonts arrive compressed with, which is to say scribe needs it, which is to say weft needs
+      it. The dependency was created three days before the thing that required it.</li>
+      <li><span class="mono">cl-tor</span> goes from a phased plan to three-hop circuits, then
+      streams and a SOCKS proxy &mdash; curl through Tor works &mdash; then consensus signature
+      validation with weighted exit-aware path selection, flow control, guard persistence, and
+      relay-family and subnet path constraints. Six phases in one day.</li>
+      <li><span class="mono">secp256k1-fast</span>, eleven times faster since
+      <a href="../2026-06-20/">&#8470;&nbsp;15</a>, made its secret operations constant-time &mdash;
+      and then tested that <em>property</em> rather than the results, with an operation-count gate
+      and a timing probe. Both <span class="mono">cl-nostr</span>, new on Sunday, and
+      <span class="mono">cl-consensus</span> recorded the change by rewriting their security
+      disclaimers, which is the honest way to benefit from somebody else&rsquo;s work.</li>
+      <li><span class="mono">cl-consensus</span> also vendored secp256k1-fast and
+      <span class="mono">pagetree</span> as submodules, and bumped pagetree to pick up a fix for a
+      quadratic read overflow &mdash; the first time in this archive that a bug in one repository
+      is fixed on behalf of another.</li>
     </ul>
   </section>
 
   <footer>
-    <p><strong>Method.</strong> Commits by <em>author</em> date, 27 June to 3 July inclusive,
-    across the 42 git repositories in the modus-lisp workspace. Of the week's 248,840 added
-    lines, 156,058 are vendored conformance corpora under <code>inspect/vectors/</code> and
-    <code>inspect/test262/</code> &mdash; WHATWG tokenizer vectors, URL test data, cmap tables
-    dumped from the fontTools oracle &mdash; checked in so the gates run offline; the tally above
-    reports the remainder separately. Line counts also exclude generated acceptance-gate
+    <p><strong>Method.</strong> Commits by <em>author</em> date, 27 June to 3 July 2026, across the
+    42 git repositories in the modus-lisp workspace. Of the week's 248,840 added lines, 156,058 are
+    vendored conformance corpora under <code>inspect/vectors/</code> and
+    <code>inspect/test262/</code> &mdash; tokenizer vectors, URL test data, character-map tables
+    dumped from the <code>ttx</code> oracle &mdash; checked in so the gates run offline; the tally
+    above reports the remainder separately. Line counts also exclude generated acceptance-gate
     artefacts and committed scratch dumps. Produced with <code>bin/week 2026-07-04 --log</code>.</p>
     <p><a href="../../">&larr; All issues</a></p>
   </footer>
