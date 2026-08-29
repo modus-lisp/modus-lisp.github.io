@@ -339,6 +339,19 @@ ul.chips li {
 
 /* ------------------------------------------------------------ issue index */
 
+h3.month {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-variation-settings: normal;
+  font-weight: 400;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 36px 0 8px;
+}
+h3.month::before { content: none; }
+h3.month:first-of-type { margin-top: 20px; }
+
 ol.issues { list-style: none; padding: 0; margin: 0; }
 ol.issues li { border-bottom: 1px solid var(--hair); }
 ol.issues li:first-child { border-top: 1px solid var(--hair); }

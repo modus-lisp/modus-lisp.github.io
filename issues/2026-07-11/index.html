@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Two things deleted — This Week in Modus №18</title>
+<meta name="description" content="This Week in Modus, 4–10 July 2026: Modus deletes its tree-walking evaluator and cl-tor deletes OpenSSL, five days after seal was born. 233 commits across 11 repos.">
+<meta property="og:title" content="Two things deleted — This Week in Modus №18">
+<meta property="og:description" content="4–10 July 2026: Modus deletes its tree-walking evaluator, and cl-tor deletes OpenSSL five days after seal was born.">
+<meta property="og:type" content="article">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..700&family=Newsreader:opsz,wght@6..72,300..600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../../assets/crier.css">
+</head>
+<body>
+<div class="page">
+
+  <div class="sitebar">
+    <a class="brand" href="../../">crier</a>
+    <nav><a href="../../#issues">Issues</a><a href="https://github.com/modus-lisp">GitHub</a></nav>
+  </div>
+
+  <header class="mast">
+    <div class="kicker">
+      <span>This Week in Modus &mdash; &#8470;&nbsp;18</span>
+      <span>&middot;</span>
+      <span>4&ndash;10 July 2026</span>
+      <span>&middot;</span>
+      <span><b>233 commits</b> &middot; 11 of 42 repos</span>
+    </div>
+    <h1>Two things<br><span class="lo">deleted</span></h1>
+    <hr class="rule-fire">
+    <p class="standfirst">Modus had two evaluators and now has one: the tree-walker is gone from
+    every production image. And OpenSSL left the stack &mdash; five days after
+    <span class="mono">seal</span> was born, cl-tor dropped its FFI dependency and started hosting
+    a v3 onion service that stock Tor clients can reach.</p>
+
+    <div class="tally">
+      <div><span class="n">233</span><span class="l">Commits</span></div>
+      <div><span class="n">11</span><span class="l">Repos moved</span></div>
+      <div><span class="n">3</span><span class="l">New repos</span></div>
+      <div><span class="n">210</span><span class="l">Source files</span></div>
+      <div><span class="n">&minus;15k</span><span class="l">Lines removed</span></div>
+    </div>
+  </header>
+
+  <div class="ledger-wrap">
+    <table class="ledger">
+      <thead><tr><th>Repo</th><th class="num">Commits</th><th></th><th class="num" colspan="2">Lines</th><th>Focus</th></tr></thead>
+      <tbody>
+        <tr><td class="repo">weft</td><td class="num">92</td><td class="barcell"><span class="bar" style="width:100%"></span></td><td class="add">+4,719</td><td class="del">&minus;909</td><td class="what">web fonts, script itemization, calc()</td></tr>
+        <tr><td class="repo">modus</td><td class="num">61</td><td class="barcell"><span class="bar" style="width:66.3%"></span></td><td class="add">+16,314</td><td class="del">&minus;13,248</td><td class="what">WS3: one evaluator</td></tr>
+        <tr><td class="repo">loom</td><td class="num">31</td><td class="barcell"><span class="bar cool" style="width:33.7%"></span></td><td class="add">+1,730</td><td class="del">&minus;263</td><td class="what">a raster web service, and an inspector</td></tr>
+        <tr><td class="repo">cl-tor</td><td class="num">22</td><td class="barcell"><span class="bar" style="width:23.9%"></span></td><td class="add">+2,152</td><td class="del">&minus;406</td><td class="what">hosting a v3 onion service</td></tr>
+        <tr><td class="repo">cl-consensus</td><td class="num">9</td><td class="barcell"><span class="bar cool" style="width:9.8%"></span></td><td class="add">+1,355</td><td class="del">&minus;136</td><td class="what">a Bitcoin node behind an .onion</td></tr>
+        <tr><td class="repo">seal</td><td class="num">7</td><td class="barcell"><span class="bar" style="width:7.6%"></span></td><td class="add">+4,355</td><td class="del">&minus;212</td><td class="what">born; TLS 1.3, then 1.2 as fallback</td></tr>
+        <tr><td class="repo">scribe</td><td class="num">5</td><td class="barcell"><span class="bar cool" style="width:5.4%"></span></td><td class="add">+267</td><td class="del">&minus;24</td><td class="what">Noto fallback; gamma out of the inner loop</td></tr>
+        <tr><td class="repo">webp-pure</td><td class="num">3</td><td class="barcell"><span class="bar" style="width:3.3%"></span></td><td class="add">+8,409</td><td class="del">&minus;9</td><td class="what">born; a VP8 key-frame decoder</td></tr>
+        <tr><td class="repo">&hellip;and 3 more</td><td class="num">3</td><td class="barcell"><span class="bar cool" style="width:3.3%"></span></td><td class="add">&nbsp;</td><td class="del">&nbsp;</td><td class="what">cl-transport (born), shuttle, stencil</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>modus</em> &nbsp;/&nbsp; 61 commits &nbsp;/&nbsp; WS3</span>
+      <h2>One evaluator</h2>
+    </div>
+
+    <p>Modus had been carrying two ways to run Lisp: a tree-walking interpreter and a compiler to
+    MVM bytecode. Two evaluators means every semantic fix has to land twice, and the one that
+    does not get the fix is the one somebody hits. This week the tree-walker was removed.</p>
+
+    <div class="callout">
+      <p>Every consumer ported to the bytecode path: the x64-Linux gate, the gauntlet build,
+      bare-metal x64, Linux/AArch64 verified natively on a Pi&nbsp;5, and bare-metal AArch64. The
+      deletion is census-gated &mdash; an instrumented build recorded zero walker fallbacks
+      across the full ANSI corpus and the gauntlet.</p>
+      <span class="src">modus &mdash; 2257554</span>
+    </div>
+
+    <p>The sequence is worth noting for how carefully it was done. The walker was first extracted
+    into a file only the fork builds loaded, then <em>quarantined</em> rather than deleted, with
+    its fallback restored and instrumented by a counter, and only deleted once the counter had
+    stayed at zero across everything. Two regressions found on the way were both about what an
+    unresolved name emits: a <code>#'fn</code> that could not be resolved was emitting a live but
+    misaligned code pointer, and a duplicate <code>defun</code> re-triggered a whole crash class.</p>
+
+    <p>With one evaluator, the CLOS and ASDF work could proceed against a single target: init
+    methods honouring <code>&amp;allow-other-keys</code>, accessor methods on generic functions,
+    runtime <code>defvar</code> specials, CLOS class objects usable as type specifiers, and
+    handler frames transparent to non-local exit. Two garbage-collector bugs of the same family
+    were fixed &mdash; the multiple-value region and the closure environment register were being
+    stored as raw words the collector could not see, and the pre-interned signalling symbols
+    lived in unscanned slots, which made condition routing collapse silently after a collection.
+    Meanwhile the register allocator learned to spill on overflow rather than fail, and the four
+    bare-metal and hosted ANSI builds were re-forked from a common ancestor so that a fix in one
+    is a fix in all.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>seal &nbsp;cl-tor &nbsp;cl-consensus</em> &nbsp;/&nbsp; 38 commits</span>
+      <h2>OpenSSL leaves the building</h2>
+    </div>
+
+    <p>On Saturday <span class="mono">seal</span> was created: a pure Common Lisp TLS 1.3 client,
+    with fail-closed certificate chain validation across RSA, ECDSA and Ed25519. By Tuesday it
+    had a TLS 1.2 fallback for servers that decline 1.3, post-handshake KeyUpdate, and ECDSA
+    verification using Jacobian coordinates and Shamir&rsquo;s trick.</p>
+
+    <p>By Thursday <span class="mono">cl-tor</span> had used it to delete
+    <code>cl+ssl</code> &mdash; which is OpenSSL through an FFI &mdash; from its link layer, and
+    <span class="mono">cl-consensus</span> had vendored seal to follow. That is the no-FFI claim
+    doing real work, five days after the library that makes it possible existed.</p>
+
+    <p>The rest of cl-tor&rsquo;s week is a v3 onion service built from the bottom: ed25519 group
+    arithmetic and key blinding, the HSDir hash ring with its timing inputs and index formulas,
+    fetching and decrypting a descriptor over a circuit, the rendezvous handshake and
+    INTRODUCE1, and an end-to-end connection to somebody else&rsquo;s <code>.onion</code>. Then
+    the same thing from the other side &mdash; building, signing and encrypting a descriptor,
+    establishing introduction points, publishing, handling INTRODUCE2, and accepting inbound
+    connections. The cross-certificate work has a specific aim recorded in its subject line:
+    descriptors valid for <em>stock</em> Tor clients, not merely for ours. Persistent entry
+    guards with rotation, shared between the SOCKS and onion paths, and rendezvous retry, made
+    it reliable rather than demonstrable.</p>
+
+    <p><span class="mono">cl-consensus</span> put that to use immediately: outbound peers routed
+    through <span class="mono">cl-transport</span> with Tor optional, a v3 onion peer directory
+    collected and persisted, its own <code>.onion</code> for inbound connections, and
+    self-advertisement to the network. A Bitcoin node that is reachable without a public address.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>loom &nbsp;weft</em> &nbsp;/&nbsp; 123 commits</span>
+      <h2>The Opera Mini approach</h2>
+    </div>
+
+    <p>The neatest idea of the week is about 180 lines. The engine renders a page to a full-height
+    PNG on the server; a minimal HTML client shows that raster in an <code>&lt;img&gt;</code> so
+    the browser scrolls it natively, and posts clicks back as coordinates. The server hit-tests,
+    dispatches the DOM click or follows the link through the page&rsquo;s navigation hook,
+    re-renders, and serves the new raster. Click-through navigation verified over real TLS.</p>
+
+    <p>From there it became a service: a supervisor, a thread per connection so one crash cannot
+    take the server down, rasters cached per generation, rendering at each request&rsquo;s own
+    viewport width so the result is readable on a phone, navigation driven from the URL hash so
+    Back and Forward work, and a performance and network inspector panel that streams
+    fine-grained navigation phases and breaks the network down by resource kind. Two robustness
+    rules arrived that a real browser needs: a script error degrades to a render instead of
+    blanking the page, and if scripts collapse the render entirely, fall back to the static
+    markup.</p>
+
+    <p>In <span class="mono">weft</span>, web fonts landed &mdash; <code>@font-face</code>
+    downloaded and rendered, plus a replay of the Web Font Loader convention that a great many
+    real sites still use &mdash; along with script itemization for font fallback, area-averaged
+    downscaling, inline background painting with highlights extending across inter-word gaps,
+    <code>object-fit</code>, and <code>calc()</code>. <span class="mono">scribe</span> supported
+    that from underneath with a comprehensive Noto set and Unicode-block script fallback, and
+    took two gamma transfers out of a per-pixel <code>expt</code> and into tables.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow">also this week</span>
+      <h2>Two more repositories</h2>
+    </div>
+    <ul class="plain">
+      <li><span class="mono">webp-pure</span> arrived on Tuesday and was a VP8 key-frame decoder
+      by the end of the day: the RIFF container, the boolean decoder and RFC&nbsp;6386&rsquo;s
+      tables, then the inverse DCT and Walsh-Hadamard transforms, then the full pixel pipeline
+      through prediction, the loop filter and YUV to RGB.</li>
+      <li><span class="mono">cl-transport</span> was extracted so that &ldquo;dial direct, through
+      SOCKS5, or through Tor&rdquo; is one interface with a pluggable backend, rather than a
+      decision every caller makes for itself.</li>
+      <li><span class="mono">loom</span> also replaced <code>cl-sdl2</code> with hand-written
+      bindings to libSDL2 &mdash; the same reasoning that <span class="mono">glass-sdl</span>
+      would repeat a month later, and the last week in which SDL was the everyday driver at all.</li>
+    </ul>
+  </section>
+
+  <footer>
+    <p><strong>Method.</strong> Commits by <em>author</em> date, 4 to 10 July inclusive, across
+    the 42 git repositories in the modus-lisp workspace. Line counts exclude generated
+    acceptance-gate artefacts and committed scratch dumps. Produced with
+    <code>bin/week 2026-07-11 --log</code>.</p>
+    <p><a href="../../">&larr; All issues</a></p>
+  </footer>
+
+</div>
+</body>
+</html>
