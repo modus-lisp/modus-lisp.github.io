@@ -1,6 +1,11 @@
 # crier
 
-**The modus-lisp project's own dispatch — a static site, written by hand, served from this repo.**
+**The modus-lisp project's own dispatch — a static site, written by hand, served from this repo
+at [modus-lisp.github.io](https://modus-lisp.github.io/).**
+
+> The repository is called `modus-lisp.github.io` because GitHub will only serve an
+> organisation's site at the root from a repo with exactly that name. The site is called
+> **crier**, and that is the name that appears on it.
 
 [modus-lisp](https://github.com/modus-lisp) is forty-two repositories that add up to one
 personal computer written from scratch in Common Lisp. That is a lot of work happening in
@@ -11,7 +16,7 @@ explained.
 
 | | |
 |---|---|
-| `index.html` | The front page: what the project is, the issue index, a map of the workspace. |
+| `index.html` | The front page: what the project is, the issue index, a map of all 42 repositories. |
 | `issues/YYYY-MM-DD/index.html` | One issue of **This Week in Modus** — what moved, across every repo, and why it was hard. |
 | `assets/crier.css` | The whole design system. Tokens, then chrome, then prose. There is no second stylesheet. |
 | `.nojekyll` | Tells Pages to serve the files as written rather than running Jekyll over them. |
@@ -24,8 +29,9 @@ generator ever arrives it will be [weft](https://github.com/modus-lisp/weft) and
 ## Publishing
 
 GitHub Pages, deployed from the `master` branch at the repository root — Settings → Pages →
-*Deploy from a branch* → `master` / `/ (root)`. Every push is live within a minute; there is
-nothing to build, so there is nothing to break in a build.
+*Deploy from a branch* → `master` / `/ (root)`. That puts the site at
+<https://modus-lisp.github.io/>, the organisation's front door. Every push is live within a
+minute; there is nothing to build, so there is nothing to break in a build.
 
 ## Adding an issue
 
