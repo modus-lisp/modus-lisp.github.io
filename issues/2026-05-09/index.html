@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The bug was a docstring — This Week in Modus №9</title>
+<meta name="description" content="This Week in Modus, 2–8 May 2026: the layout-fragility plague is root-caused to docstrings being compiled into function prologues, and the ANSI suite moves to bare-metal AArch64, where there is no fork to isolate it with. 62 commits.">
+<meta property="og:title" content="The bug was a docstring — This Week in Modus №9">
+<meta property="og:description" content="2–8 May 2026: the layout-fragility plague turns out to be docstrings compiled into function prologues; and the ANSI suite moves to bare metal, where there is no fork.">
+<meta property="og:type" content="article">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..700&family=Newsreader:opsz,wght@6..72,300..600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../../assets/crier.css">
+</head>
+<body>
+<div class="page">
+
+  <div class="sitebar">
+    <a class="brand" href="../../">crier</a>
+    <nav><a href="../../#issues">Issues</a><a href="https://github.com/modus-lisp">GitHub</a></nav>
+  </div>
+
+  <header class="mast">
+    <div class="kicker">
+      <span>This Week in Modus &mdash; &#8470;&nbsp;9</span>
+      <span>&middot;</span>
+      <span>2&ndash;8 May 2026</span>
+      <span>&middot;</span>
+      <span><b>62 commits</b> &middot; 1 repo</span>
+    </div>
+    <h1>The bug was<br>a <span class="lo">docstring</span></h1>
+    <hr class="rule-fire">
+    <p class="standfirst">The layout fragility that had been flipping tests for two weeks turned
+    out to be documentation. Meanwhile the ANSI suite was ported to bare-metal AArch64, where
+    there is no operating system to fork with &mdash; so isolation had to be rebuilt out of a
+    timer, a bitmap, and eventually an actor.</p>
+
+    <div class="tally">
+      <div><span class="n">62</span><span class="l">Commits</span></div>
+      <div><span class="n">21</span><span class="l">Source files</span></div>
+      <div><span class="n">+8.6k</span><span class="l">Lines added</span></div>
+      <div><span class="n">17,692</span><span class="l">Records, on bare metal</span></div>
+    </div>
+  </header>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>modus</em> &nbsp;/&nbsp; 3 May &nbsp;/&nbsp; 45071a9</span>
+      <h2>The bug was a docstring</h2>
+    </div>
+
+    <p>The compiler strips declarations from the front of a function body before compiling it. It
+    did not strip docstrings. So a string sitting there as the first form was compiled as a
+    string &mdash; allocated, in the function&rsquo;s prologue, every single time the function was
+    called, at roughly twenty bytes of machine code per character.</p>
+
+    <div class="callout">
+      <p><code>string-equal</code>, with a 280-character docstring, compiled to 7,022 bytes
+      instead of 1,822. The five-kilobyte shift pushed unrelated callers downstream across a
+      function-address alignment edge, corrupting dispatch and crashing at boot.</p>
+      <span class="src">modus &mdash; 45071a9, &ldquo;root cause of the long-running layout
+      fragility plague&rdquo;</span>
+    </div>
+
+    <p>That is the answer to <a href="../2026-05-02/">&#8470;&nbsp;8</a>&rsquo;s fuzzer. The tests
+    that flipped when the code moved were not flipping because of anything mysterious about the
+    code; something had been silently making functions four times larger than they should be,
+    and the amount depended on how much prose their author had felt like writing. It also
+    explains a separate note in the project&rsquo;s own documentation about miscompiles past a
+    &ldquo;function size threshold&rdquo;.</p>
+
+    <p>The fix is one line in the right place, and the commit immediately after it puts the full
+    docstring back on <code>string-equal</code> &mdash; which is the nicest possible way to
+    demonstrate that a bug is fixed.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>modus</em> &nbsp;/&nbsp; 5&ndash;7 May &nbsp;/&nbsp; e3d4982, 9a4d21d, 6e22773</span>
+      <h2>Isolation without a kernel</h2>
+    </div>
+
+    <p>Everything that made the harness trustworthy in <a href="../2026-04-18/">&#8470;&nbsp;6</a>
+    and <a href="../2026-04-25/">&#8470;&nbsp;7</a> was borrowed from Linux: <code>fork</code> for
+    per-test isolation, shared memory for verdicts that outlive a crash, signal handlers to turn
+    faults into errors. On bare metal none of those exist, and bare metal is where this
+    implementation is supposed to live. So the suite was ported to run with no operating system
+    underneath it, on both x64 and AArch64, and every borrowed mechanism had to be replaced.</p>
+
+    <ul class="plain">
+      <li><strong>For <code>fork</code>: nothing, at first.</strong> Each test simply runs inside
+      a single <code>handler-case</code>. Which means a test that hangs hangs the machine.</li>
+      <li><strong>For the alarm: the virtual timer interrupt.</strong> A per-test deadline,
+      tuned down from five guest seconds &mdash; about ten minutes of wall clock under emulation
+      &mdash; to fifty milliseconds, so a timeout can actually fire before anybody gives up.</li>
+      <li><strong>For crash containment: a bitmap.</strong> One byte per test at a fixed address,
+      recording that a verdict has been produced. Without it, a stale non-local exit from a
+      wedged test re-entered ten later tests about twenty times each, filling the output with
+      duplicates. With it, every test produces at most one result.</li>
+      <li><strong>For the tests that cannot be run at all: say so in advance.</strong> Ranges of
+      known-wedging tests are pre-stamped as failures before the run, so their absence is
+      recorded rather than lost &mdash; the same principle as the <code>+</code> byte, applied to
+      tests that never get the chance to write one.</li>
+    </ul>
+
+    <p>The coverage climbs commit by commit &mdash; 229, then 2,058, then 7,898, then 13,211 at
+    75%, then 17,403 at 98% &mdash; and closes on Thursday:</p>
+
+    <div class="console">
+      <span class="cap">modus &mdash; 6e22773, bare-metal AArch64</span>
+<pre>P = 1,602   F = 16,090   =  17,692 unique records
+<span class="ret">100% per-test coverage — missing = 0</span></pre>
+    </div>
+
+    <p>Sixteen thousand of those are failures, and that is the point rather than an
+    embarrassment. This week was not about passing the suite on bare metal; it was about being
+    able to <em>see</em> the suite on bare metal. A number you can trust is the precondition for
+    improving it, which is the whole argument of the last four issues.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>modus</em> &nbsp;/&nbsp; 7&ndash;8 May &nbsp;/&nbsp; a2ae64d</span>
+      <h2>An actor per test</h2>
+    </div>
+
+    <p>The remaining hole is the one <code>fork</code> was really for: a test that wedges takes
+    the machine with it. Modus already has the answer and has had it since
+    <a href="../2026-02-28/">&#8470;&nbsp;2</a> &mdash; actors, each with its own stack and heap,
+    which is what isolation looks like when the language is the operating system.</p>
+
+    <p>The mechanism is small enough to describe completely. The main actor writes a test
+    identifier, a thunk and an expected value into a shared block at a fixed address and yields.
+    A worker actor, looping on yield, picks the request up, runs the thunk under its own
+    <code>handler-case</code>, writes back either a result or a crash status, and yields. The main
+    actor reads the status: completed, hand the value to the comparison; crashed, record a
+    failure; still running past the deadline, record a failure and <em>leak the actor</em> &mdash;
+    abandon it where it stands and carry on, which is exactly what killing a forked child amounts
+    to.</p>
+
+    <p>It went in against the single test that had started the whole investigation, then six, then
+    eight, then fifteen. A proof of concept rather than a finished harness &mdash; but the shape
+    is right, and it is the first time the actor system has been used for the thing it was
+    designed for.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>modus</em> &nbsp;/&nbsp; 3&ndash;4 May &nbsp;/&nbsp; 4b8c87e</span>
+      <h2>Keywords become objects</h2>
+    </div>
+
+    <p>A keyword had been compiled to a hash of its name, loaded as a tagged integer. Identity
+    worked and nothing else did: <code>(symbolp :foo)</code> was false,
+    <code>(integerp :foo)</code> was true, <code>symbol-name</code> and printing were broken, and
+    &mdash; the expensive one &mdash; every keyword-argument validator that checked
+    <code>symbolp</code> on an incoming <code>:test</code> or <code>:key</code> silently did the
+    wrong thing.</p>
+
+    <p>Keywords are now real one-slot heap objects with their own subtag, distinct from
+    symbols so that <code>keywordp</code> can answer without consulting a package, with a single
+    intern table shared by the reader and the compiler. That last part matters more than it
+    sounds: reading <code>:foo</code> from source and compiling a literal <code>:foo</code> now
+    reach the same object, which is the property everything else depends on. This is the same
+    family of fix as the closures and symbols in
+    <a href="../2026-04-25/">&#8470;&nbsp;7</a> &mdash; a thing that had been represented as
+    something cheaper becoming itself.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>modus</em> &nbsp;/&nbsp; 2&ndash;4 May</span>
+      <h2>CLOS learns some manners</h2>
+    </div>
+    <p>The object system spent the week learning to fail properly rather than to fail. Reading an
+    unbound slot signals a real condition carrying the slot name and the instance; an unknown slot
+    dispatches through <code>slot-missing</code> instead of returning nonsense; a
+    <code>defclass</code> with duplicate slots or duplicate options signals a program error;
+    <code>ensure-generic-function</code> refuses to overwrite a function that is not a generic
+    function. The nine standard method combinations are registered at boot rather than assembled
+    on demand, <code>find-class</code> returns a proxy for the built-in types so they can be used
+    where a class is expected, and <code>typep</code> recognises methods and generic functions as
+    the types they are.</p>
+  </section>
+
+  <footer>
+    <p><strong>Method.</strong> Commits by <em>author</em> date, 2 to 8 May 2026, across the git
+    repositories in the modus-lisp workspace &mdash; at this point, one. The pass and coverage
+    figures are the ones the commits report, and are measured on bare-metal AArch64 under
+    emulation, not on the hosted Linux build. Line counts exclude generated build artefacts.
+    Produced with <code>bin/week 2026-05-09 --log</code>.</p>
+    <p><a href="../../">&larr; All issues</a></p>
+  </footer>
+
+</div>
+</body>
+</html>

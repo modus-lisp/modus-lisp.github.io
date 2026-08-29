@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A heuristic is a bug you haven't hit yet — This Week in Modus №8</title>
+<meta name="description" content="This Week in Modus, 25 April – 1 May 2026: tests that pass or fail depending on where the code sits in memory, a fuzzer built to catch them, and three type predicates that had been guessing. 159 commits.">
+<meta property="og:title" content="A heuristic is a bug you haven't hit yet — This Week in Modus №8">
+<meta property="og:description" content="25 April – 1 May 2026: tests that flip depending on where the code sits in memory, a fuzzer built to catch them, and three type predicates that had been guessing.">
+<meta property="og:type" content="article">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..700&family=Newsreader:opsz,wght@6..72,300..600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../../assets/crier.css">
+</head>
+<body>
+<div class="page">
+
+  <div class="sitebar">
+    <a class="brand" href="../../">crier</a>
+    <nav><a href="../../#issues">Issues</a><a href="https://github.com/modus-lisp">GitHub</a></nav>
+  </div>
+
+  <header class="mast">
+    <div class="kicker">
+      <span>This Week in Modus &mdash; &#8470;&nbsp;8</span>
+      <span>&middot;</span>
+      <span>25 April &ndash; 1 May 2026</span>
+      <span>&middot;</span>
+      <span><b>159 commits</b> &middot; 1 repo</span>
+    </div>
+    <h1>A heuristic is a bug<br>you haven&rsquo;t hit <span class="lo">yet</span></h1>
+    <hr class="rule-fire">
+    <p class="standfirst">Some tests passed or failed depending on where the compiled code
+    happened to sit in memory. A fuzzer that inserts do-nothing instructions found fourteen of
+    them, and underneath were three type predicates that had never actually checked anything
+    &mdash; they had been ruling things out.</p>
+
+    <div class="tally">
+      <div><span class="n">159</span><span class="l">Commits</span></div>
+      <div><span class="n">24</span><span class="l">Source files</span></div>
+      <div><span class="n">+11k</span><span class="l">Lines added</span></div>
+      <div><span class="n">14</span><span class="l">Tests that flipped</span></div>
+    </div>
+  </header>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>modus</em> &nbsp;/&nbsp; 26&ndash;27 April &nbsp;/&nbsp; a62eff6</span>
+      <h2>Tests that flip when the code moves</h2>
+    </div>
+
+    <p>The harness stopped losing tests last week, which made a subtler problem visible: some
+    results were not stable. A change with no semantic content &mdash; anything that made the
+    binary a little larger or a little differently arranged &mdash; could turn a passing test into
+    a failing one somewhere else entirely. That is the worst kind of bug to chase, because every
+    attempt to look at it moves it.</p>
+
+    <p>So rather than chase it, the project built an instrument. A fuzzer compiles the test binary
+    nine times, injecting <em>N</em> do-nothing instructions at every function call site for
+    <em>N</em> from zero to eight, and diffs which tests change verdict. One byte at thousands of
+    call sites shifts the whole binary by thousands of bytes per increment.</p>
+
+    <div class="callout">
+      <p>The pass count dips at N&nbsp;=&nbsp;1, 2 and 4 and recovers fully at 0, 3, and 5 through 8.
+      That non-monotonic pattern is the signature of an alignment bug &mdash; something needing to
+      sit at a particular address modulo <em>K</em> &mdash; and not of general instability. Only 14
+      tests flip; the other 9,156 are stable.</p>
+      <span class="src">modus &mdash; a62eff6</span>
+    </div>
+
+    <p>Fourteen out of nine thousand is a diagnosis rather than a catastrophe, and the shape of
+    the graph turned a vague fear into a specific hypothesis. There is also an honest retreat in
+    the middle of the week: an attempt to print diagnostics from inside the suspect function added
+    about thirty bytes to it, and thirty bytes times every call site shifted the binary enough to
+    change the failure. The commit names the property &mdash; any observation changes what is
+    observed &mdash; and stops, listing what would actually work instead.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>modus</em> &nbsp;/&nbsp; 26&ndash;27 April &nbsp;/&nbsp; 7203e19, fd27d1c, 9a11f24</span>
+      <h2>Three predicates that were guessing</h2>
+    </div>
+
+    <p>The root causes, when they came, were all the same mistake. Asking &ldquo;is this a
+    function?&rdquo; or &ldquo;is this a vector?&rdquo; had been implemented not by looking at the
+    object but by eliminating everything it wasn&rsquo;t.</p>
+
+    <div class="console">
+      <span class="cap">modus &mdash; how <code>vectorp</code> used to work</span>
+<pre>(and (not (consp obj)) (not (null obj)) (not (integerp obj))
+     (not (characterp obj)) (not (eq obj t)))</pre>
+    </div>
+
+    <p>Every heap-allocated object survives that gauntlet, so closures, bignums, ratios, generic
+    functions and packages were all vectors as far as <code>vectorp</code> was concerned.
+    Replacing it with a real check on the object&rsquo;s subtag <em>lost</em> one test and fixed
+    21,057 correctness checks &mdash; a trade the commit message states in its own subject line
+    rather than burying.</p>
+
+    <p><code>functionp</code> had the same shape and a sharper failure. It ruled out functions by
+    asking whether the value was an integer &mdash; and a raw function address <em>is</em> an
+    integer more than half the time, depending on the low bits of wherever the function landed.
+    So <code>functionp</code> returned the wrong answer for a real function about 57% of the time,
+    and which 57% depended on the layout of the binary. That is the fragility, precisely.</p>
+
+    <p>The third is not a predicate but has the same character: the instruction that reads an
+    object&rsquo;s subtag was emitting a bare load from nine bytes before the pointer, with no
+    check that the pointer was a heap object at all. A fixnum or an immediate sends that load to a
+    random address. Worse, the immediate for <code>T</code> happens to end in the same nibble that
+    marks a heap pointer, so reading its subtag lands exactly one byte past the end of a mapped
+    page &mdash; which is why the crashes clustered in CLOS tests, where comparing a result to
+    <code>T</code> is routine. Making the deref tag-safe closed that whole family.</p>
+
+    <p>Four tests still flipped on pure instruction injection at the end of the week, with the
+    hypotheses written down and unresolved. One earlier suspect was retired as a misdiagnosis, and
+    two attempted fixes &mdash; full sixteen-byte alignment, and caller-saving in the comparison
+    slow path &mdash; were reverted because each grew the code enough to move the problem
+    somewhere else.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>modus</em> &nbsp;/&nbsp; 159 commits, most with a number in the subject</span>
+      <h2>A number on every commit</h2>
+    </div>
+
+    <p>The other thing to notice about this week is what the log looks like. Almost every subject
+    line now ends in a measured delta, because there is finally a harness that can produce one:</p>
+
+    <div class="console">
+      <span class="cap">modus &mdash; a sample of the week's subjects</span>
+<pre>&amp;rest in funcall: callee-side rest-list packing prologue      <span class="ret">+426</span>
+Closure auto-capture enabled                                  <span class="ret">+290</span>
+format: rewrite ~^, ~[~], ~*, ~R, ~(...~), brace-scanner      <span class="ret">+146</span>
+format: ~:{ and ~:@{ — list-of-sublists iteration             <span class="ret">+141</span>
+aref/aset/array-length/stringp peel array wrappers            <span class="ret">+114</span>
+defun wrappers so #'cons etc are callable                      <span class="ret">+92</span>
+compiler: fix &amp;key parameter order in preprocess-params        <span class="ret">+90</span>
+equalp: char-equal for chars + element-wise for arrays         <span class="ret">+71</span></pre>
+    </div>
+
+    <p>Two of those are worth expanding. Closures built from a <code>&amp;rest</code> lambda &mdash;
+    which is what <code>formatter</code> produces &mdash; worked when called by name and corrupted
+    memory when called through <code>funcall</code>, because a direct call packs the rest list at
+    compile time and <code>funcall</code> cannot: it does not know the callee&rsquo;s signature.
+    The fix moves the packing to the callee, which reads the argument count from a slot the caller
+    always sets. That is 426 tests from one calling-convention change.</p>
+
+    <p>And a rule from the standard turns up over and over in the week&rsquo;s subjects: when a
+    keyword argument is supplied twice, the leftmost one wins. It had to be fixed in
+    <code>member</code>, <code>assoc</code>, <code>find</code>, <code>position</code>, the
+    substitution family and the shared keyword parser &mdash; each time worth a handful of tests,
+    and never something anyone would have thought to check without being told.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>modus</em> &nbsp;/&nbsp; 28&ndash;29 April</span>
+      <h2>FORMAT, and arrays that are not flat</h2>
+    </div>
+
+    <p><code>format</code> got most of a rewrite: the brace scanner, iteration over a list of
+    sublists, the escape directive checking the right enclosing list, conditional and
+    goto directives, case conversion, the integer directives with their minimum column, pad
+    character, comma grouping and sign handling, plurals, and right-aligned padding. It is the
+    single largest block of tests recovered in the week, which is unsurprising &mdash; a great
+    deal of the ANSI suite prints something and compares the string.</p>
+
+    <p>The other structural change is that an array stopped being a flat run of memory. Once
+    <code>:fill-pointer</code>, <code>:adjustable</code> and displacement exist, an array is a
+    wrapper around storage, and every function that touches one has to look through it. So
+    <code>aref</code>, <code>aset</code>, <code>array-length</code> and <code>stringp</code>
+    learned to peel wrappers, and then so did <code>elt</code>, <code>reduce</code>,
+    <code>search</code>, <code>coerce</code>, <code>concatenate</code>, <code>every</code>,
+    <code>some</code>, <code>find</code>, <code>position</code> and <code>count</code>. A related
+    correction runs through the same commits: a string&rsquo;s elements are characters, not the
+    bytes underneath them, and several functions had been handing out the numbers.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow">also this week</span>
+      <h2>Two smaller things</h2>
+    </div>
+    <ul class="plain">
+      <li><strong>CLOS became runtime-defined.</strong> <code>defclass</code>,
+      <code>defgeneric</code> and <code>defmethod</code> are now handled by <code>eval</code> as
+      well as by the compiler, <code>make-instance</code> is a real top-level function, and
+      effective slots are computed from the class precedence list &mdash; the beginning of a CLOS
+      that is a runtime object system rather than a compile-time trick.</li>
+      <li><strong>The ELF output grew symbols.</strong> Section headers, a symbol table and a
+      string table, with one entry per function pointing at its real prologue. Nothing in Modus
+      needs that; a debugger does. It is the difference between an address and a name in every
+      crash report from here on.</li>
+    </ul>
+  </section>
+
+  <footer>
+    <p><strong>Method.</strong> Commits by <em>author</em> date, 25 April to 1 May 2026, across the
+    git repositories in the modus-lisp workspace &mdash; at this point, one. The per-commit test
+    deltas are the ones the commits report. Line counts exclude generated build artefacts.
+    Produced with <code>bin/week 2026-05-02 --log</code>.</p>
+    <p><a href="../../">&larr; All issues</a></p>
+  </footer>
+
+</div>
+</body>
+</html>
