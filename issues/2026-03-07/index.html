@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A Pi with no SD card — This Week in Modus №3</title>
+<meta name="description" content="This Week in Modus, 28 February – 6 March 2026: Modus runs on real Pi Zero 2 W hardware, reached over SSH across a USB Ethernet gadget it implements itself, and the MVM compiler compiles its own 759 functions.">
+<meta property="og:title" content="A Pi with no SD card — This Week in Modus №3">
+<meta property="og:description" content="28 February – 6 March 2026: Modus runs on real Pi Zero 2 W hardware, reached over SSH across a USB Ethernet gadget it implements itself.">
+<meta property="og:type" content="article">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..700&family=Newsreader:opsz,wght@6..72,300..600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../../assets/crier.css">
+</head>
+<body>
+<div class="page">
+
+  <div class="sitebar">
+    <a class="brand" href="../../">crier</a>
+    <nav><a href="../../#issues">Issues</a><a href="https://github.com/modus-lisp">GitHub</a></nav>
+  </div>
+
+  <header class="mast">
+    <div class="kicker">
+      <span>This Week in Modus &mdash; &#8470;&nbsp;3</span>
+      <span>&middot;</span>
+      <span>28 February &ndash; 6 March 2026</span>
+      <span>&middot;</span>
+      <span><b>3 commits</b> &middot; 1 repo</span>
+    </div>
+    <h1>A Pi with<br>no <span class="lo">SD card</span></h1>
+    <hr class="rule-fire">
+    <p class="standfirst">Modus left the emulator. It runs on real Pi&nbsp;Zero&nbsp;2&nbsp;W
+    silicon, booted over USB with no card in the slot, and is reached over SSH across a USB
+    Ethernet gadget it implements itself &mdash; while the MVM compiler learns to compile its own
+    759 functions.</p>
+
+    <div class="tally">
+      <div><span class="n">3</span><span class="l">Commits</span></div>
+      <div><span class="n">64</span><span class="l">Source files</span></div>
+      <div><span class="n">+12.6k</span><span class="l">Lines added</span></div>
+      <div><span class="n">759</span><span class="l">Functions self-compiled</span></div>
+    </div>
+  </header>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>modus</em> &nbsp;/&nbsp; 2 March &nbsp;/&nbsp; bc14258</span>
+      <h2>USB, from both ends</h2>
+    </div>
+
+    <p>A Raspberry Pi has no serial port you can casually plug into and no Ethernet jack on the
+    small ones, so reaching one means USB &mdash; and USB is not a thing an operating system gets
+    for free. This week Modus wrote both halves of it.</p>
+
+    <p>As a <em>host</em>, on an emulated Pi 3B: a DWC2 host controller driver, device enumeration,
+    hub support, and CDC Ethernet, with the SSH server running over that same network stack. Then
+    USB HID over the boot protocol &mdash; keyboard, mouse and tablet &mdash; with the keyboard
+    driving the REPL directly. As a <em>device</em>, on a real Pi&nbsp;Zero&nbsp;2&nbsp;W: the same
+    controller in gadget mode presenting CDC-ECM Ethernet to the machine it is plugged into, so
+    the Pi appears as a network interface on your desk.</p>
+
+    <p>Around it, the peripherals a board actually needs: the BCM2835 system timer, a GPIO LED,
+    the GPU framebuffer, and the mini UART at <code>0x3F215040</code> with 32-bit stores and
+    TX-ready polling. And a serial bootloader, which is the difference between an afternoon and a
+    week: a permanent kernel on the SD card receives a new kernel over the wire at 115,200 baud
+    and jumps to it at <code>0x300000</code>, driven by a host-side script that resets the board
+    over GPIO17 first.</p>
+
+    <h3>Where the emulator stops telling the truth</h3>
+
+    <p>Two fixes in this commit exist only because the work moved to real silicon. The MVM
+    <code>YIELD</code> opcode had been compiled to a bare <code>WFE</code> &mdash; wait for event
+    &mdash; which is correct under emulation and stalls a real Cortex-A53 outright; it now pairs
+    with an <code>SEV</code>. And the hardware random number generator on the BCM2710A1 crashes,
+    so entropy comes from the timer instead. There is also a persistent bulk-IN channel fix for a
+    reconnection bug in QEMU&rsquo;s DWC2, which is the mirror image of the same problem: the
+    emulator lying in the other direction.</p>
+
+    <h3>Actors as isolation</h3>
+
+    <p>The AArch64 side gained the cooperative actor system &mdash; spawn, yield, mailbox send
+    and receive, a scheduler, and real context switching through save and restore of the machine
+    context &mdash; with a four-megabyte heap per actor and soft allocation that can fail rather
+    than trap. The arrangement it enables is described in the commit as Qubes-like, and it is the
+    first statement of a principle the project keeps: <strong>a net-domain actor owns the
+    hardware, and SSH handlers reach it only through typed mailbox messages, with the boundary
+    drawn at the TCP byte stream.</strong> Isolation is a property of the language runtime here,
+    not of a kernel that has to be trusted underneath one.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>modus</em> &nbsp;/&nbsp; 5 March &nbsp;/&nbsp; 133df85</span>
+      <h2>Real hardware, over a wire it made itself</h2>
+    </div>
+
+    <p>Three days later the whole stack runs on the real board: DWC2 in gadget mode with
+    interrupt-driven receive through a four-slot ring buffer serviced by an ISR at
+    <code>0x1000</code>, an SSH server with Ed25519, X25519 and ChaCha20, an HTTP client with DNS
+    resolution and an HTTP server on port 80, and actors scheduling all of it. It boots over
+    <code>rpiboot</code> with no SD card at all, and redeploys over the UART bootloader.</p>
+
+    <p>Two of the fixes name a constraint that only exists when a Lisp is the network stack. USB
+    Ethernet has a five-second watchdog; a cold boot that computes its crypto keys when first
+    asked will blow through it, so the keys are pre-computed at boot &mdash; and the long crypto
+    loops (X25519, Ed25519, field squaring) poll USB inside themselves, because there is no
+    kernel to do it for them while the CPU is busy multiplying.</p>
+
+    <p>And one line in the changelog is going to come back for months:</p>
+
+    <div class="callout">
+      <p>Uninitialized RAM fixes throughout &mdash; <code>make-array</code> doesn&rsquo;t zero on
+      real hardware.</p>
+      <span class="src">modus &mdash; 133df85</span>
+    </div>
+
+    <p>Under an emulator, fresh memory tends to be zeros, so code that forgets to initialise
+    something works perfectly. On a real board it is whatever was there before. This is a hazard
+    class rather than a bug, and the repository will be finding members of it for a long time.</p>
+
+    <h3>The compiler starts compiling itself</h3>
+
+    <p>The other half of the commit is the MVM compiler compiling its own 759 functions to
+    architecture-independent bytecode. Making that possible meant giving the bytecode a Lisp big
+    enough to express a compiler in: a prelude with MVM-compilable hash tables, <code>sort</code>,
+    <code>mapcar</code>, <code>gensym</code> and <code>symbol-value</code>; new opcodes for
+    <code>funcall</code>, <code>multiple-value-bind</code> and <code>flet</code>; macros for
+    <code>ldb</code>, <code>list</code>, <code>vector</code> and multi-place <code>setf</code>.
+    All seven translators were updated in step, which is the tax the portable-ISA design charges
+    and the reason it keeps being worth paying.</p>
+
+    <p>The week&rsquo;s third commit is a slide deck for a talk at ATL BitLab, with an empty
+    message. Somebody stood up and showed people this.</p>
+  </section>
+
+  <footer>
+    <p><strong>Method.</strong> Commits by <em>author</em> date, 28 February to 6 March 2026,
+    across the git repositories in the modus-lisp workspace &mdash; at this point, one. Line
+    counts exclude generated build artefacts. Produced with <code>bin/week 2026-03-07 --log</code>.</p>
+    <p><a href="../../">&larr; All issues</a></p>
+  </footer>
+
+</div>
+</body>
+</html>

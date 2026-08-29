@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nine architectures in four commits — This Week in Modus №2</title>
+<meta name="description" content="This Week in Modus, 21–27 February 2026: the project restarts without Movitz, in 64 bits, and within four days has actors, SMP, self-hosting, and a portable bytecode ISA with nine backends.">
+<meta property="og:title" content="Nine architectures in four commits — This Week in Modus №2">
+<meta property="og:description" content="21–27 February 2026: the project restarts without Movitz and within four days has actors, SMP, self-hosting, and a bytecode ISA with nine backends.">
+<meta property="og:type" content="article">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..700&family=Newsreader:opsz,wght@6..72,300..600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../../assets/crier.css">
+</head>
+<body>
+<div class="page">
+
+  <div class="sitebar">
+    <a class="brand" href="../../">crier</a>
+    <nav><a href="../../#issues">Issues</a><a href="https://github.com/modus-lisp">GitHub</a></nav>
+  </div>
+
+  <header class="mast">
+    <div class="kicker">
+      <span>This Week in Modus &mdash; &#8470;&nbsp;2</span>
+      <span>&middot;</span>
+      <span>21&ndash;27 February 2026</span>
+      <span>&middot;</span>
+      <span><b>4 commits</b> &middot; 1 repo</span>
+    </div>
+    <h1>Nine architectures<br>in four <span class="lo">commits</span></h1>
+    <hr class="rule-fire">
+    <p class="standfirst">Work resumes after eleven months, and not where it stopped. Modus is
+    rewritten as a native 64-bit Lisp cross-compiled from SBCL &mdash; then, over four days,
+    gains an actor system, symmetric multiprocessing, the ability to recompile itself from
+    source it carries inside its own binary, and a portable instruction set with nine backends.</p>
+
+    <div class="tally">
+      <div><span class="n">4</span><span class="l">Commits</span></div>
+      <div><span class="n">77</span><span class="l">Source files</span></div>
+      <div><span class="n">+54k</span><span class="l">Lines added</span></div>
+      <div><span class="n">9</span><span class="l">Architectures</span></div>
+    </div>
+  </header>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>modus</em> &nbsp;/&nbsp; 23 February &nbsp;/&nbsp; 89f6713</span>
+      <h2>Monday: a 64-bit Lisp with actors</h2>
+    </div>
+
+    <p>Movitz is gone. The new image is cross-compiled from SBCL to x86-64 and boots to a Lisp
+    REPL carrying a runtime native compiler, a Cheney copying collector, an E1000 driver, an SSH
+    server, and Erlang-style actors with a heap each. Preemptive multitasking comes from
+    reduction counting and the local APIC timer, and it is stable on eight cores.</p>
+
+    <p>Three of those are unusual to find in a first commit of a rewrite. A per-actor heap means
+    collection is per-actor too, so one process&rsquo;s garbage is not everybody&rsquo;s pause.
+    Reduction counting &mdash; interrupting a process after it has done a fixed amount of work
+    rather than after a fixed amount of time &mdash; is the scheduling idea Erlang uses, and it
+    is what makes a language runtime able to preempt itself without help from a kernel. And SMP
+    on eight cores on day one sets the constraint that every later data structure has to live
+    with.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>modus</em> &nbsp;/&nbsp; 25 February &nbsp;/&nbsp; c73b202</span>
+      <h2>Wednesday: the kernel recompiles itself</h2>
+    </div>
+
+    <p>Generation zero is built by SBCL. Generation one is built by generation zero, at runtime,
+    from source the kernel is carrying: the whole thing is serialized with symbols replaced by
+    integer identifiers and embedded in the binary, so a running image has everything it needs
+    to produce its successor without a host Lisp anywhere.</p>
+
+    <p>The pipeline for proving it is worth a sentence, because it is the shape of every gate
+    this project will build later. Boot generation zero under QEMU, call <code>(build-image)</code>,
+    then extract the result <em>out of the emulator&rsquo;s memory</em> over the QEMU monitor
+    protocol, and boot that. Not &ldquo;the compiler ran without error&rdquo; &mdash; the artefact
+    is taken out and started.</p>
+
+    <p>The commit also mentions, in one clause, switching to actor one&rsquo;s stack before
+    entering the REPL so that the collector scans the right stack. That is the first appearance
+    of a theme this dispatch will keep returning to: almost every hard bug in Modus is a
+    disagreement about what the garbage collector can see.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>modus</em> &nbsp;/&nbsp; 26 February &nbsp;/&nbsp; cd4eda7, 34a4eb5</span>
+      <h2>Thursday: one bytecode, nine targets</h2>
+    </div>
+
+    <p>The Modus Virtual Machine is a portable instruction set of about fifty opcodes that sits
+    between the Lisp compiler and the machine. Source compiles to MVM bytecode; a per-target
+    translator turns that into native code. The compiler stops knowing what a register is, and
+    porting to a new processor stops meaning porting a compiler.</p>
+
+    <div class="console">
+      <span class="cap">modus &mdash; cd4eda7, all nine verified in QEMU</span>
+<pre>x86-64   i386     AArch64
+RISC-V64 PPC64    PPC32
+ARM32    ARMv7    Motorola 68k
+
+<span class="ret">all produce correct serial output: factorial = 3628800</span></pre>
+    </div>
+
+    <p>The self-hosting pipeline from Wednesday now runs through it &mdash; SBCL to MVM to x64
+    for generation zero, then generation zero compiles generation one from its own source, and
+    generation one boots to a REPL with arithmetic, loops, factorial and a real-time clock read
+    off the CMOS. And the same day, AArch64 stopped being a list entry: the image boots on QEMU
+    virt <em>and</em> on a Raspberry Pi, with the SSH server and the crypto that go with it.</p>
+
+    <p>Four commits, one week, and the shape of the whole project is now fixed. A Lisp that owns
+    every layer beneath it, a virtual instruction set so that owning it is affordable across
+    machines, actors so that isolation is a language feature rather than a kernel feature, and a
+    self-hosting cycle so that none of it depends on somebody else&rsquo;s compiler for long.</p>
+  </section>
+
+  <footer>
+    <p><strong>Method.</strong> Commits by <em>author</em> date, 21 to 27 February 2026, across
+    the git repositories in the modus-lisp workspace &mdash; at this point, one. Line counts
+    exclude generated build artefacts. Produced with <code>bin/week 2026-02-28 --log</code>.</p>
+    <p><a href="../../">&larr; All issues</a></p>
+  </footer>
+
+</div>
+</body>
+</html>

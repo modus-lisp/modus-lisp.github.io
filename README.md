@@ -59,6 +59,10 @@ published first; №1 is a single commit in March 2025.
 1. `bin/week 2026-09-05 --log` — read the whole week, then read the bodies of the commits that
    turn out to matter. The subjects in this workspace are written to be read, but the *why* is
    almost always in the body.
+
+   Backfill goes **forward**, oldest first. An issue should only know what came before it, which
+   is also the reader's position; written backwards you end up explaining early code in terms of
+   what it later became, and inventing significance the week did not have yet.
 2. `cp -r issues/2026-08-29 issues/2026-09-05` and rewrite it. Change `<title>`, the `og:` tags,
    the kicker, the headline, the standfirst, the tally and the ledger. The stylesheet needs no
    changes — every class an issue uses already exists.
@@ -76,6 +80,10 @@ published first; №1 is a single commit in March 2025.
   happens before the allocation.
 - **The reader is a stranger.** Not everyone reading knows what a seat, a shard, or a
   constant vector is. Say it in the sentence rather than linking away.
+- **Length follows the week.** №17 is 437 commits and runs six sections; №1 is one commit and
+  runs three paragraphs. A single-repo week gets no ledger table, because a one-row table is
+  furniture. Nothing here is printed and nothing is sold against it, so there is no length to
+  hit.
 
 ## Licence
 

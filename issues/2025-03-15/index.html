@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>88,377 lines, then silence — This Week in Modus №1</title>
+<meta name="description" content="This Week in Modus, 8–14 March 2025: the first commit. A bare-metal Lisp operating system on Movitz, arriving complete — and then nothing for eleven and a half months.">
+<meta property="og:title" content="88,377 lines, then silence — This Week in Modus №1">
+<meta property="og:description" content="8–14 March 2025: the first commit. A bare-metal Lisp OS on Movitz, arriving complete — then nothing for eleven and a half months.">
+<meta property="og:type" content="article">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..700&family=Newsreader:opsz,wght@6..72,300..600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../../assets/crier.css">
+</head>
+<body>
+<div class="page">
+
+  <div class="sitebar">
+    <a class="brand" href="../../">crier</a>
+    <nav><a href="../../#issues">Issues</a><a href="https://github.com/modus-lisp">GitHub</a></nav>
+  </div>
+
+  <header class="mast">
+    <div class="kicker">
+      <span>This Week in Modus &mdash; &#8470;&nbsp;1</span>
+      <span>&middot;</span>
+      <span>8&ndash;14 March 2025</span>
+      <span>&middot;</span>
+      <span><b>1 commit</b> &middot; 1 repo</span>
+    </div>
+    <h1>88,377 lines,<br>then <span class="lo">silence</span></h1>
+    <hr class="rule-fire">
+    <p class="standfirst">The first commit is 210 files and eighty-eight thousand lines, and it
+    boots x86 hardware into a Common Lisp REPL with TLS and SSH and nothing underneath it. The
+    second commit is eleven and a half months later.</p>
+
+    <div class="tally">
+      <div><span class="n">1</span><span class="l">Commit</span></div>
+      <div><span class="n">210</span><span class="l">Source files</span></div>
+      <div><span class="n">+88k</span><span class="l">Lines added</span></div>
+      <div><span class="n">349</span><span class="l">Days to the next</span></div>
+    </div>
+  </header>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>modus</em> &nbsp;/&nbsp; abd9648 &nbsp;/&nbsp; 11 March 2025</span>
+      <h2>Modus: bare-metal Lisp OS on Movitz</h2>
+    </div>
+
+    <p>There is no scaffolding commit, no &ldquo;initial import&rdquo;, no README landing first.
+    The repository begins with a working operating system:</p>
+
+    <div class="callout">
+      <p>Boots x86 hardware (or QEMU) into an interactive Common Lisp REPL over serial console.
+      Includes TLS 1.3, SSH server, e1000 networking, and Ed25519/X25519/ChaCha20 crypto &mdash;
+      all in Lisp, no underlying OS.</p>
+      <span class="src">modus &mdash; abd9648, the whole commit message</span>
+    </div>
+
+    <p>The foundation is Movitz, an x86 Common Lisp
+    environment that runs with no operating system beneath it &mdash; a project that had been
+    quiet for many years. Building on it means the hard part
+    &mdash; a Lisp that exists before Unix does &mdash; is already answered, and the work is
+    everything above: drivers, a network stack, ciphers, a protocol.</p>
+
+    <p>That choice is also the reason this issue has a sequel and not a continuation. Movitz is
+    32-bit and it is somebody else&rsquo;s foundation, and a project whose whole argument is that
+    you should be able to read every layer eventually has to own the bottom one too. When work
+    resumes in February 2026, it does not resume here.</p>
+
+    <h3>The gap</h3>
+
+    <p>Three hundred and forty-nine days pass before the next commit. This dispatch numbers its
+    issues by weeks that have commits in them, so &#8470;&nbsp;2 is the last week of February
+    2026 &mdash; the gap is a single line in the archive and about a year in life. Nothing in the
+    repository explains it, and this is a weekly that reports what the commit log says, so
+    neither will we.</p>
+  </section>
+
+  <footer>
+    <p><strong>Method.</strong> Commits by <em>author</em> date, 8 to 14 March 2025, across the
+    git repositories in the modus-lisp workspace &mdash; at this point, one. The commit itself
+    reports 216 changed files; the 210 above excludes generated build artefacts. Produced with
+    <code>bin/week 2025-03-15 --log</code>.</p>
+    <p><a href="../../">&larr; All issues</a></p>
+  </footer>
+
+</div>
+</body>
+</html>
