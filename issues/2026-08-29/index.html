@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Pi Zero answers the doorbell — This Week in Modus №1</title>
+<meta name="description" content="This Week in Modus, 22–29 August 2026: a real OpenSSH client logs in to bare-metal Modus on Pi Zero 2 W silicon, and the desktop above it learns its own name and resolution. 93 commits across 7 repos.">
+<meta property="og:title" content="The Pi Zero answers the doorbell — This Week in Modus №1">
+<meta property="og:description" content="22–29 August 2026: a real OpenSSH client logs in to bare-metal Modus on Pi Zero 2 W silicon, then downloads a library and runs it. 93 commits across 7 repos.">
+<meta property="og:type" content="article">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..700&family=Newsreader:opsz,wght@6..72,300..600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../../assets/crier.css">
+</head>
+<body>
+<div class="page">
+
+  <div class="sitebar">
+    <a class="brand" href="../../">crier</a>
+    <nav>
+      <a href="../../#issues">Issues</a>
+      <a href="https://github.com/modus-lisp">GitHub</a>
+    </nav>
+  </div>
+
+  <header class="mast">
+    <div class="kicker">
+      <span>This Week in Modus &mdash; &#8470;&nbsp;1</span>
+      <span>&middot;</span>
+      <span>22&ndash;29 August 2026</span>
+      <span>&middot;</span>
+      <span><b>93 commits</b> &middot; 7 of 42 repos</span>
+    </div>
+    <h1>The Pi Zero<br>answers the <span class="lo">doorbell</span></h1>
+    <hr class="rule-fire">
+    <p class="standfirst">A Lisp that had never been trusted with a network card logged a real
+    OpenSSH client in on real Pi&nbsp;Zero silicon, then downloaded a library and ran it. Meanwhile
+    the desktop above it learned its own name, its own resolution, and how to tell you where to
+    find it.</p>
+
+    <div class="tally">
+      <div><span class="n">93</span><span class="l">Commits</span></div>
+      <div><span class="n">7</span><span class="l">Repos moved</span></div>
+      <div><span class="n">115</span><span class="l">Source files</span></div>
+      <div><span class="n">+7.5k</span><span class="l">Lines added</span></div>
+      <div><span class="n">2</span><span class="l">Bare-metal firsts</span></div>
+    </div>
+  </header>
+
+  <div class="ledger-wrap">
+    <table class="ledger">
+      <thead>
+        <tr>
+          <th>Repo</th><th class="num">Commits</th><th></th>
+          <th class="num" colspan="2">Lines</th><th>Focus</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td class="repo">modus</td><td class="num">40</td><td class="barcell"><span class="bar" style="width:100%"></span></td><td class="add">+3,365</td><td class="del">&minus;660</td><td class="what">bare metal, JIT, conformance</td></tr>
+        <tr><td class="repo">kiln</td><td class="num">23</td><td class="barcell"><span class="bar" style="width:57.5%"></span></td><td class="add">+2,203</td><td class="del">&minus;303</td><td class="what">sessions, voice, container ops</td></tr>
+        <tr><td class="repo">glass</td><td class="num">17</td><td class="barcell"><span class="bar" style="width:42.5%"></span></td><td class="add">+1,239</td><td class="del">&minus;88</td><td class="what">resize, naming, root menu</td></tr>
+        <tr><td class="repo">webrtc-data</td><td class="num">6</td><td class="barcell"><span class="bar cool" style="width:15%"></span></td><td class="add">+178</td><td class="del">&minus;21</td><td class="what">browser payload follows the screen</td></tr>
+        <tr><td class="repo">glass-sdl</td><td class="num">5</td><td class="barcell"><span class="bar cool" style="width:12.5%"></span></td><td class="add">+358</td><td class="del">&minus;106</td><td class="what">native window, pointer, filtering</td></tr>
+        <tr><td class="repo">operandi-gui</td><td class="num">1</td><td class="barcell"><span class="bar cool" style="width:2.5%"></span></td><td class="add">+55</td><td class="del">&minus;6</td><td class="what"><code>/model</code>, verified before kept</td></tr>
+        <tr><td class="repo">secp256k1-fast</td><td class="num">1</td><td class="barcell"><span class="bar cool" style="width:2.5%"></span></td><td class="add">+89</td><td class="del">&minus;17</td><td class="what">x86-64 <code>MUL</code> encoding</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>modus</em> &nbsp;/&nbsp; 36 commits, 4 merges &nbsp;/&nbsp; #275</span>
+      <h2>The Pi Zero answers the doorbell</h2>
+    </div>
+
+    <p>The week opened with the least glamorous work there is: distrusting the bootloader.
+    A new RPi boot preamble sanitises whatever cache and MMU state the loader left behind,
+    then brings the MMU up on Modus&rsquo;s own terms &mdash; an identity page table with a cached
+    CPU and coherent DMA, which is the precondition for touching a USB controller at all.</p>
+
+    <p>On top of that went a from-scratch RTL8153 USB-ethernet driver. Getting frames <em>in</em>
+    took reading the vendor registers back over the serial REPL, and the answer was that
+    U-Boot had already enabled the receiver for its own TFTP and left it enabled through the
+    port reset. The previous five-write enable sequence was re-writing <code>PLA_CR</code> under
+    the config-write unlock for no reason, and that was exactly what wedged the chip, run after
+    run. The working enable is two idempotent writes: accept bits into <code>PLA_RCR</code>,
+    and ungate <code>RXDY</code>. ARP resolved. Ping answered.</p>
+
+    <h3>Then a real OpenSSH client logged in</h3>
+
+    <p>Curve25519 key exchange, an Ed25519 host key, chacha20-poly1305, authentication,
+    channel exec, result on stdout, exit status 0 &mdash; against Modus on actual Pi Zero 2 W
+    silicon, over that driver.</p>
+
+    <div class="console">
+      <span class="cap">Verified on the netboot rig &mdash; 24 &amp; 25 August</span>
+<pre>$ ssh test@10.0.0.2 '(+ 2 3)'
+<span class="ret">= 5</span>
+
+$ ssh test@10.0.0.2 '(net-install-and-call "http://10.0.0.1:8099/alexandria.tar")'
+<span class="ret">= T</span>
+
+$ ssh test@10.0.0.2 '(alexandria:flatten (list 1 (list 2 3)))'
+<span class="ret">= (1 2 3)</span></pre>
+    </div>
+
+    <p>Three root causes stood between &ldquo;incorrect signature&rdquo; and a login prompt, and
+    two of them are the same lesson twice. <code>ssh-receive-version</code> used a legacy
+    zero-as-false idiom; in this image <code>0</code> is truthy, so it reported success on its
+    first pass without parsing anything, the client version string stayed empty, and the
+    server&rsquo;s exchange hash covered an empty banner while OpenSSH hashed its real one.
+    Every cryptographically valid signature failed. Separately, the receive path re-armed the
+    next bulk-IN into the same single buffer the moment one completed, so back-to-back TCP
+    segments DMA&rsquo;d over each other before the caller could copy a frame out.</p>
+
+    <h3>One bug wearing four costumes</h3>
+
+    <p>The second milestone &mdash; the JIT running on the Pi and <code>alexandria</code> being
+    fetched, untarred, parsed and loaded over the network, all eighteen files &mdash; was gated
+    by a single allocator bug that had been producing unrelated-looking failures for weeks.</p>
+
+    <div class="callout">
+      <p>The GC check compares the allocation pointer <em>before</em> the allocation, so an
+      object that starts just under the limit writes its header and zero-fill straight past it.
+      On the RPi the upper semispace ends where the GC config page begins.</p>
+      <span class="src">*aarch64-gc-limit-guard* &mdash; bfca1db</span>
+    </div>
+
+    <p>A 64K-element buffer allocated inside the aarch64 translator was zeroing
+    <code>space_size</code> on the config page &mdash; watchpoint-proven &mdash; and the next
+    collection then ran on garbage geometry. The &ldquo;<code>MAP-PRODUCT</code> corrupts chars&rdquo;
+    mystery, the wild-pointer fault in <code>%PARSE-START-END</code>, and the recursive exception
+    storm when the allocation bitmap was on were all this. The fix is an 8&nbsp;MB guard band.
+    Related zero-init gaps in <code>ALLOC-STRING</code>, <code>ALLOC-U8</code> and freshly
+    allocated conses closed out <span class="mono">#274</span> the same week.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>modus</em> &nbsp;/&nbsp; compiler, runtime, conformance</span>
+      <h2>Climbing the Quicklisp ladder</h2>
+    </div>
+
+    <p>Loading real libraries keeps finding places where Modus is not yet Common Lisp.
+    This week it got package-local nicknames (<code>defpackage :local-nicknames</code>),
+    conditions that keep their identity across an interp-state boundary, a real
+    <code>with-open-file</code>, runtime <code>:default-initargs</code>, CLOS accessor generic
+    functions, <code>slot-unbound</code> dispatch, glob <code>DIRECTORY</code>, an ASDF searcher
+    hook, cross-unit loop <code>RETURN</code>, and the <code>~$</code> monetary FORMAT directive.</p>
+
+    <p>The JIT&rsquo;s constant vector &mdash; <span class="mono">#226</span> and
+    <span class="mono">#278</span> &mdash; went from a diagnostic ring buffer and a
+    <code>BADFN</code> printout to a thunk-scoped, GC-updated vector with a coverage guard, and
+    full scope flipped from a <code>MODUS_CONSTVEC_FULL=1</code> opt-in to the default once the
+    dead-page read was understood. Cross-unit <code>GO</code> now dispatches through a runtime
+    <code>CATCH</code> frame. And the merge criteria stopped being folklore:
+    <code>scripts/acceptance-gate.sh</code> now encodes the gate, with 8&nbsp;GB of dynamic space
+    for the runner builds.</p>
+
+    <h3>An honest entry in the ledger</h3>
+
+    <p><code>CONCATENATE</code> got four commits in two days. First it learned to validate every
+    input up front and name the offender instead of reading a header blindly. Then a fast path
+    that skips the reject scan and copies string codes raw made it three times faster. Then the
+    fast path was found to be testing <code>STRINGP</code> where it needed
+    <code>%PRIM-STRINGP</code>. Then the whole raw copy was reverted, because it breaks strings
+    with a fill pointer. The validation stayed; the speedup will come back when it is correct.
+    In the same batch, <code>EQL</code> against a constant stopped calling the runtime, and
+    compile-time <code>SAFETY</code> levels landed as a sketch with a first consumer.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>kiln &nbsp;glass &nbsp;glass-sdl &nbsp;webrtc-data</em> &nbsp;/&nbsp; 51 commits</span>
+      <h2>A desktop that knows its own name</h2>
+    </div>
+
+    <p>The upper half of the stack spent the week becoming something you can hand to a person.
+    A session now has a name, and the desktop writes it in the corner, big and faint, without
+    painting over a name somebody chose. It also has its own identity: one nsec per session,
+    named after its own key, so <code>--resume</code> and <code>--detach</code> mean something and
+    there is no host key to fall back on. The container gets that identity too, and locks that
+    are real locks.</p>
+
+    <p>Which makes one command the whole of &ldquo;start a desktop and let me in from my phone&rdquo;:</p>
+
+    <div class="console">
+      <span class="cap">kiln &mdash; a012b5c</span>
+<pre>$ kiln local --detach --vnc-socket --nostr=ynniv@ynniv.com
+$ kiln run --nostr=npub1&hellip;</pre>
+    </div>
+
+    <p><code>--nostr=WHO</code> takes an npub, 64 hex, or a NIP-05 name, and answers two questions
+    that happen to have the same answer: who may connect, and who gets a direct message telling
+    them the session is up. They stay two variables on purpose &mdash; an allowlist can hold
+    people nobody is messaging. The NIP-05 lookup is resolved where a failure is visible rather
+    than swallowed at boot.</p>
+
+    <h3>Resize, all the way down</h3>
+
+    <p>Making a window draggable turned out to touch every layer at once. <span class="mono">glass</span>
+    now advertises RFB <code>ExtendedDesktopSize</code> without waiting to be asked for pixels
+    &mdash; otherwise no client ever asks for a size &mdash; and a client that does ask resizes
+    the seat it is looking at; the wallpaper became a picture the seat re-cuts rather than a
+    fixed bitmap. <span class="mono">glass-sdl</span> stopped predicting the size its window would
+    get and started asking the window what it actually got, with filtering that isn&rsquo;t nearest
+    and a pointer that lands where you clicked. <span class="mono">webrtc-data</span>&rsquo;s browser
+    payload notices a resolution change without being told, asks the desktop to be the size of the
+    window looking at it, and stops the desktop hiding underneath its own control buttons.</p>
+
+    <h3>Ears, and a menu worth opening</h3>
+
+    <p><code>--voice</code> and <code>--ears</code> are now checked <em>before</em> the desktop
+    starts, and <code>kiln models</code> fetches what they need. The podcast client and the Listen
+    window were both in the checkout and in no image &mdash; the engines and the windows are
+    separate systems, so loading the recogniser without its window gives you a working ear with
+    no way to reach it, and a menu entry that vanishes silently. Both now build into the core and
+    report through the same missing-systems path as everything else.</p>
+
+    <p>And the root menu finally offers what this project wrote. A desktop carrying a browser, a
+    file manager, a podcast client, a speech synthesiser and a recogniser was offering a McCLIM
+    calculator and a gadget demo, because every one of those apps ships a register function and
+    nothing ever called one. They are now discovered by name &mdash; glass must not depend on
+    <span class="mono">loom</span>, <span class="mono">warren</span> or
+    <span class="mono">spool</span>, since those depend on glass &mdash; so a first-party app is
+    found exactly the way an out-of-tree one would be, an entry appears only when the image has
+    the code behind it, and a menu line can never break a build.</p>
+
+    <h3>Operations</h3>
+    <ul class="plain">
+      <li>Nothing was ever sweeping the oldest generation. Now something is, and the housekeeping
+      lives in the core rather than in one file&rsquo;s boot path.</li>
+      <li>SBCL&rsquo;s heap has to be smaller than the container it runs in &mdash; obvious in
+      hindsight, invisible until the OOM killer explains it.</li>
+      <li>Quicklisp archives are fetched with curl during the build, because its own client hangs
+      in this environment.</li>
+      <li>The framebuffer&rsquo;s two locks now have different names, so a deadlock report says
+      which one, and the compositor no longer waits on a surface&rsquo;s framebuffer.</li>
+    </ul>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow">elsewhere &nbsp;/&nbsp; 2 commits</span>
+      <h2>Two small ones</h2>
+    </div>
+    <ul class="plain">
+      <li><span class="mono">secp256k1-fast</span> &mdash; on x86-64, <code>MUL</code> is a
+      one-operand instruction and its operand size has to be stated. Pinned into
+      <span class="mono">kiln</span>&rsquo;s <code>repos.lock</code> the same night.</li>
+      <li><span class="mono">operandi-gui</span> &mdash; a <code>/model</code> command that pings
+      the model before it keeps it, so a typo fails at the prompt instead of at the next message.</li>
+    </ul>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow">no commits this week</span>
+      <h2>Quiet in the workshop</h2>
+    </div>
+    <p>Thirty-five of the workspace&rsquo;s forty-two repositories didn&rsquo;t move &mdash;
+    including <span class="mono">weft</span>, <span class="mono">scribe</span> and
+    <span class="mono">loom</span>, which carry most of the desktop&rsquo;s text and layout and
+    have been stable since mid-August.</p>
+    <ul class="chips">
+      <li>brotli-pure</li><li>cabinet</li><li>cairn</li><li>chord</li><li>cl-consensus</li>
+      <li>cl-frpc</li><li>cl-nostr</li><li>cl-tor</li><li>cl-transport</li><li>conch</li>
+      <li>cram</li><li>dist</li><li>folio</li><li>gesso</li><li>glass-mcclim</li><li>loom</li>
+      <li>mill</li><li>natrium</li><li>operandi</li><li>pagetree</li><li>pigment</li><li>reed</li>
+      <li>scribe</li><li>seal</li><li>shuttle</li><li>skep</li><li>spool</li><li>stave</li>
+      <li>stencil</li><li>warp</li><li>warren</li><li>webp-pure</li><li>webrtc-media</li>
+      <li>weft</li><li>zstd-pure</li>
+    </ul>
+  </section>
+
+  <footer>
+    <p><strong>Method.</strong> Commits authored on or after 2026-08-22 across the 42 git
+    repositories in the modus-lisp workspace. Line counts exclude generated acceptance-gate
+    artefacts &mdash; <code>gate-net.out*</code>, the JIT shard corpora and
+    <code>real-ansi-gen.lisp</code> &mdash; which alone account for roughly 790,000 of the raw
+    insertions in <span class="mono">modus</span>. Merge commits are counted in repo totals but
+    not in the per-file churn.</p>
+    <p><a href="../../">&larr; All issues</a></p>
+  </footer>
+
+</div>
+</body>
+</html>
