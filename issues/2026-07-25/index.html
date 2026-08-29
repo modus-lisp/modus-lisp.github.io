@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Modus compiles Modus — This Week in Modus №20</title>
-<meta name="description" content="This Week in Modus, 18–24 July 2026: the SBCL-free self-hosting cycle closes, weft lands 256 spec sections, and a drag goes from 18 fps to 76. 414 commits across 14 repos.">
+<meta name="description" content="This Week in Modus, 18–24 July 2026: the self-hosting cycle closes without a host Lisp anywhere in it, held up at the last by one uninitialised counter — and a VNC drag goes from 18 frames a second to 76. 414 commits across 14 repos.">
 <meta property="og:title" content="Modus compiles Modus — This Week in Modus №20">
-<meta property="og:description" content="18–24 July 2026: the SBCL-free self-hosting cycle closes, weft lands 256 spec sections, and a VNC drag goes from 18 fps to 76.">
+<meta property="og:description" content="18–24 July 2026: the self-hosting cycle closes with no host Lisp anywhere in it, and a VNC drag goes from 18 frames a second to 76.">
 <meta property="og:type" content="article">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -31,10 +31,10 @@
     </div>
     <h1>Modus<br>compiles <span class="lo">Modus</span></h1>
     <hr class="rule-fire">
-    <p class="standfirst">The self-hosting cycle closed on Tuesday, and the last thing standing
-    in its way was one uninitialised counter. Elsewhere: weft landed 256 spec sections in seven
-    days, a VNC drag went from 18 frames a second to 76, and a Lisp desktop appeared in a plain
-    browser tab.</p>
+    <p class="standfirst">A Modus image compiled the Modus sources into a second Modus image that
+    boots and does it again, with no host Lisp anywhere in the loop. The last thing standing in the
+    way was a counter that had never been set. Elsewhere: 256 spec sections in weft, and a VNC drag
+    that went from 18 frames a second to 76.</p>
 
     <div class="tally">
       <div><span class="n">414</span><span class="l">Commits</span></div>
@@ -53,8 +53,8 @@
         <tr><td class="repo">glass</td><td class="num">48</td><td class="barcell"><span class="bar" style="width:18.8%"></span></td><td class="add">+4,424</td><td class="del">&minus;824</td><td class="what">the RFB performance week</td></tr>
         <tr><td class="repo">webrtc-data</td><td class="num">35</td><td class="barcell"><span class="bar" style="width:13.7%"></span></td><td class="add">+21,519</td><td class="del">&minus;531</td><td class="what">renamed; a desktop in a browser tab</td></tr>
         <tr><td class="repo">loom</td><td class="num">16</td><td class="barcell"><span class="bar cool" style="width:6.3%"></span></td><td class="add">+2,751</td><td class="del">&minus;932</td><td class="what">a real browser UI, and reftest runners</td></tr>
-        <tr><td class="repo">modus</td><td class="num">16</td><td class="barcell"><span class="bar" style="width:6.3%"></span></td><td class="add">+703</td><td class="del">&minus;208</td><td class="what">#176: the cycle closes</td></tr>
-        <tr><td class="repo">operandi</td><td class="num">12</td><td class="barcell"><span class="bar cool" style="width:4.7%"></span></td><td class="add">+7,516</td><td class="del">&minus;563</td><td class="what">an ACP server, resumable sessions</td></tr>
+        <tr><td class="repo">modus</td><td class="num">16</td><td class="barcell"><span class="bar" style="width:6.3%"></span></td><td class="add">+703</td><td class="del">&minus;208</td><td class="what">the cycle closes</td></tr>
+        <tr><td class="repo">operandi</td><td class="num">12</td><td class="barcell"><span class="bar cool" style="width:4.7%"></span></td><td class="add">+7,516</td><td class="del">&minus;563</td><td class="what">an editor protocol, resumable sessions</td></tr>
         <tr><td class="repo">cl-nostr</td><td class="num">6</td><td class="barcell"><span class="bar cool" style="width:2.3%"></span></td><td class="add">+1,001</td><td class="del">&minus;57</td><td class="what">gift wrap, the double ratchet, nsite</td></tr>
         <tr><td class="repo">seal</td><td class="num">5</td><td class="barcell"><span class="bar cool" style="width:2%"></span></td><td class="add">+417</td><td class="del">&minus;91</td><td class="what">fast AES-GCM, P-256, DES</td></tr>
         <tr><td class="repo">shuttle</td><td class="num">5</td><td class="barcell"><span class="bar cool" style="width:2%"></span></td><td class="add">+224</td><td class="del">&minus;66</td><td class="what">when a slash is a regex</td></tr>
@@ -69,30 +69,41 @@
 
   <section>
     <div class="sec-head">
-      <span class="sec-eyebrow"><em>modus</em> &nbsp;/&nbsp; 16 commits &nbsp;/&nbsp; #176</span>
+      <span class="sec-eyebrow"><em>modus</em> &nbsp;/&nbsp; 21 July &nbsp;/&nbsp; #176</span>
       <h2>Modus compiles Modus</h2>
     </div>
 
-    <p>The smallest section in this issue is the one that matters most. On Tuesday the SBCL-free
-    self-hosting cycle closed: a Modus image compiled the Modus sources into a second Modus image
-    that boots and does it again. The last obstacle was not an architectural problem.</p>
+    <p>The smallest section in this issue is the one that matters most, and it needs a careful
+    statement of what is new. <a href="../2026-02-28/">&#8470;&nbsp;2</a> had a running image build
+    its own successor from source embedded in its binary.
+    <a href="../2026-03-14/">&#8470;&nbsp;4</a> proved with five hash comparisons that the compiler
+    leaves no trace of the machine that ran it.
+    <a href="../2026-07-18/">&#8470;&nbsp;19</a> produced a <code>modus</code> binary carrying the
+    whole build toolchain. But in every one of those, the first generation came out of SBCL. This
+    week the loop closes with no host Lisp in it anywhere.</p>
+
+    <p>The last obstacle was not architectural.</p>
 
     <div class="callout">
       <p><code>(gensym)</code> returned <code>#:GNIL</code> every time, because
-      <code>*gensym-counter*</code> was NIL &mdash; its <code>defvar</code> init does not run at
-      boot. Every other build image sets it explicitly in <code>kernel-main</code>; the self-host
-      source did not. Colliding <code>GNIL</code> labels broke the native translator.</p>
+      <code>*gensym-counter*</code> was NIL &mdash; its <code>defvar</code> initialiser does not run
+      at boot. Every other build image sets it explicitly; the self-host source did not. Colliding
+      <code>GNIL</code> labels broke the native translator.</p>
       <span class="src">modus &mdash; 2fef2b2</span>
     </div>
 
-    <p>That is the same standing limitation that would go on to earn a build-time check three
-    weeks later in <a href="../2026-08-15/">&#8470;&nbsp;23</a>, and this is one of the five
-    production bugs that check was written to catch. The week around it was the usual clearing of
-    the path: the in-image self-compile&rsquo;s GC corruption root-caused, an O(n&sup2;)
-    <code>puthash</code> in label emission removed &mdash; it was the &ldquo;GC wall&rdquo; that
-    a self-compile appeared to hit &mdash; a 96&nbsp;MB code-buffer over-allocation stopped, and
-    the compile driver taught to report the failing form and its condition type instead of dying
-    quietly.</p>
+    <p>That limitation is not new &mdash; <a href="../2026-06-06/">&#8470;&nbsp;13</a> had already
+    made initialiser thunks fire at boot for one image family, without generalising it. A
+    limitation that has been worked around correctly in four places and forgotten in the fifth is
+    the most expensive kind, because every individual instance looks like an oversight rather than
+    a pattern.</p>
+
+    <p>The rest of the week around it is clearing the path: the in-image self-compile&rsquo;s
+    collector corruption root-caused, a quadratic hash insertion in label emission removed &mdash;
+    it was the &ldquo;GC wall&rdquo; a self-compile appeared to hit, which is to say it was
+    misattributed to the collector, the way <a href="../2026-06-27/">&#8470;&nbsp;16</a> warned it
+    would be &mdash; a 96&nbsp;MB code-buffer over-allocation stopped, and the compile driver taught
+    to report the failing form and its condition type instead of dying quietly.</p>
   </section>
 
   <section>
@@ -101,27 +112,26 @@
       <h2>A spec section per commit</h2>
     </div>
 
-    <p>weft&rsquo;s week is 256 commits and almost every subject line ends in a citation: grid
-    subgrid on both axes, <code>@layer</code> ordering, container-query length units, mask-image
-    alpha masking, <code>clip-path: path()</code>, relative colours, logical properties under
-    vertical writing modes, collapsing-border table geometry, multi-layer background paint,
-    <code>background-blend-mode</code>, small/large/dynamic viewport units, individual
-    transform properties, drop-shadow filters, and lazy image loading measured from a live
-    scroll offset.</p>
+    <p>Almost every one of weft&rsquo;s 256 subject lines this week ends in a citation: grid
+    subgrid on both axes, cascade layer ordering, container-query length units, mask images,
+    path-based clipping, relative colour syntax, logical properties under vertical writing modes,
+    collapsing-border table geometry, multi-layer background painting, viewport units in their
+    small, large and dynamic forms, individual transform properties, drop-shadow filters, and lazy
+    image loading measured from a live scroll offset.</p>
 
-    <p>Volume like that comes from a harness rather than from typing, and the harness is
-    documented in the tree. A per-unit oracle maps a feature to its real Web Platform Tests files
-    and prints how many passed; a wave/worker/merge script drives a fleet where each worker edits
-    exactly one file in an isolated copy of weft and loops against the oracle until it stops
-    improving; the merge step re-verifies in the canonical tree and keeps only what actually
-    helped. Round two added diversified variants and kept the best of each. The isolation is
-    proven, not assumed &mdash; the source registry is pinned to a tree with inherited
-    configuration switched off, so a worker cannot silently fall through to the real checkout.</p>
+    <p>Volume like that comes from the harness <a href="../2026-07-04/">&#8470;&nbsp;17</a>
+    established, now grown a third stage. A per-unit oracle maps a feature to its real Web Platform
+    Tests files and prints how many pass. A wave script drives a fleet of workers, each editing
+    exactly one file in an isolated copy of weft and looping against the oracle. And a merge step
+    re-verifies every result in the canonical tree and <em>keeps only what actually helped</em>
+    &mdash; which is the part that makes the whole thing trustworthy rather than merely fast.</p>
 
-    <p>The forms work is where that shows: form controls drawn as widgets, the form-control IDL
-    reflected, validity and labels behind a per-feature extension hook, the text-selection API,
-    and then the genuinely awkward units &mdash; <code>valueAsNumber</code>,
-    <code>valueAsDate</code>, <code>stepUp</code> and <code>stepDown</code>.</p>
+    <p>The isolation is proven rather than assumed: the source registry is pinned to a private tree
+    with inherited configuration switched off, so a worker cannot silently fall through to the real
+    checkout and score itself against code it did not write. Round two added diversified variants
+    of each task and kept the best. That is the same instinct as the census before deletion in
+    <a href="../2026-07-11/">&#8470;&nbsp;18</a> &mdash; the mechanism is only worth having if you
+    have checked that it is telling the truth.</p>
   </section>
 
   <section>
@@ -130,38 +140,41 @@
       <h2>18 frames a second, then 76</h2>
     </div>
 
-    <p>glass spent the week being measured. Dragging a window ran at 18 fps, and the profile said
-    it was nobody&rsquo;s fault: compositing took 0.2 to 0.45 milliseconds, and a drag frame is
-    about 1.6&nbsp;KB, which encodes in about a millisecond. Yet each frame took 56.</p>
+    <p>Dragging a window ran at 18 frames a second, and the profile exonerated everything obvious:
+    compositing took under half a millisecond, and a drag frame is about 1.6&nbsp;KB, which encodes
+    in about one. Yet each frame took 56.</p>
 
     <div class="callout">
       <p>That 50 milliseconds is pure TCP latency. The accept path never set
-      <code>TCP_NODELAY</code>, so Nagle held every small interactive frame for about 40 ms
-      waiting on the peer&rsquo;s ACK. VNC&rsquo;s request/tiny-response pattern is Nagle&rsquo;s
-      worst case, which is why every real VNC server disables it.</p>
+      <code>TCP_NODELAY</code>, so Nagle&rsquo;s algorithm held every small interactive frame for
+      about 40 ms waiting on the peer&rsquo;s acknowledgement. A request-and-tiny-response protocol
+      is Nagle&rsquo;s worst case, which is why every real VNC server disables it.</p>
       <span class="src">glass &mdash; 2ce7ae5, drags 18 &rarr; 76 fps</span>
     </div>
 
-    <p>The rest of the encoding work is a catalogue of the same discipline. CopyRect for window
-    moves, so a drag sends coordinates instead of pixels. Per-region damage with region-limited
-    diffing, and the frame diff skipped entirely when a generation counter says nothing changed.
-    TRLE for big rectangles to skip a serial deflate, then stored-block ZRLE as the fast path
-    TigerVNC actually takes &mdash; a 13&times; encode win from one threshold. And a compliance
-    fix worth its own line: TRLE tiles are 16 pixels, not 64.</p>
+    <p>The encoding work around it is a catalogue of the same discipline: a window move sending
+    coordinates instead of pixels, per-region damage with region-limited diffing, the frame
+    comparison skipped entirely when a generation counter says nothing changed, a tile encoding
+    chosen to skip a serial compression pass, and then a stored-block variant that is a
+    thirteen-fold encode win from one threshold. Plus a compliance fix worth its own line: those
+    tiles are sixteen pixels, not sixty-four.</p>
 
-    <p>Then there is the drag that adapts. A big drag on a client with no CopyRect &mdash; macOS
-    &mdash; re-encodes the whole window every frame, measured at about 397&nbsp;KB and 20 ms, and
-    lags; small moves are cheap and look perfect. So rather than a fixed rule, the sender tracks
-    how long the oldest unsent change has been waiting, smooths it, and switches: a drag starts
-    opaque and falls back to a wireframe only once the link is demonstrably behind.</p>
+    <p>Then the drag that adapts, and it is the week&rsquo;s best small idea. A big drag on a client
+    without a copy-rectangle extension re-encodes the whole window every frame &mdash; measured at
+    about 397&nbsp;KB and 20 ms &mdash; while small moves are cheap and look perfect. So rather than
+    pick a rule, the sender tracks how long the oldest unsent change has been waiting, smooths it,
+    and switches: a drag starts opaque and falls back to a wireframe only once the link is
+    demonstrably behind. The decision is driven off the measured backlog rather than off a clock,
+    which is the same correction the ANSI harness made in
+    <a href="../2026-04-18/">&#8470;&nbsp;6</a> when it stopped trusting what it had not observed.</p>
 
-    <p>Interoperability took the other half of the week, and each fix names the client that
-    forced it: a version-aware handshake for RFB 3.3 and VNC Authentication offered to it, for
-    macOS Screen Sharing; honouring the client&rsquo;s <code>SetPixelFormat</code>, including for
-    the cursor shape, for iOS clients; Hextile rather than ZRLE for RealVNC, and then the cursor
-    folded into the frame update, which fixed it for real. The authentication is from-scratch DES,
-    which promptly moved into <span class="mono">seal</span> where the ciphers live, leaving glass
-    with only the RFB wrapper.</p>
+    <p>Interoperability took the other half of the week, and each fix names the client that forced
+    it: an older handshake version and its authentication scheme for macOS Screen Sharing;
+    honouring the client&rsquo;s requested pixel format, including for the cursor, for iOS clients;
+    a different encoding for RealVNC, and then the cursor folded into the frame update, which fixed
+    it properly. The authentication needed DES, which was written from scratch and promptly moved
+    into <span class="mono">seal</span> where the ciphers live &mdash; the same consolidation reflex
+    as natrium in <a href="../2026-07-18/">&#8470;&nbsp;19</a>.</p>
   </section>
 
   <section>
@@ -171,26 +184,26 @@
     </div>
 
     <p>The repository began the week by renaming itself. It implements the WebRTC data-channel
-    profile &mdash; SDP, ICE, DTLS, SCTP, DCEP &mdash; and not media, so <code>cl-webrtc</code>
-    overclaimed and <code>webrtc-data</code> does not, leaving the name
-    <span class="mono">webrtc-media</span> well-defined for whatever fills it. (Three days later,
-    it did.)</p>
+    profile and not media, so <code>cl-webrtc</code> overclaimed and <code>webrtc-data</code> does
+    not &mdash; leaving the name <span class="mono">webrtc-media</span> well-defined for whatever
+    fills it later. Naming a thing for what it actually does is cheap now and expensive in six
+    months.</p>
 
-    <p>Then it carried a desktop. SCTP became a reliable, flow-controlled transport with RTT
-    estimation and message fragmentation; ICE gained server-reflexive candidates, full-agent
-    connectivity checks and a TURN client, proven against a rootless NAT rig; DTLS switched its
-    client certificate from RSA-2048 to ECDSA P-256, which is a smaller flight and about 540 ms
-    faster to set up. On top of that, glass over WebRTC: noVNC accepts a data channel directly as
-    its transport, so the stack is a transparent RFB pipe from a browser tab to a Lisp
-    framebuffer.</p>
+    <p>Then it carried a desktop. The transport became reliable and flow-controlled with round-trip
+    estimation and message fragmentation; the connectivity layer gained server-reflexive candidates,
+    full agent checks and a relay client, proven against a rootless NAT rig rather than asserted;
+    the handshake switched its certificate to an elliptic-curve one, a smaller flight and about
+    540 ms faster. On top of that, glass over WebRTC: an off-the-shelf browser VNC client accepts a
+    data channel directly as its transport, so the stack is a transparent pipe from a browser tab to
+    a Lisp framebuffer.</p>
 
-    <p>The signalling is the part with no server in it. <span class="mono">cl-nostr</span> added
-    NIP-44, NIP-59 gift wrap and the Nostr double ratchet, plus Blossom blob upload and nsite
-    static-site publishing; webrtc-data used them to signal an offer and answer over gift-wrapped
-    direct messages, then to hand out one-time magic-link logins by DM. Because a phone has no
-    console, the page grew an on-screen diagnostics panel with a copy button &mdash; and the
-    gateway learned to log <em>why</em> a login code was denied, which is the kind of thing you
-    only build after standing in a room trying to log in.</p>
+    <p>The signalling is the part with no server in it. <span class="mono">cl-nostr</span> &mdash;
+    which had been three weeks old and mostly a client &mdash; added encrypted direct messages, gift
+    wrapping, a double ratchet, blob upload and static-site publishing; webrtc-data used them to
+    exchange an offer and answer over direct messages, then to hand out one-time login links.
+    Because a phone has no console, the page grew an on-screen diagnostics panel with a copy button,
+    and the gateway learned to log <em>why</em> a login code was refused &mdash; which is the kind of
+    thing you only build after standing in a room failing to log in.</p>
   </section>
 
   <section>
@@ -199,32 +212,30 @@
       <h2>Five smaller things</h2>
     </div>
     <ul class="plain">
-      <li><span class="mono">pigment</span> was born by splitting the image codecs out of weft,
-      and immediately switched PNG inflation from chipz to <span class="mono">cram</span> &mdash;
-      the first move in a consolidation that runs for weeks.</li>
-      <li><span class="mono">skep</span> was born on Friday: a Buzz-interoperable Nostr agent
-      workspace, proven against the real Buzz CLI rather than against a mock.</li>
-      <li><span class="mono">operandi</span> grew an Agent Client Protocol server, so it can be
-      driven from an editor, validated against the official schema &mdash; which caught a
-      <code>null</code> that should have been <code>{}</code> &mdash; and against Block&rsquo;s
-      own client. It also got resumable sessions and an input line you can type into while the
-      agent is still working.</li>
+      <li><span class="mono">pigment</span> was born by splitting the image codecs out of weft, and
+      immediately switched its PNG decompression to <span class="mono">cram</span>. That is the
+      third library this month to drop a third-party codec for the workspace&rsquo;s own.</li>
+      <li><span class="mono">skep</span> was born on Friday: a Nostr agent workspace, proven against
+      a real interoperating implementation rather than a mock.</li>
+      <li><span class="mono">operandi</span> grew a server for the protocol editors use to drive
+      agents, validated against the official schema &mdash; which caught a <code>null</code> that
+      should have been an empty object &mdash; and against a third-party client. It also got
+      resumable sessions and an input line you can type into while the agent is still working.</li>
       <li><span class="mono">shuttle</span> spent five commits on the JavaScript lexer&rsquo;s
-      oldest problem: whether a slash begins a regular expression or is a division. After a
-      block, after a function declaration, after an <code>if</code> or <code>while</code> head,
-      and &mdash; the other way &mdash; not after a postfix increment.</li>
-      <li><span class="mono">glass</span>&rsquo;s terminal moved to 24-bit colour cells, picked
-      up WezTerm&rsquo;s font set with scribe&rsquo;s hinting on, and learned to preserve its
-      contents across a resize. There is also a demo that displays a JPEG in the terminal as
-      sixels, for no reason anybody needed to justify.</li>
+      oldest problem: whether a slash begins a regular expression or is a division. After a block,
+      after a function declaration, after an <code>if</code> or <code>while</code> head, and &mdash;
+      the other way &mdash; not after a postfix increment.</li>
+      <li><span class="mono">glass</span>&rsquo;s terminal moved to 24-bit colour cells, picked up a
+      programming font with scribe&rsquo;s hinting on, and learned to keep its contents across a
+      resize. There is also a demo that displays a JPEG in the terminal, for no reason anybody felt
+      obliged to justify.</li>
     </ul>
   </section>
 
   <footer>
-    <p><strong>Method.</strong> Commits by <em>author</em> date, 18 to 24 July inclusive, across
-    the 42 git repositories in the modus-lisp workspace. Line counts exclude generated
-    acceptance-gate artefacts and committed scratch dumps. Produced with
-    <code>bin/week 2026-07-25 --log</code>.</p>
+    <p><strong>Method.</strong> Commits by <em>author</em> date, 18 to 24 July 2026, across the 42
+    git repositories in the modus-lisp workspace. Line counts exclude generated acceptance-gate
+    artefacts and committed scratch dumps. Produced with <code>bin/week 2026-07-25 --log</code>.</p>
     <p><a href="../../">&larr; All issues</a></p>
   </footer>
 
