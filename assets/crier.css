@@ -374,6 +374,14 @@ ol.issues .dek { grid-column: 2; color: var(--ink-soft); font-weight: 300; max-w
   ol.issues .dek { grid-column: 1; }
 }
 
+p.backfill {
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: .04em;
+  color: var(--muted);
+  margin-top: 20px;
+}
+
 /* -------------------------------------------------------------- repo map */
 
 .families { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 34px 40px; }

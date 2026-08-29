@@ -17,7 +17,8 @@ explained.
 | | |
 |---|---|
 | `index.html` | The front page: what the project is, the issue index, a map of all 42 repositories. |
-| `issues/YYYY-MM-DD/index.html` | One issue of **This Week in Modus** — what moved, across every repo, and why it was hard. |
+| `issues/YYYY-MM-DD/index.html` | One issue of **This Week in Modus** — what moved, across every repo, and why it was hard. The date is the Saturday that closes the week. |
+| `bin/week` | Everything an issue is made of: the ledger, and every commit subject grouped by repo. |
 | `assets/crier.css` | The whole design system. Tokens, then chrome, then prose. There is no second stylesheet. |
 | `.nojekyll` | Tells Pages to serve the files as written rather than running Jekyll over them. |
 
@@ -33,11 +34,34 @@ GitHub Pages, deployed from the `master` branch at the repository root — Setti
 <https://modus-lisp.github.io/>, the organisation's front door. Every push is live within a
 minute; there is nothing to build, so there is nothing to break in a build.
 
+## Weeks, and their numbers
+
+An issue dated Saturday *S* covers the seven days `[S-7, S)`, by **author** date — when the work
+was done, not when a rebase replayed it. `git log --since` reads the *committer* date, which a
+history rewrite resets to the day of the rewrite, so a week's work would land in whatever week it
+was replayed; `bin/week` filters on `%ad` instead.
+
+Issues are numbered from the project's first working week, counting only weeks that have commits
+in them. `bin/week --list` prints the whole numbering, and is the authority:
+
+```
+$ bin/week --list | tail -3
+ 23  2026-08-15  8 Aug–14 Aug 2026    273 commits
+ 24  2026-08-22  15 Aug–21 Aug 2026   136 commits
+ 25  2026-08-29  22 Aug–28 Aug 2026    88 commits
+```
+
+The number of an issue therefore never changes as the backfill fills in behind it. №25 was
+published first; №1 is a single commit in March 2025.
+
 ## Adding an issue
 
-1. `cp -r issues/2026-08-29 issues/$(date +%F)` and rewrite it.
-2. Change `<title>`, the `og:` tags, the kicker, the headline and the standfirst.
-   The stylesheet needs no changes — every class an issue uses already exists.
+1. `bin/week 2026-09-05 --log` — read the whole week, then read the bodies of the commits that
+   turn out to matter. The subjects in this workspace are written to be read, but the *why* is
+   almost always in the body.
+2. `cp -r issues/2026-08-29 issues/2026-09-05` and rewrite it. Change `<title>`, the `og:` tags,
+   the kicker, the headline, the standfirst, the tally and the ledger. The stylesheet needs no
+   changes — every class an issue uses already exists.
 3. Add one `<li>` to `ol.issues` in `index.html`, newest first.
 
 ## House rules for the writing

@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>629 bytes of desktop — This Week in Modus №21</title>
+<meta name="description" content="This Week in Modus, 25–31 July 2026: a from-scratch VP8 encoder goes from its first entropy coder to Safari decoding a live desktop, a PDF renderer lands in a day, and five new repositories appear. 294 commits across 16 repos.">
+<meta property="og:title" content="629 bytes of desktop — This Week in Modus №21">
+<meta property="og:description" content="25–31 July 2026: a from-scratch VP8 encoder goes from its first entropy coder to Safari decoding a live desktop, and a PDF renderer lands in a day.">
+<meta property="og:type" content="article">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..700&family=Newsreader:opsz,wght@6..72,300..600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../../assets/crier.css">
+</head>
+<body>
+<div class="page">
+
+  <div class="sitebar">
+    <a class="brand" href="../../">crier</a>
+    <nav><a href="../../#issues">Issues</a><a href="https://github.com/modus-lisp">GitHub</a></nav>
+  </div>
+
+  <header class="mast">
+    <div class="kicker">
+      <span>This Week in Modus &mdash; &#8470;&nbsp;21</span>
+      <span>&middot;</span>
+      <span>25&ndash;31 July 2026</span>
+      <span>&middot;</span>
+      <span><b>294 commits</b> &middot; 16 of 42 repos</span>
+    </div>
+    <h1>629 bytes<br>of <span class="lo">desktop</span></h1>
+    <hr class="rule-fire">
+    <p class="standfirst">On Monday there was a boolean entropy coder. By Tuesday night Safari
+    was decoding frames of a live Lisp desktop encoded by a VP8 encoder written from the RFC.
+    Elsewhere in the same week: a complete PDF renderer, three audio decoders, a file browser,
+    a UI protocol, and Acid3 at 100/100.</p>
+
+    <div class="tally">
+      <div><span class="n">294</span><span class="l">Commits</span></div>
+      <div><span class="n">16</span><span class="l">Repos moved</span></div>
+      <div><span class="n">5</span><span class="l">New repos</span></div>
+      <div><span class="n">378</span><span class="l">Source files</span></div>
+      <div><span class="n">+55k</span><span class="l">Lines added</span></div>
+    </div>
+  </header>
+
+  <div class="ledger-wrap">
+    <table class="ledger">
+      <thead><tr><th>Repo</th><th class="num">Commits</th><th></th><th class="num" colspan="2">Lines</th><th>Focus</th></tr></thead>
+      <tbody>
+        <tr><td class="repo">modus</td><td class="num">104</td><td class="barcell"><span class="bar" style="width:100%"></span></td><td class="add">+13,941</td><td class="del">&minus;3,329</td><td class="what">i386 from scratch, the aarch64 JIT</td></tr>
+        <tr><td class="repo">webrtc-data</td><td class="num">44</td><td class="barcell"><span class="bar" style="width:42.3%"></span></td><td class="add">+2,255</td><td class="del">&minus;355</td><td class="what">the desktop as a video stream</td></tr>
+        <tr><td class="repo">weft</td><td class="num">43</td><td class="barcell"><span class="bar" style="width:41.3%"></span></td><td class="add">+7,976</td><td class="del">&minus;1,576</td><td class="what">forms, and Acid3 100/100</td></tr>
+        <tr><td class="repo">webrtc-media</td><td class="num">28</td><td class="barcell"><span class="bar" style="width:26.9%"></span></td><td class="add">+2,894</td><td class="del">&minus;450</td><td class="what">born; a VP8 encoder from the RFC</td></tr>
+        <tr><td class="repo">folio</td><td class="num">20</td><td class="barcell"><span class="bar" style="width:19.2%"></span></td><td class="add">+13,314</td><td class="del">&minus;370</td><td class="what">born; a PDF renderer, M0 to M7</td></tr>
+        <tr><td class="repo">reed</td><td class="num">11</td><td class="barcell"><span class="bar cool" style="width:10.6%"></span></td><td class="add">+7,533</td><td class="del">&minus;287</td><td class="what">born; MP3, AAC and Opus</td></tr>
+        <tr><td class="repo">warp</td><td class="num">10</td><td class="barcell"><span class="bar cool" style="width:9.6%"></span></td><td class="add">+2,152</td><td class="del">&minus;143</td><td class="what">born; a delta protocol</td></tr>
+        <tr><td class="repo">glass</td><td class="num">8</td><td class="barcell"><span class="bar cool" style="width:7.7%"></span></td><td class="add">+1,086</td><td class="del">&minus;121</td><td class="what">CopyRect for scrolls</td></tr>
+        <tr><td class="repo">loom</td><td class="num">7</td><td class="barcell"><span class="bar cool" style="width:6.7%"></span></td><td class="add">+2,011</td><td class="del">&minus;142</td><td class="what">forms, selection, PDFs inline</td></tr>
+        <tr><td class="repo">gesso</td><td class="num">6</td><td class="barcell"><span class="bar cool" style="width:5.8%"></span></td><td class="add">+352</td><td class="del">&minus;22</td><td class="what">blend modes and soft masks</td></tr>
+        <tr><td class="repo">warren</td><td class="num">6</td><td class="barcell"><span class="bar cool" style="width:5.8%"></span></td><td class="add">+1,219</td><td class="del">&minus;70</td><td class="what">born; Miller columns over VNC</td></tr>
+        <tr><td class="repo">&hellip;and 5 more</td><td class="num">7</td><td class="barcell"><span class="bar cool" style="width:6.7%"></span></td><td class="add">&nbsp;</td><td class="del">&nbsp;</td><td class="what">operandi, pigment, scribe, seal, skep</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>webrtc-media &nbsp;webrtc-data</em> &nbsp;/&nbsp; 72 commits, one new repo</span>
+      <h2>629 bytes of desktop</h2>
+    </div>
+
+    <p>The commit sequence is the story, so here it is in order. Monday: SRTP-GCM, RTP and G.711,
+    then full-duplex audio &mdash; the box beeps, the browser&rsquo;s microphone comes back.
+    Monday night: the boolean entropy coder of RFC&nbsp;6386, the first piece of a codec. Then
+    the 4&times;4 DCT and quantization. Then a keyframe&rsquo;s uncompressed header, byte-exact
+    against ffmpeg. Then the first decodable frame &mdash; a solid grey keyframe, verified by
+    libvpx. Then an alternating pattern confirmed on a real device: Safari decodes our frames.</p>
+
+    <p>Tuesday was correctness and then colour. A bitstream parser was built on the bool decoder
+    purely as a debug oracle; the DC path was verified against ffmpeg, which isolated AC coding
+    as the remaining bug; real images encoded once the end-of-block node and the Y2 AC quantizer
+    were exact; then 4:2:0 chroma. And then the number in the headline.</p>
+
+    <div class="callout">
+      <p>Inter frames built from exactly one mode &mdash; a zero motion vector against the last
+      reconstruction. The prediction is the co-located pixels of the previous frame, with no
+      motion search and nothing on the wire, so an unchanged macroblock collapses to a single
+      skip bit. A static desktop costs 629 bytes instead of 76 kilobytes.</p>
+      <span class="src">webrtc-media &mdash; 8c6bbad</span>
+    </div>
+
+    <p>The refinements that followed all sharpen the same idea: use what the desktop already
+    knows. RFB damage rectangles feed the encoder, so a static frame encodes in a millisecond.
+    A per-frame size bound, not just an average rate. An adaptive quantizer with an idle
+    refinement pass, and deferred macroblocks drained when the screen goes quiet. And then, on
+    Friday, one global motion vector per frame that a macroblock may choose instead of the zero
+    one &mdash; so a scroll costs a mode bit rather than a re-encode of everything it touched,
+    which is what had been producing seconds of mush after every scroll.</p>
+
+    <h3>And on the other end, a phone on a cellular network</h3>
+
+    <p>The client side spent the week on the things that only appear in the field. Two-finger
+    scroll-lock, natural touch scrolling, mid-session quality switching, a cursor ring with a
+    real outline so it shows on light backgrounds, and video that does not swallow touches.
+    Enrolled devices renew themselves for 24 hours, credentials expire visibly, and the device
+    file &mdash; not process memory &mdash; is the source of truth.</p>
+
+    <p>The best-diagnosed failure of the week was an ICE pair that never formed on cellular,
+    from a real session where the box <em>was</em> advertising a relay and the phone offered
+    three of its own. Gathering was calling install-peer for every remote candidate, and each
+    call does a permission create <em>and</em> a channel bind, blocking, before the answer can
+    go out. A modern browser on cellular offered sixty-six candidates from a handful of
+    addresses &mdash; about 132 blocking round trips before anyone could answer. Permissions are
+    now installed per unique IP.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>folio &nbsp;gesso &nbsp;loom</em> &nbsp;/&nbsp; 33 commits, one new repo</span>
+      <h2>A PDF renderer, in a day</h2>
+    </div>
+
+    <p>On Sunday <span class="mono">folio</span> went from nothing to a PDF renderer, in twenty
+    commits that read as a milestone list: the parser (objects, xref and xref streams, filters,
+    the page tree); the content-stream interpreter drawing through <span class="mono">gesso</span>;
+    text machinery and the standard fonts, with glyphs from <span class="mono">scribe</span>;
+    embedded CFF and Type0/CID composite fonts; form and image XObjects; then a conformance
+    harness graded against pdfium.</p>
+
+    <p>What came after the harness is the part worth noting, because it is all the material that
+    real PDFs are actually made of: a CCITT Group-4 fax decoder for scanned pages, exact embedded
+    Type1 charstring outlines, transparency with soft masks and blend modes, axial and radial
+    shadings with colour functions, tiling patterns, AcroForm field recognition, a JBIG2 codec
+    with its MQ decoder and symbol dictionaries, predefined CJK CMaps for the four Adobe
+    character collections, Type3 fonts whose glyphs are procedures, and a fidelity tail for
+    Type3 spacing and non-embedded CJK.</p>
+
+    <p>gesso grew what folio needed and no more &mdash; a per-pixel colour source across a clip,
+    affine RGBA blits, offscreen group compositing, soft masks, and the four non-separable blend
+    modes. And <span class="mono">loom</span> wired it up: <code>application/pdf</code> now opens
+    inline, rendered to a scrollable canvas.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>reed</em> &nbsp;/&nbsp; 11 commits, one new repo</span>
+      <h2>Three decoders in three days</h2>
+    </div>
+    <p>A pure Common Lisp MPEG-1/2/2.5 Layer III decoder on Tuesday, verified against minimp3 at
+    24&nbsp;kHz once the LSF implicit preflag was applied. AAC-LC with ADTS and MP4 framing on
+    Wednesday. Then Opus, in pieces that each stand on their own: the range decoder and packet
+    framing, a conformance-verified CELT decoder, a SILK decoder covering narrow, medium and
+    wideband in mono and stereo, hybrid mode with mode-switch redundancy, and Ogg demuxing to
+    finish it. Which is to say the whole of RFC&nbsp;6716.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>modus</em> &nbsp;/&nbsp; WS4, WS5 &nbsp;/&nbsp; 104 commits</span>
+      <h2>A third architecture, and an honest verdict</h2>
+    </div>
+
+    <p>Two workstreams ran in parallel. On aarch64 the runtime JIT came up in five staged pieces
+    &mdash; translator baked in as dead code, runtime co-init, out-of-module call relocation, a
+    constant pool, then a generic evaluator seam &mdash; and was flipped on by default for the
+    shipping CLI, after a call-relocation untag bug that had been halving addresses. It was
+    flipped back off two days later, because the JIT re-executes top-level forms. That reversal
+    is recorded as its own commit rather than folded away.</p>
+
+    <p>The other workstream brought up i386 from nothing: seventeen missing opcodes, a hosted
+    ELF32 target, then a CL image that boots and evaluates on 32 bits. Most of the work was
+    width: the numeric width now follows the target rather than assuming 64 bits, the bignum
+    half-limb width stopped being hardcoded at 62 bits, and a register invariant that had been
+    a convention became a mechanized check &mdash; which immediately found fifteen violating
+    opcodes and then reported an empty list.</p>
+
+    <div class="callout">
+      <p>The i386 collector was never wired at all. The GC label is only ever the struct default,
+      no i386 arm exists in the cross-compiler, and the collect path is an invalid interrupt on
+      hosted Linux. The bulk SIGSEGV was arena exhaustion.</p>
+      <span class="src">modus &mdash; 0a68b3d, &ldquo;proven twice over rather than argued&rdquo;</span>
+    </div>
+
+    <p>Three things in that sequence are worth more than the fixes. A ChaCha20 failure was
+    localised to bignum arithmetic above 32 bits &mdash; and then <em>retracted</em>: the bignum
+    band was not broken and ChaCha20 was correct. An EDX-clobber hypothesis was pronounced dead
+    and the round stopped rather than continuing to chase it. And when the ported collector ran
+    but corrupted memory, it was gated off with the honest crash restored instead of shipped
+    half-working.</p>
+
+    <p>Underneath, the hosted CLI got real sockets: TCP and UDP on Linux, a DNS resolver, the
+    server side with bind/listen/accept, <code>SO_REUSEADDR</code> and UDP multi-peer, block
+    storage with fsync durability, and an HTTP/1.0 client &mdash; the first time modus fetched
+    anything from the network. Plus a long run of conformance fixes driven by alexandria, and the
+    week&rsquo;s tidiest rename: <code>eval2</code> became <code>mvm-eval</code> everywhere.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>warp &nbsp;warren</em> &nbsp;/&nbsp; 16 commits, two new repos</span>
+      <h2>A delta protocol, and a file browser</h2>
+    </div>
+
+    <p><span class="mono">warren</span> arrived first: a Finder-style Miller-column file browser
+    drawn over glass and VNC, with real image previews through <span class="mono">pigment</span>,
+    decoded asynchronously on a worker thread with a loading state and a stale guard, and an
+    embedding mode so it can live in a framebuffer somebody else owns.</p>
+
+    <p><span class="mono">warp</span> arrived the same day and spent the week deciding what it
+    is. The answer, in its own words:</p>
+
+    <div class="callout">
+      <p>The core is a delta protocol, not a renderer: keyed, budgeted, staleness-annotated
+      deltas over typed projections, with encodings per consumer. <em>Present</em> is a
+      compression decision &mdash; which slice travels toward a consumer with finite intake &mdash;
+      so macroblocks and tokens are peer encodings and neither is privileged.</p>
+      <span class="src">warp &mdash; 52b2c13</span>
+    </div>
+
+    <p>That reframing &mdash; a context window is a viewport, attention is priced per token the
+    way frames are priced per macroblock &mdash; turned most of its rules into transport rules,
+    which they always had been. The first practical client was a live pipeline monitor, which is
+    also where it learned what the design had got wrong; by Thursday warp implemented glass&rsquo;s
+    surface contract and could be a desktop window in its own right.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>weft &nbsp;glass</em> &nbsp;/&nbsp; 51 commits</span>
+      <h2>Forms, and a scroll that costs a CopyRect</h2>
+    </div>
+    <p><span class="mono">weft</span> took the forms remainder in one wave &mdash; interactive
+    controls with activation, focus, typing and painted state; one selection rather than two,
+    with shift-arrows, drag ranges and tab order; and what a <code>&lt;select&gt;</code> pick
+    means and where its popup goes. Block-in-inline hoisting per CSS&nbsp;2.1 cut one page&rsquo;s
+    box error from 12,302 to 1,338. Acid3 finished the week scripted at 100/100, and the roadmap
+    was corrected from being two phases behind reality &mdash; it still claimed &ldquo;no
+    JavaScript&rdquo;.</p>
+    <p>In <span class="mono">glass</span>, a scrolling window on the desktop became a CopyRect
+    rather than a repaint, a clipped rectangle fills by the row instead of by the pixel, and each
+    surface&rsquo;s poll and draw were isolated so that one bad window can no longer take the
+    compositor down with it.</p>
+  </section>
+
+  <footer>
+    <p><strong>Method.</strong> Commits by <em>author</em> date, 25 to 31 July inclusive, across
+    the 42 git repositories in the modus-lisp workspace. Line counts exclude generated
+    acceptance-gate artefacts and committed scratch dumps. Produced with
+    <code>bin/week 2026-08-01 --log</code>.</p>
+    <p><a href="../../">&larr; All issues</a></p>
+  </footer>
+
+</div>
+</body>
+</html>

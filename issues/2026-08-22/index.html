@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The stack learns to leave home — This Week in Modus №24</title>
+<meta name="description" content="This Week in Modus, 15–21 August 2026: kiln and glass-sdl appear, the CL stack runs a REPL on real Pi Zero silicon, and one HTTP client replaces four. 136 commits across 23 repos.">
+<meta property="og:title" content="The stack learns to leave home — This Week in Modus №24">
+<meta property="og:description" content="15–21 August 2026: kiln and glass-sdl appear, the CL stack runs a REPL on real Pi Zero silicon, and one HTTP client replaces four. 136 commits across 23 repos.">
+<meta property="og:type" content="article">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..700&family=Newsreader:opsz,wght@6..72,300..600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../../assets/crier.css">
+</head>
+<body>
+<div class="page">
+
+  <div class="sitebar">
+    <a class="brand" href="../../">crier</a>
+    <nav>
+      <a href="../../#issues">Issues</a>
+      <a href="https://github.com/modus-lisp">GitHub</a>
+    </nav>
+  </div>
+
+  <header class="mast">
+    <div class="kicker">
+      <span>This Week in Modus &mdash; &#8470;&nbsp;24</span>
+      <span>&middot;</span>
+      <span>15&ndash;21 August 2026</span>
+      <span>&middot;</span>
+      <span><b>136 commits</b> &middot; 23 of 42 repos</span>
+    </div>
+    <h1>The stack learns<br>to leave <span class="lo">home</span></h1>
+    <hr class="rule-fire">
+    <p class="standfirst">Two repositories appeared &mdash; one that fires the whole workspace
+    into a container, one that puts it in a native window. The CL stack ran a REPL on real
+    Pi&nbsp;Zero silicon for the first time. And half a dozen libraries stopped assuming whose
+    home directory they were living in.</p>
+
+    <div class="tally">
+      <div><span class="n">136</span><span class="l">Commits</span></div>
+      <div><span class="n">23</span><span class="l">Repos moved</span></div>
+      <div><span class="n">3</span><span class="l">New repos</span></div>
+      <div><span class="n">236</span><span class="l">Source files</span></div>
+      <div><span class="n">+27k</span><span class="l">Lines added</span></div>
+    </div>
+  </header>
+
+  <div class="ledger-wrap">
+    <table class="ledger">
+      <thead>
+        <tr><th>Repo</th><th class="num">Commits</th><th></th><th class="num" colspan="2">Lines</th><th>Focus</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="repo">modus</td><td class="num">37</td><td class="barcell"><span class="bar" style="width:100%"></span></td><td class="add">+4,986</td><td class="del">&minus;1,636</td><td class="what">bare-metal RPi rungs 1&ndash;4, GC</td></tr>
+        <tr><td class="repo">kiln</td><td class="num">21</td><td class="barcell"><span class="bar" style="width:56.8%"></span></td><td class="add">+3,124</td><td class="del">&minus;250</td><td class="what">born Tuesday</td></tr>
+        <tr><td class="repo">glass</td><td class="num">14</td><td class="barcell"><span class="bar" style="width:37.8%"></span></td><td class="add">+4,320</td><td class="del">&minus;344</td><td class="what">enrolment, seats, a control socket</td></tr>
+        <tr><td class="repo">webrtc-data</td><td class="num">13</td><td class="barcell"><span class="bar" style="width:35.1%"></span></td><td class="add">+1,547</td><td class="del">&minus;373</td><td class="what">one-time links, route records</td></tr>
+        <tr><td class="repo">stencil</td><td class="num">8</td><td class="barcell"><span class="bar cool" style="width:21.6%"></span></td><td class="add">+1,417</td><td class="del">&minus;85</td><td class="what">masks, patterns, graded on Chromium</td></tr>
+        <tr><td class="repo">chord</td><td class="num">5</td><td class="barcell"><span class="bar cool" style="width:13.5%"></span></td><td class="add">+284</td><td class="del">&minus;67</td><td class="what">fetching a voice, and its licence</td></tr>
+        <tr><td class="repo">glass-sdl</td><td class="num">5</td><td class="barcell"><span class="bar cool" style="width:13.5%"></span></td><td class="add">+702</td><td class="del">&minus;11</td><td class="what">born Thursday</td></tr>
+        <tr><td class="repo">cl-nostr</td><td class="num">4</td><td class="barcell"><span class="bar cool" style="width:10.8%"></span></td><td class="add">+1,359</td><td class="del">&minus;120</td><td class="what">FFI-free at last</td></tr>
+        <tr><td class="repo">mill</td><td class="num">4</td><td class="barcell"><span class="bar cool" style="width:10.8%"></span></td><td class="add">+1,894</td><td class="del">&minus;140</td><td class="what">packed matmul, ONNX subgraphs</td></tr>
+        <tr><td class="repo">operandi-gui</td><td class="num">3</td><td class="barcell"><span class="bar cool" style="width:8.1%"></span></td><td class="add">+1,018</td><td class="del">&minus;66</td><td class="what">the agent becomes a warp app</td></tr>
+        <tr><td class="repo">seal</td><td class="num">3</td><td class="barcell"><span class="bar cool" style="width:8.1%"></span></td><td class="add">+576</td><td class="del">&minus;7</td><td class="what">HTTP and WebSocket clients</td></tr>
+        <tr><td class="repo">stave</td><td class="num">3</td><td class="barcell"><span class="bar cool" style="width:8.1%"></span></td><td class="add">+1,803</td><td class="del">&minus;90</td><td class="what">beam, lexicon, streaming, WER</td></tr>
+        <tr><td class="repo">&hellip;and 11 more</td><td class="num">16</td><td class="barcell"><span class="bar cool" style="width:43.2%"></span></td><td class="add">&nbsp;</td><td class="del">&nbsp;</td><td class="what">cairn, conch, cram, gesso, glass-mcclim, loom, pigment, spool, warp, webp-pure, weft</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>kiln</em> &nbsp;/&nbsp; 21 commits, all of them its first</span>
+      <h2>A desktop you can install</h2>
+    </div>
+
+    <p>On Tuesday a repository appeared containing one idea: take the forty-two checkouts that
+    make up this workspace and fire them into a single image that boots a desktop. By Friday it
+    could do that on Docker, on podman, on Apple&rsquo;s container runtime, out of a plain folder
+    with no container at all, and on Windows.</p>
+
+    <p>The build bootstraps itself in Lisp, and the way it does that is the most modus-lisp thing
+    in the week. Five repositories arrive as tarballs &mdash; <span class="mono">cairn</span> and
+    its closure, which between them depend on nothing third-party &mdash; and then cairn, the
+    org&rsquo;s own from-scratch git, clones the other thirty-three out of GitHub over
+    <span class="mono">seal</span>&rsquo;s TLS. There is no git binary in the image.
+    <code>repos.lock</code> pins every commit and <code>kiln lock</code> refreshes it through
+    cairn&rsquo;s own ref discovery, which needs no GitHub API and no token.</p>
+
+    <p>The rest of the week was the difference between a demo and a thing you hand somebody.
+    The browser became the default surface and VNC the opt-in. A published port lands on
+    loopback unless you ask otherwise. The box configures over ssh, menuconfig style. The agent
+    runs inside fences, and the mount list <em>is</em> the fence. And on Thursday a second new
+    repository, <span class="mono">glass-sdl</span>, gave the desktop a native window &mdash;
+    verified 13/13 on real Windows hardware with a real video driver, then saved as a standalone
+    executable.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>modus</em> &nbsp;/&nbsp; 37 commits &nbsp;/&nbsp; #209, #160, #266</span>
+      <h2>Four rungs, and a Pi that answers</h2>
+    </div>
+
+    <p>Issue &#8470;&nbsp;25 has a Pi Zero taking an SSH login. This is the week it first said
+    anything at all.</p>
+
+    <div class="console">
+      <span class="cap">Real Pi Zero 2 W hardware &mdash; #209 rung 4, ebd1e04</span>
+<pre>## Starting application at 0x00300000 ...
+BOOT
+MODUS-CL
+Modus CL REPL (bare metal).  EVAL = MVM-EVAL.
+&gt; (mapcar (lambda (x) (* x x)) (list 1 2 3 4 5))
+<span class="ret">(1 4 9 16 25)</span>
+&gt; (fact 20)
+<span class="ret">2432902008176640000</span></pre>
+    </div>
+
+    <p>Four rungs went up in a day: a bare-metal Raspberry&nbsp;Pi&nbsp;3B image on the CL/mvm
+    stack, then that image fetching a <code>.tar.gz</code> over real HTTP, then installing,
+    loading and calling the library inside it, and then the whole thing on real Pi Zero 2 W
+    silicon. Getting there needed the mini UART rather than the PL011 for chain-loaded images,
+    a loader protocol that carries the load address on the wire, and <code>VBAR_EL2</code> set
+    as well as <code>VBAR_EL1</code>, because the image runs at EL2.</p>
+
+    <h3>Two bugs inside the garbage collector</h3>
+
+    <p>Turning on allocation bitmaps for bare-metal aarch64 &mdash; <span class="mono">#160</span>
+    &mdash; found a collector that had never actually forwarded anything.</p>
+
+    <div class="callout">
+      <p><code>(mem-ref A :u64)</code> does not return the machine word at <code>A</code>. The
+      loaded word is left untagged, so every later Lisp operation reads it as a tagged value:
+      the integer handed back is <em>word/2</em>.</p>
+      <span class="src">gc.lisp &mdash; 6c1b027, proven against physical memory with gdb</span>
+    </div>
+
+    <p>The docstring blamed i386 and claimed x64 and aarch64 used native trampolines instead.
+    That was false for aarch64, whose trampoline is a register-saving shim that calls this same
+    Lisp collector &mdash; so every bare-metal Pi image was running it. Its sibling bug is
+    almost funnier: all four bitmap helpers wrote their mask with <code>(ash 1 bit)</code> for a
+    <em>variable</em> bit, and a variable shift count routes through the runtime
+    <code>BIGNUM-ASH</code>, which conses. Each of them runs inside <code>%gc-collect</code>,
+    where the alloc pointer is already at the limit, so a single cons re-trips the GC check and
+    re-enters the collector. They had never been exercised, because the targets with bitmaps on
+    used a different path.</p>
+
+    <h3>A fork nobody had noticed</h3>
+
+    <p><span class="mono">#266</span> cut 871 lines by making the bare-metal RPi build a thin
+    tail over the shared CLI assembly instead of a private fork of it. Twenty-seven of its
+    thirty-eight defvars were verbatim copies; among the duplicated code was a complete x64 JIT
+    block baked into an aarch64 image, dead only because its <code>*jit-on*</code> was NIL. The
+    commit names the cost plainly: this is the shape of the console and USB-DMA bugs from the
+    same week &mdash; a fix lands in one assembly and not the other.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>seal &nbsp;cl-nostr &nbsp;cairn</em> &nbsp;/&nbsp; 8 commits</span>
+      <h2>One HTTP client, at last</h2>
+    </div>
+
+    <p>Four hand-rolled HTTP clients had grown in this workspace, because there was nowhere for
+    one to live: cairn&rsquo;s 108 lines, just enough for git&rsquo;s smart transport;
+    weft&rsquo;s 527, the mature one, reachable only by depending on a browser engine; skep&rsquo;s;
+    and cl-nostr, which had given up and reached for dexador &mdash; which is cl+ssl, which is
+    OpenSSL through an FFI, in a workspace whose whole claim is that there isn&rsquo;t one.</p>
+
+    <p>So HTTP/1.1 moved into <span class="mono">seal</span>, on seal&rsquo;s own TLS: URLs with
+    bracketed IPv6 authorities, chunked and Content-Length bodies, read-to-close, plain
+    <code>http://</code> over a raw socket as well as <code>https://</code>, and redirect
+    following where 303 and a 301/302 on a POST degrade to GET without the body, which is what
+    clients actually do. An RFC 6455 WebSocket client followed it out of modus. cairn stopped
+    being a fourth client; cl-nostr moved its relays, NIP-05 lookups and Blossom uploads across
+    and is now FFI-free.</p>
+
+    <p>One thing that fell out of the move is worth its own paragraph. cl-nostr found that
+    <span class="mono">secp256k1-fast</span> keeps mutable state across a scalar multiplication,
+    so two threads signing at once do not merely contend &mdash; they corrupt each other. Of
+    eighty signatures taken from four threads, seventy-seven signalled and the three that
+    returned were invalid. Silently invalid is the dangerous half: the event looks complete, and
+    the relay that rejects it reports a bad signature for a key you know is good. A pool fans
+    out and an uploader fans out, so the lock went underneath everybody rather than into a note
+    asking each caller to remember.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>glass &nbsp;webrtc-data</em> &nbsp;/&nbsp; 27 commits</span>
+      <h2>A link a person has to spend</h2>
+    </div>
+
+    <p>Handing somebody a desktop over a DM means handing them a code, and a code that can be
+    used twice is not much of a code. So an enrolment became a record: revoking marks it, the
+    box says when it runs out, and it tells the client so before the client is surprised. A
+    login code is traded exactly once, and cancelled when it turns out not to be needed.</p>
+
+    <p>Then the interesting failure. Single use gives a real property &mdash; a successful
+    redemption means nobody else got there first &mdash; but only if a code cannot be spent
+    without a person. These links arrive in a DM, and preview bots fetch them; some render the
+    page in a headless browser. One of those would connect, bind the code to its own throwaway
+    key, and the human&rsquo;s tap would be refused <em>as a leak</em>: a false alarm that locks
+    the owner out, caused by the defence.</p>
+
+    <div class="callout">
+      <p>So the gate sits on redemption, not on connecting. A returning terminal has an enrolment
+      and spends nothing, so it opens straight away; only a load actually carrying a live code
+      waits for a finger.</p>
+      <span class="src">glass-webrtc &mdash; 78b4b63</span>
+    </div>
+
+    <p>Around that: glass grew a single control socket that answers even the form it cannot read,
+    two seats onto one real desktop with a gate that proves it, seats bound to loopback unless
+    somebody asks otherwise, and a terminal window whose shell is a Lisp listener. And the box
+    now writes down which route a session took and how it ended, so &ldquo;it didn&rsquo;t
+    connect&rdquo; has an answer.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>mill &nbsp;stave &nbsp;chord</em> &nbsp;/&nbsp; 12 commits</span>
+      <h2>The half that listens</h2>
+    </div>
+
+    <p><span class="mono">mill</span> learned to read a <code>.onnx</code> in Lisp and convert it
+    once, to carry a model&rsquo;s config alongside its graph, to handle subgraphs, and to pack
+    the B operand of a matmul and pool its workers &mdash; with the gates that keep all of it
+    honest. On top of that <span class="mono">stave</span> got its second half: beam search, a
+    lexicon, streaming, and a word error rate to be judged by. <span class="mono">chord</span>
+    can now fetch a voice from Lisp and convert it.</p>
+
+    <p>chord also spent three commits on a licence, which is not the kind of thing a weekly
+    usually reports. Piper&rsquo;s model card for the Lessac voice says MIT &mdash; but that
+    covers Piper&rsquo;s repository, not the speech it was trained on, and the Blizzard 2013
+    licence it links to grants research use only and forbids redistribution. Weights trained on
+    that data are a derived work of it. So the voice cannot ship; the README says how to fetch
+    and convert one yourself, and why <code>cmudict</code> and the rules learned from it
+    <em>do</em> ship, being BSD. A dataset licence and a model licence are routinely different,
+    and the dataset is the one that binds.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>stencil</em> &nbsp;/&nbsp; 8 commits</span>
+      <h2>Graded against a browser, not against itself</h2>
+    </div>
+
+    <p>stencil&rsquo;s self-test asked stencil whether stencil agreed with stencil. Twenty-three
+    checks, all green, and underneath them <code>&lt;pattern&gt;</code> rendered nothing at all:
+    the paint server was not implemented, <code>url(#id)</code> resolved to no paint, and the
+    shape was silently dropped. Nothing in a self-referential suite knows what the pixels were
+    supposed to be. It surfaced when a wallpaper named for its patterns came out with no patterns
+    in it.</p>
+
+    <p>The grader is now Chromium. Each test renders as a top-level <code>file://</code> document
+    at a size computed from width, height and viewBox; stencil renders the same file into the same
+    box; both composite onto the same white and the pixels are compared. In the week that followed,
+    masks, clips, patterns, rounded rects, every colour name, <code>&lt;use&gt;</code> cycle
+    detection, <code>&lt;image&gt;</code> through a hook and <code>.svgz</code> all landed &mdash;
+    along with a note recording where the oracle itself is wrong.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow">everywhere &nbsp;/&nbsp; one line at a time</span>
+      <h2>Nobody lives in /home/claude</h2>
+    </div>
+    <p>The quiet theme of the week, and the reason for its title. Half a dozen repositories had
+    hard-coded a path that happened to be right on one machine:</p>
+    <ul class="plain">
+      <li><span class="mono">weft</span> takes the WPT checkout from <code>$WPT_ROOT</code>.</li>
+      <li><span class="mono">loom</span> takes Playwright, Quicklisp and WPT from <code>$HOME</code>.</li>
+      <li><span class="mono">warp</span> and <span class="mono">spool</span> resolve the workspace
+      from the script that is running, and glass from the file asking for it.</li>
+      <li><span class="mono">glass</span> derives every <code>load-asd</code> from
+      <code>*load-truename*</code>, and finds Quicklisp rather than assuming a home it owns.</li>
+      <li><span class="mono">webrtc-data</span> finds esbuild under <code>$HOME</code>, and its
+      deploy scripts say what to do instead of how to do it.</li>
+    </ul>
+    <p>None of these is interesting on its own. Together they are the difference between a
+    workspace that runs where it was written and one that runs in a container, in a folder, on
+    Windows, or on a Pi &mdash; which is exactly what the rest of the week was about.</p>
+  </section>
+
+  <footer>
+    <p><strong>Method.</strong> Commits by <em>author</em> date &mdash; when the work was done,
+    not when a rebase replayed it &mdash; from 15 to 21 August inclusive, across the 42 git
+    repositories in the modus-lisp workspace. Line counts exclude generated acceptance-gate
+    artefacts. This site's own repository is never counted. Produced with
+    <code>bin/week 2026-08-22 --log</code>.</p>
+    <p><a href="../../">&larr; All issues</a></p>
+  </footer>
+
+</div>
+</body>
+</html>

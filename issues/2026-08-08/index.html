@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Speech, both ways — This Week in Modus №22</title>
+<meta name="description" content="This Week in Modus, 1–7 August 2026: chord and stave arrive, the desktop gets a mixer and dictation, and the JIT stops falling back. 218 commits across 15 repos.">
+<meta property="og:title" content="Speech, both ways — This Week in Modus №22">
+<meta property="og:description" content="1–7 August 2026: chord and stave arrive, the desktop gets a mixer and dictation, and the JIT stops falling back to the interpreter.">
+<meta property="og:type" content="article">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..700&family=Newsreader:opsz,wght@6..72,300..600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../../assets/crier.css">
+</head>
+<body>
+<div class="page">
+
+  <div class="sitebar">
+    <a class="brand" href="../../">crier</a>
+    <nav><a href="../../#issues">Issues</a><a href="https://github.com/modus-lisp">GitHub</a></nav>
+  </div>
+
+  <header class="mast">
+    <div class="kicker">
+      <span>This Week in Modus &mdash; &#8470;&nbsp;22</span>
+      <span>&middot;</span>
+      <span>1&ndash;7 August 2026</span>
+      <span>&middot;</span>
+      <span><b>218 commits</b> &middot; 15 of 42 repos</span>
+    </div>
+    <h1>Speech,<br>both <span class="lo">ways</span></h1>
+    <hr class="rule-fire">
+    <p class="standfirst">In one week the workspace got a voice and something to hear with:
+    a text-to-speech engine, a speech recognizer, and a desktop that wires a phone&rsquo;s
+    microphone through to whichever window has focus. Underneath, the JIT stopped falling back
+    to the interpreter, and i386 went from <code>(eval 42)</code> to a working CLI.</p>
+
+    <div class="tally">
+      <div><span class="n">218</span><span class="l">Commits</span></div>
+      <div><span class="n">15</span><span class="l">Repos moved</span></div>
+      <div><span class="n">4</span><span class="l">New repos</span></div>
+      <div><span class="n">+51k</span><span class="l">Lines of code</span></div>
+      <div><span class="n">488k</span><span class="l">Lines of phonetics</span></div>
+    </div>
+  </header>
+
+  <div class="ledger-wrap">
+    <table class="ledger">
+      <thead><tr><th>Repo</th><th class="num">Commits</th><th></th><th class="num" colspan="2">Lines</th><th>Focus</th></tr></thead>
+      <tbody>
+        <tr><td class="repo">modus</td><td class="num">112</td><td class="barcell"><span class="bar" style="width:100%"></span></td><td class="add">+17,234</td><td class="del">&minus;7,538</td><td class="what">the JIT keystone, i386, the build matrix</td></tr>
+        <tr><td class="repo">webrtc-data</td><td class="num">24</td><td class="barcell"><span class="bar" style="width:21.4%"></span></td><td class="add">+2,221</td><td class="del">&minus;480</td><td class="what">a bandwidth ladder in kbps</td></tr>
+        <tr><td class="repo">glass</td><td class="num">18</td><td class="barcell"><span class="bar" style="width:16.1%"></span></td><td class="add">+8,022</td><td class="del">&minus;175</td><td class="what">a session mixer, selection, dictation</td></tr>
+        <tr><td class="repo">chord</td><td class="num">16</td><td class="barcell"><span class="bar" style="width:14.3%"></span></td><td class="add">+495,974</td><td class="del">&minus;3,820</td><td class="what">born; 488k of it is cmudict and the rules learned from it</td></tr>
+        <tr><td class="repo">webrtc-media</td><td class="num">14</td><td class="barcell"><span class="bar" style="width:12.5%"></span></td><td class="add">+3,080</td><td class="del">&minus;658</td><td class="what">what a drag actually costs</td></tr>
+        <tr><td class="repo">warren</td><td class="num">11</td><td class="barcell"><span class="bar cool" style="width:9.8%"></span></td><td class="add">+139</td><td class="del">&minus;42</td><td class="what">the desktop gets a voice</td></tr>
+        <tr><td class="repo">mill</td><td class="num">5</td><td class="barcell"><span class="bar cool" style="width:4.5%"></span></td><td class="add">+4,691</td><td class="del">&minus;130</td><td class="what">the ONNX engine, extracted from chord</td></tr>
+        <tr><td class="repo">stave</td><td class="num">4</td><td class="barcell"><span class="bar cool" style="width:3.6%"></span></td><td class="add">+2,064</td><td class="del">&minus;39</td><td class="what">born; it transcribes</td></tr>
+        <tr><td class="repo">loom</td><td class="num">3</td><td class="barcell"><span class="bar cool" style="width:2.7%"></span></td><td class="add">+203</td><td class="del">&minus;26</td><td class="what">selecting is copying</td></tr>
+        <tr><td class="repo">reed</td><td class="num">3</td><td class="barcell"><span class="bar cool" style="width:2.7%"></span></td><td class="add">+1,059</td><td class="del">&minus;24</td><td class="what">plays a file, not only converts one</td></tr>
+        <tr><td class="repo">weft</td><td class="num">3</td><td class="barcell"><span class="bar cool" style="width:2.7%"></span></td><td class="add">+941</td><td class="del">&minus;68</td><td class="what">&nbsp;</td></tr>
+        <tr><td class="repo">&hellip;and 4 more</td><td class="num">5</td><td class="barcell"><span class="bar cool" style="width:4.5%"></span></td><td class="add">&nbsp;</td><td class="del">&nbsp;</td><td class="what">cl-nostr, seal, spool, warp</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>chord &nbsp;mill &nbsp;stave</em> &nbsp;/&nbsp; 25 commits, three new repos</span>
+      <h2>Speech, both ways</h2>
+    </div>
+
+    <p>On Thursday a repository called <span class="mono">chord</span> appeared containing text
+    to speech in pure Common Lisp: an ONNX graph interpreter with no runtime under it, a
+    pronunciation dictionary, and letter-to-sound rules learned from that dictionary for the
+    words it does not contain. Those two data files are 488,000 of the week&rsquo;s lines, and
+    they are the reason the tally above separates code from phonetics.</p>
+
+    <p>The rest of Thursday was making it fast enough to be a desktop&rsquo;s voice rather than a
+    demonstration. The commits read like a profile being walked down.</p>
+
+    <div class="callout">
+      <p>MatMul was 22% of a synthesis; now it is 0.8%. Twenty-six nodes out of 2,755, and a
+      third of a second of every four-second sentence.</p>
+      <span class="src">chord &mdash; fde2002</span>
+    </div>
+
+    <p>The loop order was already right. The op simply ran at default safety with untyped index
+    arithmetic, so every offset went through generic addition and every element through the
+    hairy bounds-checking accessor: the arithmetic was the small part of what the arithmetic
+    cost. A typed core at <code>(speed 3) (safety 0)</code> with declared indices, and the rows
+    fanned across the worker pool that already existed. The convolutions got the same two levers
+    plus a five-operation SIMD layer, ConvTranspose&rsquo;s scatter became an axpy once the
+    output row was de-interleaved, and dead data vectors started being recycled instead of asking
+    the allocator for fresh pages.</p>
+
+    <p>By Friday the tensor engine had moved out into <span class="mono">mill</span> &mdash;
+    &ldquo;chord is what is about speech&rdquo; &mdash; taking the ONNX interpreter, subgraphs,
+    Tile, Gemm, 2-D convolution and a transpose that had only ever worked on square inputs. And
+    <span class="mono">stave</span> arrived on the other side of the conversation: the transducer
+    engine proven against all three graphs, a front end of wav, FFT and Kaldi&rsquo;s
+    filterbank, then &ldquo;it transcribes&rdquo;, then transcribing compressed audio without
+    leaving Lisp.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>glass &nbsp;warren &nbsp;loom</em> &nbsp;/&nbsp; 32 commits</span>
+      <h2>A desktop with a mixer</h2>
+    </div>
+
+    <p>A session got a sound, and then more than one listener for it, and then the mix learned to
+    leave the process that makes it. A drifting sink is corrected by one frame at a time rather
+    than by a lump, which is the difference between audio that slides and audio that clicks. On
+    top of that came the desktop&rsquo;s own voice, a window to type into when you want it to say
+    something by hand, and a selection menu that appears where the words are and asks the
+    <em>window</em> what is selected rather than the clipboard.</p>
+
+    <p>Then the ear, and the neatest trick of the week: dictation needed no new input path at
+    all.</p>
+
+    <div class="callout">
+      <p>The key injector already existed, for pasting into apps that do not read a clipboard.
+      An injected key takes the identical route a client&rsquo;s keypress takes &mdash; the
+      window manager&rsquo;s focus rule, the pty write, the CLIM event queue &mdash; and nothing
+      downstream can tell the difference.</p>
+      <span class="src">glass &mdash; 0f70ef5</span>
+    </div>
+
+    <p>So speech reaches an application that has never heard of an ear, the phone&rsquo;s
+    microphone reaches the desktop instead of the floor, and stopping the ear stops dictation
+    with a button that says so. <span class="mono">loom</span> made selecting the same as copying,
+    with the selection owned by the window rather than by the browser in general;
+    <span class="mono">warren</span> gave the desktop a voice, and then removed its own two speech
+    menu items once the window manager had them.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>modus</em> &nbsp;/&nbsp; #222, #227, #220, #221</span>
+      <h2>The JIT stops falling back</h2>
+    </div>
+
+    <p>Every runtime <code>DEFUN</code> was being installed as a heap closure that re-enters the
+    interpreter. A later form calling it failed the native-callee check, and the whole calling
+    module fell back to interpretation. That one gap was the JIT&rsquo;s only remaining fallback
+    reason &mdash; and the reason a runtime-defined function could never be an actor entry, and
+    the reason a loadable ANSI corpus ran fully interpreted. Runtime-defined functions now
+    install as real native code, without anything new having to be compiled.</p>
+
+    <p>Its counterpart is <span class="mono">#227</span>, found because someone made the
+    &ldquo;survives GC&rdquo; probes actually collect. A runtime macro&rsquo;s expander stopped
+    working after any collection: <code>macro-function</code> still returned something, but the
+    expander&rsquo;s quoted-symbol constants had gone stale, so an expansion came back with an
+    unprintable object where a function name should be. A macro defined after a collection worked
+    until the next one. The cause is not about macros at all &mdash; a JIT page bakes absolute
+    addresses into immediates in three places, two of which could be heap addresses, and heap
+    objects move under a Cheney collector. Four classes of stale-address corruption closed at
+    once.</p>
+
+    <h3>One scratch register, six wrong answers</h3>
+
+    <p>On aarch64, <code>ensure-src</code> hands back the scratch register whenever a value&rsquo;s
+    virtual register is spilled. Several instruction sequences were using that same scratch as
+    working space while still needing the source it stood for.</p>
+
+    <div class="console">
+      <span class="cap">modus &mdash; #220, what <code>(mod x y)</code> emitted</span>
+<pre>SDIV x16, pa, pb      ; x16 = quotient
+MUL  x16, x16, pb     ; x16 = q * divisor
+SUB  pd, pa, x16      ; remainder = dividend - q*divisor
+
+<span class="ret">; at any site whose dividend is spilled, pa IS x16 —
+; so the last line degenerates to SUB pd, x16, x16</span></pre>
+    </div>
+
+    <p><code>(mod x y)</code> returned a hard zero. A 102-site sweep found five more of the same
+    shape: <code>(consp nil)</code> answering T, <code>(atom nil)</code> answering NIL, a wild
+    store from <code>obj-set</code>, an atomic exchange whose address had been destroyed, and a
+    per-CPU set that clobbered its own value at large offsets. Two other resolution bugs went
+    with them &mdash; an unresolved call landing at bytecode offset 0 instead of a safe stub,
+    which turned out to be the SSH images&rsquo; long-standing &ldquo;dhcp-discover hang&rdquo;.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>modus</em> &nbsp;/&nbsp; #201, #210, #211 &nbsp;/&nbsp; 32 bits</span>
+      <h2>i386, from <code>(eval 42)</code> upward</h2>
+    </div>
+
+    <p>Saturday&rsquo;s i386 commits are a bring-up log read in one sitting:
+    <code>(eval 42)</code> evaluates &mdash; <code>CONSP</code> said T for NIL and
+    <code>MAKE-ARRAY</code> was missing. The macro and backquote bootstrap, real file I/O, and
+    <code>LOAD</code>. <code>BNULL</code> could not see NIL, so <code>handler-case</code> now
+    works under eval. The interpreter&rsquo;s canonical NIL was a bignum. And then the one that
+    explains a whole column of symptoms above it:</p>
+
+    <div class="callout">
+      <p><code>(eval '(quote X))</code> returned NIL for every X, because x86-32 masks a shift
+      count to five bits. A runtime <code>DEFMACRO</code> was handed NIL and registered nothing
+      &mdash; silently, because the key lookup just answers NIL.</p>
+      <span class="src">modus &mdash; 571a19d</span>
+    </div>
+
+    <p>Floats were the other wall, and the diagnosis is worth the distinction it draws: i386
+    floats were a <em>representation</em> problem, not a codegen gap. The layout became
+    width-neutral &mdash; four slots of 16-bit tagged chunks &mdash; the in-image accessors were
+    hoisted into one file, and then SSE2 codegen landed, taking the translator gap from thirteen
+    down to one. The bignum-to-float conversion stopped hardcoding a 2<sup>62</sup> limb radix.</p>
+
+    <h3>And the build matrix stopped being a rumour</h3>
+
+    <p>Thirty-six build scripts were audited by actually building them, then consolidated:
+    36&nbsp;&rarr;&nbsp;33&nbsp;&rarr;&nbsp;28, with one <code>build.lisp</code> covering
+    architecture &times; mode &times; board and one <code>run.sh</code> replacing about fourteen
+    QEMU launchers. Seven of twenty-eight output paths in the build table turned out to be wrong,
+    and were transcribed from the scripts themselves. In the middle of it,
+    <span class="mono">#210</span> reached its first rung: an x64 image that cross-emits a running
+    aarch64 ELF. Also, and less gloriously, 960&nbsp;MB of accidentally committed build binaries
+    were untracked.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>webrtc-media &nbsp;webrtc-data</em> &nbsp;/&nbsp; 38 commits</span>
+      <h2>A drag is not a screen full of new content</h2>
+    </div>
+
+    <p>Dragging a window over a slow link produced a long wait and then the window at its final
+    position in one step, with nothing in between. The cost model was pricing a translation as
+    fresh content: an inter frame was estimated as dirty macroblocks times a price per
+    coefficient, but a macroblock that merely moved codes no coefficients at all. It spends a
+    mode and a vector reference &mdash; about a byte, and the same byte at every quantizer. A
+    drag dirties most of the screen and translates almost all of what it dirties, so the estimate
+    was wrong by orders of magnitude exactly when it mattered.</p>
+
+    <p>Out of that came a bandwidth ladder where everything derives from one knob in kbps: a rung
+    names a cadence and not only a rate, and the coarseness a frame may <em>settle</em> at is
+    kept separate from the coarseness it may <em>move</em> at. Resolution follows damage. An idle
+    frame may not hold the link, and a picture nobody can see is not a picture that stopped. On
+    the phone side, the client picks a rung and sees what it bought, survives backgrounding,
+    reconnects on its own, remembers the box, honours a keyframe request on the control channel,
+    and stops answering ghosts &mdash; one live session per terminal, replayed answers rejected.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow">also this week</span>
+      <h2>Three smaller things</h2>
+    </div>
+    <ul class="plain">
+      <li><span class="mono">spool</span>, a podcast client for the glass desktop, arrived on
+      Wednesday.</li>
+      <li><span class="mono">reed</span> learned to play a file rather than only convert one, to
+      open a player over bytes already in memory or at an offset, and to start an
+      <code>.m4a</code> where its audio starts rather than where its bitstream does.</li>
+      <li><span class="mono">seal</span> added TLS 1.2 ECDHE over the NIST curves, with a gate
+      that runs it.</li>
+    </ul>
+  </section>
+
+  <footer>
+    <p><strong>Method.</strong> Commits by <em>author</em> date, 1 to 7 August inclusive, across
+    the 42 git repositories in the modus-lisp workspace. Line counts exclude generated
+    acceptance-gate artefacts and committed scratch dumps, but <em>not</em>
+    <span class="mono">chord</span>&rsquo;s 488,000 lines of pronunciation data &mdash;
+    <code>cmudict</code> and the letter-to-sound rules learned from it &mdash; which are shipped
+    content and are broken out separately above. Produced with
+    <code>bin/week 2026-08-08 --log</code>.</p>
+    <p><a href="../../">&larr; All issues</a></p>
+  </footer>
+
+</div>
+</body>
+</html>

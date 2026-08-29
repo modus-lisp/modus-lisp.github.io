@@ -1,0 +1,97 @@
+#!/usr/bin/env bash
+#
+# week — everything an issue of This Week in Modus is made of.
+#
+#   bin/week 2026-08-22          the issue dated that Saturday: 15–21 Aug
+#   bin/week 2026-08-22 --log    ... and every commit subject, grouped by repo
+#   bin/week --list              every week of the project, numbered
+#
+# An issue dated Saturday S covers the seven days [S-7, S).  The workspace is
+# the parent of this repo unless MODUS_WORKSPACE says otherwise.  The site's own
+# repo is never counted: a dispatch does not report on itself.
+#
+# Line counts exclude generated acceptance-gate artefacts and committed scratch
+# dumps, which in a bad week
+# are 790,000 insertions of machine-written Lisp and would drown everything else.
+
+set -o pipefail
+
+ROOT="${MODUS_WORKSPACE:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
+SELF=modus-lisp.github.io
+NOISE='shards-jit|shards-off|real-ansi-gen|gate-net[.]out|[[:blank:]]scratch/'
+
+die()   { printf 'week: %s\n' "$*" >&2; exit 1; }
+usage() { awk 'NR>1 && /^#/ {sub(/^# ?/, ""); print; next} NR>1 {exit}' "${BASH_SOURCE[0]}"; exit "${1:-0}"; }
+
+repos() { for d in "$ROOT"/*/; do r=$(basename "$d"); [ -e "$d/.git" ] || continue
+            [ "$r" = "$SELF" ] && continue; echo "$r"; done; }
+
+# Commits whose AUTHOR date falls in [since, until).  git's own --since/--until
+# read the committer date, which a rebase or a history rewrite resets to the day
+# of the rewrite — so a week's work would land in whatever week it was replayed.
+in_week() { git -C "$ROOT/$1" log ${4:+"$4"} --format='%ad %H' --date=short |
+              awk -v s="$2" -v u="$3" '$1 >= s && $1 < u {print $2}'; }
+
+# ---------------------------------------------------------------- --list
+
+list_weeks() {
+  { for r in $(repos); do git -C "$ROOT/$r" log --format='%ad' --date=short; done; } |
+  python3 -c '
+import sys, datetime, collections
+c = collections.Counter()
+for line in sys.stdin:
+    d = datetime.date.fromisoformat(line.strip())
+    slip = (5 - d.weekday()) % 7          # days to the next Saturday
+    c[d + datetime.timedelta(days=slip or 7)] += 1
+for i, w in enumerate(sorted(c), 1):
+    s = w - datetime.timedelta(days=7)
+    print(f"{i:3d}  {w}  {s:%-d %b}–{w - datetime.timedelta(days=1):%-d %b %Y}  {c[w]:5d} commits")'
+}
+
+# ---------------------------------------------------------------- a week
+
+week() {
+  local until="$1" log="$2" since
+  since=$(python3 -c "
+import datetime,sys
+d=datetime.date.fromisoformat('$until')
+if d.weekday()!=5: sys.exit('week: %s is a %s, not a Saturday' % (d, d.strftime('%A')))
+print(d-datetime.timedelta(days=7))") || exit 1
+
+  printf 'ISSUE %s   covering %s .. %s (exclusive), by author date\n\n' "$until" "$since" "$until"
+  printf '%-18s %7s %7s %9s %9s\n' REPO COMMITS FILES ADDED DELETED
+  printf -- '---------------------------------------------------------\n'
+
+  local total=0 moved=0
+  for r in $(repos); do
+    local all work n
+    all=$(in_week "$r" "$since" "$until" "")
+    [ -z "$all" ] && continue
+    n=$(printf '%s\n' "$all" | wc -l | tr -d ' ')
+    total=$((total + n)); moved=$((moved + 1))
+    work=$(in_week "$r" "$since" "$until" --no-merges)
+    if [ -n "$work" ]; then
+      git -C "$ROOT/$r" log --no-walk --numstat --format='' $work | grep -vE "$NOISE" |
+        awk -F'\t' -v r="$r" -v n="$n" '$1 ~ /^[0-9]+$/ {a+=$1; d+=$2; f[$3]=1}
+          END {c=0; for (x in f) c++; printf "%-18s %7s %7d %9d %9d\n", r, n, c, a, d}'
+    else
+      printf '%-18s %7s %7d %9d %9d\n' "$r" "$n" 0 0 0
+    fi
+  done
+  printf -- '---------------------------------------------------------\n'
+  printf '%-18s %7d across %d repositories\n' TOTAL "$total" "$moved"
+
+  [ -n "$log" ] || return 0
+  for r in $(repos); do
+    local h; h=$(in_week "$r" "$since" "$until" "")
+    [ -z "$h" ] || { printf '\n######## %s (%s)\n' "$r" "$(printf '%s\n' "$h" | wc -l | tr -d ' ')"
+                     git -C "$ROOT/$r" log --no-walk --format='  %ad %h %s' --date=short $h; }
+  done
+}
+
+case "${1:-}" in
+  ''|-h|--help) usage 0 ;;
+  --list)       list_weeks ;;
+  *)            [[ $1 =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]] || die "expected a Saturday (YYYY-MM-DD) or --list"
+                week "$1" "${2:-}" ;;
+esac

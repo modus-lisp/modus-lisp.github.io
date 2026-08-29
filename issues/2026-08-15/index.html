@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Two packages, one variable — This Week in Modus №23</title>
+<meta name="description" content="This Week in Modus, 8–14 August 2026: nine of modus's name-keyed registries turn out to be blind to packages, the build starts checking itself, and alexandria finishes at 230/230. 273 commits across 13 repos.">
+<meta property="og:title" content="Two packages, one variable — This Week in Modus №23">
+<meta property="og:description" content="8–14 August 2026: nine name-keyed registries turn out to be blind to packages, the build starts checking itself, and alexandria finishes at 230/230.">
+<meta property="og:type" content="article">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..700&family=Newsreader:opsz,wght@6..72,300..600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../../assets/crier.css">
+</head>
+<body>
+<div class="page">
+
+  <div class="sitebar">
+    <a class="brand" href="../../">crier</a>
+    <nav><a href="../../#issues">Issues</a><a href="https://github.com/modus-lisp">GitHub</a></nav>
+  </div>
+
+  <header class="mast">
+    <div class="kicker">
+      <span>This Week in Modus &mdash; &#8470;&nbsp;23</span>
+      <span>&middot;</span>
+      <span>8&ndash;14 August 2026</span>
+      <span>&middot;</span>
+      <span><b>273 commits</b> &middot; 13 of 42 repos</span>
+    </div>
+    <h1>Two packages,<br>one <span class="lo">variable</span></h1>
+    <hr class="rule-fire">
+    <p class="standfirst">Nine of Modus&rsquo;s name-keyed registries turned out to be blind to
+    packages &mdash; one of them dispatching the wrong generic function in silence. A new
+    build-time check found globals the shipping ARM binary had never initialised. And by
+    Thursday alexandria&rsquo;s own test suite ran 230 out of 230.</p>
+
+    <div class="tally">
+      <div><span class="n">273</span><span class="l">Commits</span></div>
+      <div><span class="n">13</span><span class="l">Repos moved</span></div>
+      <div><span class="n">356</span><span class="l">Source files</span></div>
+      <div><span class="n">+48k</span><span class="l">Lines added</span></div>
+      <div><span class="n">230</span><span class="l">of 230 passing</span></div>
+    </div>
+  </header>
+
+  <div class="ledger-wrap">
+    <table class="ledger">
+      <thead><tr><th>Repo</th><th class="num">Commits</th><th></th><th class="num" colspan="2">Lines</th><th>Focus</th></tr></thead>
+      <tbody>
+        <tr><td class="repo">modus</td><td class="num">180</td><td class="barcell"><span class="bar" style="width:100%"></span></td><td class="add">+16,214</td><td class="del">&minus;5,249</td><td class="what">registries, build checks, the ladder</td></tr>
+        <tr><td class="repo">glass</td><td class="num">23</td><td class="barcell"><span class="bar" style="width:12.8%"></span></td><td class="add">+12,600</td><td class="del">&minus;1,391</td><td class="what">seats, and a second person watching</td></tr>
+        <tr><td class="repo">warp</td><td class="num">21</td><td class="barcell"><span class="bar" style="width:11.7%"></span></td><td class="add">+8,737</td><td class="del">&minus;1,031</td><td class="what">rule 8, rule 9, a DOM encoding</td></tr>
+        <tr><td class="repo">webrtc-data</td><td class="num">21</td><td class="barcell"><span class="bar" style="width:11.7%"></span></td><td class="add">+8,717</td><td class="del">&minus;621</td><td class="what">the phone client, and admission</td></tr>
+        <tr><td class="repo">operandi</td><td class="num">11</td><td class="barcell"><span class="bar cool" style="width:6.1%"></span></td><td class="add">+1,483</td><td class="del">&minus;80</td><td class="what">an agent over private DMs</td></tr>
+        <tr><td class="repo">warren</td><td class="num">6</td><td class="barcell"><span class="bar cool" style="width:3.3%"></span></td><td class="add">+97</td><td class="del">&minus;30</td><td class="what">five sockets, no ports</td></tr>
+        <tr><td class="repo">cram</td><td class="num">3</td><td class="barcell"><span class="bar cool" style="width:1.7%"></span></td><td class="add">+162</td><td class="del">&minus;16</td><td class="what">gzip, crc32, a truncation bug</td></tr>
+        <tr><td class="repo">scribe</td><td class="num">3</td><td class="barcell"><span class="bar cool" style="width:1.7%"></span></td><td class="add">+161</td><td class="del">&minus;400</td><td class="what">drops its own DEFLATE</td></tr>
+        <tr><td class="repo">&hellip;and 5 more</td><td class="num">5</td><td class="barcell"><span class="bar cool" style="width:2.8%"></span></td><td class="add">&nbsp;</td><td class="del">&nbsp;</td><td class="what">cl-consensus, conch, loom, spool, weft</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>modus</em> &nbsp;/&nbsp; #211, #241 &nbsp;/&nbsp; nine registries</span>
+      <h2>Two packages, one variable</h2>
+    </div>
+
+    <p>A Lisp keeps a lot of tables: what is a generic function, what is a macro, what is a type
+    name, what is a special variable, which class a condition belongs to, what a
+    <code>setf</code> of this name expands into. Modus keys those tables by name. Over the week
+    it emerged that nine of them were keyed by the name and <em>not</em> the package it lives in
+    &mdash; so <code>da::*v*</code> and <code>db::*v*</code> were the same entry.</p>
+
+    <p>The generic-function registry is the one worth dwelling on, because it was already
+    package-exact on its primary lookup. The blindness lived entirely in a secondary hash pass
+    that exists to bridge two representations of the same symbol, and that pass compares a hash
+    of the plain name. Probed directly: the hash of <code>ma::zz</code> and the hash of
+    <code>mb::zz</code> are the same number. A generic function defined in one package could be
+    dispatched from another, silently, with no error anywhere.</p>
+
+    <p>The rest fell in the same shape &mdash; <code>deftype</code>, symbol macros,
+    <code>setf</code> expanders, compiler macros, <code>defstruct</code>, method combinations,
+    the CLOS class and condition registries (which fixed cross-package
+    <code>handler-case</code>), the runtime macro expanders, and special variables, where a
+    global <em>write</em> had to start keying by name rather than by the symbol object. Each one
+    got a battery covering both directions, and the family was declared closed.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>modus</em> &nbsp;/&nbsp; #242, #245, #248, #251, #252</span>
+      <h2>The build starts checking itself</h2>
+    </div>
+
+    <p>One of Modus&rsquo;s standing limitations is that a <code>defvar</code>&rsquo;s init thunk
+    only runs if this image&rsquo;s <code>kernel-main</code> calls <code>init-all-globals</code>.
+    That had produced five separate production bugs, each found the hard way. The pattern is
+    mechanical, so this week it became a build check that fails the build and names the
+    variable.</p>
+
+    <div class="callout">
+      <p>The unit of analysis is the assembled blob one build script hands to the image builder,
+      not a source file &mdash; because the last bug was a function that existed and was correct
+      in every file, and that three of ten build scripts simply never called.</p>
+      <span class="src">build-checks &mdash; 09355d2</span>
+    </div>
+
+    <p>It immediately found a live one: the shipping AArch64 CLI never called
+    <code>init-all-globals</code> at all, leaving 150 globals unbound. Its siblings arrived over
+    the next three days &mdash; a sweep of every first-party file for read errors, which found
+    two unescaped quotes that had made two build scripts unbuildable; a check for
+    <code>let</code> of an unregistered special, which found seventeen live bugs; and a
+    compiler-warning histogram with a ratchet, so the number can only go down.</p>
+
+    <p>Reproducibility got the same treatment. The MVM compiler was drawing gensyms from the
+    host&rsquo;s counter, which made the host&rsquo;s state an input to the image; it now has its
+    own, with names collision-proof by construction rather than by luck, and the three pins that
+    had been holding the old behaviour in place were dropped.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>modus</em> &nbsp;/&nbsp; #259, #261 &nbsp;/&nbsp; three CLIs become one</span>
+      <h2>One lineage, three architectures</h2>
+    </div>
+
+    <p>The i386 CLI was a third build lineage. It loaded the loader directly and re-derived the
+    entire source set by hand &mdash; its own defun scanner, symbol-name scanner, macro-table
+    scanner, opcode emitter, float-slot override and boot sequence, all running parallel to the
+    shared one. The consequence was not stylistic: it baked zero library surface, so the
+    twenty-two-library ladder and alexandria&rsquo;s test suite could not run on 32 bits at all.
+    Converged onto the shared assembly, it went from 2,145 lines to 384. The aarch64 CLI went
+    the same way the day before &mdash; and that convergence <em>fixed four defects</em> by
+    itself, because the fixes had only ever landed in one of the two copies.</p>
+
+    <p>With all three architectures finally measurable, i386 got x64&rsquo;s 16&nbsp;MB GC arena
+    guard band and twelve of its thirteen SIGSEGVs became exit 0; aarch64 got the same invariant
+    asserted at build time rather than relied on. A zero-init hypothesis for the remaining i386
+    fault was tested and <em>disproved</em>, and the disproof was recorded rather than quietly
+    dropped.</p>
+
+    <h3>And the ladder</h3>
+
+    <p>Underneath all of that, a long list of conformance defects, each one found by a real
+    library refusing to load. <code>CHECK-TYPE</code> was a no-op at runtime.
+    <code>WITH-STANDARD-IO-SYNTAX</code> was silently a <code>PROGN</code> in clean images.
+    <code>READ-SEQUENCE</code> and <code>WRITE-SEQUENCE</code> parsed their keyword arguments
+    positionally. <code>CATCH</code>/<code>THROW</code> and cross-unit <code>RETURN-FROM</code>
+    truncated to a single value. A stale multiple-value count leaked out of an <code>AND</code>-
+    or <code>OR</code>-tailed function as phantom extra values. <code>ASSERT</code> was not a
+    macro, so it evaluated its places. <code>DO</code> dropped a step form that was literally
+    <code>NIL</code>. <code>CHAR-CODE-LIMIT</code> did not exist. <code>:LITTLE-ENDIAN</code>
+    was not in <code>*features*</code>, which is why babel raised a program error.</p>
+
+    <p>A package symbol table became an O(1) hash index, which recovered three reader tests
+    above U+00FF and took one gate shard from 139 seconds to 21. And the week closed with
+    alexandria&rsquo;s own 230 tests all running to completion and passing &mdash; the skip list
+    kept, but empty, because an empty list is the honest inventory of what does not terminate.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>glass &nbsp;warp</em> &nbsp;/&nbsp; 44 commits</span>
+      <h2>A seat is who is watching</h2>
+    </div>
+
+    <p>A glass port had been two things wearing one name: the session &mdash; the applications,
+    their windows, the pixels in them &mdash; and the single person watching it, with a screen,
+    a pointer, a keyboard, a focus, an open menu and an arrangement of windows. Nothing forced
+    them apart while there was one viewer, and everything about a second one is the second half.</p>
+
+    <p>So a seat is now its own thing, holding what a second watcher must not get a second copy
+    of: its own framebuffer and size, its own wallpaper rasterised <em>at</em> that size (a phone
+    and a desktop want the same picture, not the same pixels), its own pointer, its own focus.
+    A second person can now be on the same windows, arranged their own way. The menu belongs to
+    its window, on whichever screen is watching. My mix is not yours, and my microphone is mine.
+    A seat mints its own npub once and remembers it, and serving is the seat&rsquo;s decision
+    rather than the session&rsquo;s.</p>
+
+    <p>The same idea arrived in <span class="mono">warp</span> from the other end, and the
+    commit that records it is unusually candid about being wrong first.</p>
+
+    <div class="callout">
+      <p>The boundary was one level too high. Sharing a projection necessarily shares scroll
+      <em>and</em> window size, which makes &ldquo;independent scroll over one projection&rdquo;
+      unimplementable. The projection should hold the query; present, layout, diff and encode
+      belong to the consumer.</p>
+      <span class="src">warp rule 8 &mdash; d8a00f5</span>
+    </div>
+
+    <p>The forcing argument is that a DOM consumer lays out in a browser with its own viewport,
+    while a token consumer has no extents at all. With that settled, warp grew a third encoding
+    &mdash; a browser&rsquo;s DOM, over its own protocol and nothing else &mdash; moved the
+    protocol into a core that loads in an image without glass in it, and reached rule 9: an app
+    is a bundle of facets and the consumer chooses which one it wants.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>webrtc-data &nbsp;warren</em> &nbsp;/&nbsp; 27 commits</span>
+      <h2>The box answers its own door</h2>
+    </div>
+
+    <p>The phone client stopped being a demo. The box got an identity of its own and refuses to
+    run without one; admission became the desktop&rsquo;s answer, with the gateway merely asking
+    for it. The terminal list and then a file browser arrived on the connection the phone already
+    had, rather than each opening their own. A small stable shell lives on nsite and pulls the
+    rest of the client from the box, so the part that must never break is the part that almost
+    never changes. And a pile of real-world corrections: iOS restores a tab without ever firing
+    <code>visibilitychange</code>; the page now says whether the link is still there; a reconnect
+    stays in the corner instead of taking over the screen; a feature nobody has used yet does not
+    get to take the desktop down.</p>
+
+    <p><span class="mono">warren</span>, meanwhile, moved the box&rsquo;s identity and its DM bot
+    out of the gateway and into the desktop, stopped listening on every interface, and fixed the
+    banner that went on saying <code>0.0.0.0</code> after the bind had moved to loopback &mdash;
+    a small thing, but the kind that costs somebody an hour.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>operandi</em> &nbsp;/&nbsp; 11 commits</span>
+      <h2>An agent you can text</h2>
+    </div>
+    <p>operandi grew a headless mode that runs over Nostr NIP-17 private DMs: it greets the
+    operator on startup if asked, keeps a fixed admission floor so nothing arrives out of order,
+    stays quiet about backlog, and splits a long reply into clean messages instead of truncating
+    it. Underneath, sessions became an append-only entry tree whose state is derived by replay,
+    and the engine stopped fabricating cost numbers, started surfacing provider errors, and now
+    preflights the model before it commits to one.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow">across the workspace</span>
+      <h2>One DEFLATE, and ten repos that stopped guessing</h2>
+    </div>
+    <ul class="plain">
+      <li><span class="mono">scribe</span> dropped its own DEFLATE and reads WOFF1 through
+      <span class="mono">cram</span>, vendored as a submodule the way brotli-pure already was.
+      cram had just learned gzip and crc32 &mdash; and fixed stored blocks over 64&nbsp;KB, which
+      were being silently truncated.</li>
+      <li>On 12 August, ten repositories committed the same one-line change: find sibling repos
+      relative to the script, not to a home directory that happens to exist on one machine. The
+      sweep finishes in <a href="../2026-08-22/">&#8470;&nbsp;24</a>.</li>
+      <li><span class="mono">glass</span> stopped calling <code>setsid</code> unconditionally,
+      which does not exist on macOS or the BSDs.</li>
+      <li><span class="mono">spool</span> and <span class="mono">warp</span> picked up a README
+      and MIT, to match the rest of the org.</li>
+    </ul>
+  </section>
+
+  <footer>
+    <p><strong>Method.</strong> Commits by <em>author</em> date, 8 to 14 August inclusive, across
+    the 42 git repositories in the modus-lisp workspace. Line counts exclude generated
+    acceptance-gate artefacts and committed scratch dumps &mdash; of which there were 380,000
+    lines this week, swept in by a <code>git add -u</code> and untracked again two days later.
+    Produced with <code>bin/week 2026-08-15 --log</code>.</p>
+    <p><a href="../../">&larr; All issues</a></p>
+  </footer>
+
+</div>
+</body>
+</html>
