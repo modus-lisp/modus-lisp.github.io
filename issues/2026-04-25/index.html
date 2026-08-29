@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lost: none — This Week in Modus №7</title>
+<meta name="description" content="This Week in Modus, 18–24 April 2026: the ANSI harness stops losing tests entirely, closures and symbols stop sharing a representation, and the implementation learns to complain when you call it wrongly. 82 commits.">
+<meta property="og:title" content="Lost: none — This Week in Modus №7">
+<meta property="og:description" content="18–24 April 2026: the ANSI harness stops losing tests entirely, closures and symbols stop sharing a representation, and the implementation learns to complain.">
+<meta property="og:type" content="article">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..700&family=Newsreader:opsz,wght@6..72,300..600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../../assets/crier.css">
+</head>
+<body>
+<div class="page">
+
+  <div class="sitebar">
+    <a class="brand" href="../../">crier</a>
+    <nav><a href="../../#issues">Issues</a><a href="https://github.com/modus-lisp">GitHub</a></nav>
+  </div>
+
+  <header class="mast">
+    <div class="kicker">
+      <span>This Week in Modus &mdash; &#8470;&nbsp;7</span>
+      <span>&middot;</span>
+      <span>18&ndash;24 April 2026</span>
+      <span>&middot;</span>
+      <span><b>82 commits</b> &middot; 1 repo</span>
+    </div>
+    <h1>Lost:<br><span class="lo">none</span></h1>
+    <hr class="rule-fire">
+    <p class="standfirst">Last week&rsquo;s reckoning left 17,587 tests unaccounted for. This week
+    closes that to zero &mdash; and finds out why so many were crashing: closures and symbols had
+    been the same shape, so calling one could call the other.</p>
+
+    <div class="tally">
+      <div><span class="n">82</span><span class="l">Commits</span></div>
+      <div><span class="n">21</span><span class="l">Source files</span></div>
+      <div><span class="n">+4.5k</span><span class="l">Lines added</span></div>
+      <div><span class="n">0</span><span class="l">Tests lost</span></div>
+    </div>
+  </header>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>modus</em> &nbsp;/&nbsp; 24 April &nbsp;/&nbsp; a65b0cf</span>
+      <h2>Lost: none</h2>
+    </div>
+
+    <p>Running each test in its own forked child stops one crash from taking nineteen files with
+    it, but it does not solve the underlying problem: a child that dies from an uncatchable fault
+    cannot report anything, and the parent only knows which test the child had been about to
+    start. Across roughly twelve hundred chunks that still added up to 1,215 tests whose fate
+    nobody knew.</p>
+
+    <p>The fix is to give parent and child somewhere to write that survives the child. A new trap
+    emits an <code>mmap</code> call inline &mdash; anonymous, shared, read-write &mdash; and hands
+    back a tagged address; writes to that page are visible on the other side of a fork. The parent
+    allocates a four-kilobyte page at boot, the child stamps its verdict there before it does
+    anything dangerous, and a child that dies still leaves behind what it knew.</p>
+
+    <div class="callout">
+      <p>1,215 lost tests, then none. Every test in the suite now produces a verdict &mdash; pass,
+      fail, or crash &mdash; and nothing disappears silently.</p>
+      <span class="src">modus &mdash; a65b0cf</span>
+    </div>
+
+    <p>The rest of the harness work is the same instinct applied in smaller places. A file&rsquo;s
+    outer handler records a failure rather than swallowing it. The per-file alarm is cancelled
+    before the process exits, so a timeout cannot fire during shutdown. Nested
+    <code>handler-case</code> gets a real per-fork handler stack, pushed on <code>setjmp</code> and
+    cleared on the way out. A dedicated crash-failure path stops one bad test from cascading. And
+    <code>write-object</code> is bounded, because printing an object that is not what you think it
+    is should not be able to run forever.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>modus</em> &nbsp;/&nbsp; 21&ndash;24 April &nbsp;/&nbsp; 398deb7, fd550a9, 9aff875</span>
+      <h2>Two things wearing the same shape</h2>
+    </div>
+
+    <p>With the harness no longer hiding its casualties, the reason for the casualties became
+    visible, and it is a single design decision made early and never revisited: too many things
+    were cons cells.</p>
+
+    <p>A closure was <code>(cons function-address environment)</code>. A Common Lisp symbol was
+    also a cons cell. So <code>funcall</code>, which tested for a cons to decide whether it was
+    looking at a closure, treated a symbol as one &mdash; took its <code>car</code>, which is a
+    large integer, called it as a function address, and died.</p>
+
+    <div class="callout">
+      <p>This was the root cause of the 974-lost-tests baseline. The signal handler caught them as
+      failures, so they had been showing up as a wall of unrelated wrong answers.</p>
+      <span class="src">modus &mdash; 398deb7</span>
+    </div>
+
+    <p>Closures moved to their own heap object with their own subtag, and <code>funcall</code>
+    began checking a tag rather than a shape. Symbols followed three commits later, and together
+    the two migrations were worth about 460 additional passes. Once they were separated, a
+    null-check short-circuit in <code>car</code> and <code>cdr</code> that had been unsafe became
+    safe.</p>
+
+    <p>The sequel, on Friday, is the same bug one level finer &mdash; and a good demonstration of
+    why &ldquo;give it a distinct tag&rdquo; is only half an answer. Native symbols and Common
+    Lisp symbols now shared a subtag but not a layout: one slot for the first, three for the
+    second. A predicate that checked only the subtag said yes to both, and the code that trusted
+    it read slot two of a one-slot object &mdash; landing in the next object&rsquo;s data and
+    returning whatever was there. In one file, 978 of 1,002 tests were crashing before they could
+    even announce themselves. Teaching the predicate to check the layout as well as the tag was
+    worth 970 passes on its own.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>modus</em> &nbsp;/&nbsp; 18&ndash;21 April &nbsp;/&nbsp; 22ee9a9</span>
+      <h2>Learning to complain</h2>
+    </div>
+
+    <p>A large part of the ANSI suite checks that an implementation <em>rejects</em> things: call
+    a function with too few arguments and you should get a program error, not a wrong answer. So
+    the week put arity checking in &mdash; for too many arguments and then for too few, across the
+    accessors (<code>first</code> through <code>caddr</code> and <code>rest</code>), the numeric
+    macro wrappers, <code>ldb</code>, and the list functions &mdash; plus type-error signalling for
+    the sequence builtins and an upfront type check on <code>member-if</code>.</p>
+
+    <p>Enabling it broadly crashed everything, because internal call sites had been quietly
+    passing fewer arguments than their functions declared, and nothing had ever objected. Reading
+    the resulting error log surfaced four real bugs. The best of them: the compiler&rsquo;s
+    generic <code>setf</code> expansion was dropping every place argument but the first, so
+    <code>(setf (char s i) ch)</code> compiled to <code>(set-char s ch)</code> &mdash; storing the
+    character at index NIL. Nobody had noticed, because nothing was checking.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>modus</em> &nbsp;/&nbsp; 21 April &nbsp;/&nbsp; b2f6bbe</span>
+      <h2>Three attempts, written down</h2>
+    </div>
+
+    <p>The nicest commit of the week adds no code. Making <code>car</code> and <code>cdr</code>
+    check their argument at runtime was tried three ways, and all three were reverted:</p>
+
+    <div class="console">
+      <span class="cap">modus &mdash; b2f6bbe, all three reverted</span>
+<pre>gensym-let wrapping                       <span class="ret">16,000 lost</span>
+inline null + consp + error, temp reg     <span class="ret">16,000 lost</span>
+inline NULL CHECK ONLY, no consp, no error  <span class="ret">245 lost, 122 regressions</span></pre>
+    </div>
+
+    <p>The third is the interesting one, and the commit says so. Inserting a branch-and-label
+    between evaluating the argument and reading the cell is semantically identical to the original
+    for every value except NIL &mdash; and it still broke 245 test forks. That is not a
+    correctness bug in the check; it is evidence that something about a label-branch in that
+    position interacts badly with the compiler, which is a much more useful thing to know than a
+    working <code>car</code>. A second commit went back and expanded the note after the second
+    attempt, rather than deleting the record of the first.</p>
+
+    <p>The same week added <code>ansi-notes.md</code>, a handoff document: the fork, handler and
+    alarm architecture, how tests were being lost, which diagnostic pipelines were tried and
+    reverted, the specific mysteries still open, and what to do next. A project that is going to
+    be picked up again by somebody without yesterday&rsquo;s context &mdash; which describes
+    almost everyone, eventually &mdash; needs the failures written down as carefully as the
+    successes.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>modus</em> &nbsp;/&nbsp; 18&ndash;19 April &nbsp;/&nbsp; ~40 commits</span>
+      <h2>The keyword grind</h2>
+    </div>
+    <p>Half the week is the least quotable work there is, and it is most of what standing up a
+    Common Lisp actually consists of: making the sequence functions honour the arguments the
+    standard says they take. <code>:test</code>, <code>:test-not</code>, <code>:key</code>,
+    <code>:start</code>, <code>:end</code>, <code>:count</code> and <code>:from-end</code>
+    threaded through <code>position</code>, <code>find</code>, <code>count</code>,
+    <code>mismatch</code>, <code>fill</code>, <code>remove</code>, <code>delete</code>,
+    <code>assoc</code>, <code>reduce</code> and the substitution family; result-type designators
+    respected by <code>map</code>, <code>merge</code> and <code>concatenate</code>;
+    <code>remove-duplicates</code> corrected to keep the <em>last</em> occurrence, which is the
+    default the standard specifies and the opposite of what it had been doing; and the whole set
+    made polymorphic over lists, strings and arrays, including presenting a string&rsquo;s slots
+    as characters rather than as the numbers underneath. LOOP got <code>into</code>, multiple
+    accumulators, <code>initially</code>, <code>upto</code>, <code>maximize</code>,
+    <code>minimize</code>, <code>of-type</code>, keyword clauses in any order, and numeric bounds
+    that are floats or ratios without hanging.</p>
+  </section>
+
+  <footer>
+    <p><strong>Method.</strong> Commits by <em>author</em> date, 18 to 24 April 2026, across the
+    git repositories in the modus-lisp workspace &mdash; at this point, one. Pass and loss counts
+    are the ones the commits report. Line counts exclude generated build artefacts. Produced with
+    <code>bin/week 2026-04-25 --log</code>.</p>
+    <p><a href="../../">&larr; All issues</a></p>
+  </footer>
+
+</div>
+</body>
+</html>
