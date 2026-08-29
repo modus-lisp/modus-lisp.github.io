@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Somebody else's tests — This Week in Modus №5</title>
+<meta name="description" content="This Week in Modus, 4–10 April 2026: Modus stops grading itself and wires up Paul Dietz's ANSI suite, symbols become real objects, and three documented compiler limitations turn out not to exist. 50 commits.">
+<meta property="og:title" content="Somebody else's tests — This Week in Modus №5">
+<meta property="og:description" content="4–10 April 2026: Modus wires up Paul Dietz's ANSI suite, symbols become real objects with identity, and three documented compiler limitations turn out not to exist.">
+<meta property="og:type" content="article">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..700&family=Newsreader:opsz,wght@6..72,300..600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../../assets/crier.css">
+</head>
+<body>
+<div class="page">
+
+  <div class="sitebar">
+    <a class="brand" href="../../">crier</a>
+    <nav><a href="../../#issues">Issues</a><a href="https://github.com/modus-lisp">GitHub</a></nav>
+  </div>
+
+  <header class="mast">
+    <div class="kicker">
+      <span>This Week in Modus &mdash; &#8470;&nbsp;5</span>
+      <span>&middot;</span>
+      <span>4&ndash;10 April 2026</span>
+      <span>&middot;</span>
+      <span><b>50 commits</b> &middot; 1 repo</span>
+    </div>
+    <h1>Somebody<br>else&rsquo;s <span class="lo">tests</span></h1>
+    <hr class="rule-fire">
+    <p class="standfirst">After four quiet weeks, Modus stopped grading itself. Paul Dietz&rsquo;s
+    ANSI Common Lisp test suite &mdash; written by somebody with no stake in whether this
+    implementation passes &mdash; went in on Thursday, and Friday is thirty-four commits of the
+    number going up.</p>
+
+    <div class="tally">
+      <div><span class="n">50</span><span class="l">Commits</span></div>
+      <div><span class="n">206</span><span class="l">Source files</span></div>
+      <div><span class="n">+44k</span><span class="l">Lines added</span></div>
+      <div><span class="n">5,804</span><span class="l">Tests, by Friday</span></div>
+    </div>
+  </header>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>modus</em> &nbsp;/&nbsp; 9&ndash;10 April &nbsp;/&nbsp; 40 commits</span>
+      <h2>Somebody else&rsquo;s tests</h2>
+    </div>
+
+    <p>A project that writes its own tests is measuring its own intentions. The ANSI suite is
+    different in kind: it is a large body of Common Lisp written against the standard by someone
+    who never saw this implementation, so every file it cannot load is a fact rather than an
+    opinion. Wiring it up starts on Thursday with a test harness and 191 tests, and by that
+    evening real files from the suite are compiling and running.</p>
+
+    <p>Friday is the ratchet, and the commit subjects are a graph:</p>
+
+    <div class="console">
+      <span class="cap">modus &mdash; 10 April, in order</span>
+<pre>13 real ANSI files:     379/384 pass  (98.7%)
+16 ANSI files:          421/424       (99.3%)
+23 ANSI files:         1349/1656      (81%)
+28 ANSI files:         2025 tests     (85%)
+28 ANSI files:         3052/3695      (82.6%)
+46 ANSI files across 3 chapters
+94 ANSI files:                        2 failures
+<span class="ret">185 ANSI files, 5804 tests, 0 failures — 11 chapters</span></pre>
+    </div>
+
+    <p>The percentage falls as often as it rises, which is the shape of an honest ratchet: each
+    new chapter drags the rate down until the defects behind it are fixed. And the denominator
+    moves because the denominator is a choice &mdash; this is a growing selection of the suite,
+    file by file, not the whole of it. &ldquo;Zero failures&rdquo; means every file wired up so
+    far passes, and the interesting number is the one beside it: 185 files across eleven
+    chapters, weighted toward cons (68), destructuring (25), sequences (32) and iteration (13).</p>
+
+    <p>What went in underneath, in the order the tests demanded it: <code>equal</code> corrected
+    to expand to the general comparison, variadic <code>append</code> and <code>nconc</code>,
+    <code>list-length</code> with cycle detection, <code>format</code>, <code>values</code> and
+    <code>multiple-value-bind</code>, <code>defstruct</code>&rsquo;s <code>:conc-name</code> and
+    copier options, LOOP&rsquo;s <code>always</code>, <code>thereis</code> and
+    <code>unless</code>, <code>&amp;rest</code> parameters, the iteration macros, package
+    operations and declarations accepted as no-ops, heap strings and boxed floats so that string
+    and float literals are objects rather than immediates, and evaluation order preserved in
+    argument lists &mdash; which the suite checks, and almost nobody checks for themselves.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>modus</em> &nbsp;/&nbsp; 9 April &nbsp;/&nbsp; f1f3f8d</span>
+      <h2>Symbols become objects</h2>
+    </div>
+
+    <p>None of that would have been gradeable without one change made the same day. Symbols had
+    been compiled to a hash of their name, which is fast and works for almost everything &mdash;
+    except identity. <code>(eq 'a 'a)</code> could not be relied on, and a great deal of the ANSI
+    suite is exactly that question asked in different costumes.</p>
+
+    <div class="callout">
+      <p>Symbols are now proper objects, interned through a table that maps a name hash to a
+      unique object. Two reads of the same name produce the same object, so <code>eq</code>
+      works.</p>
+      <span class="src">modus &mdash; f1f3f8d</span>
+    </div>
+
+    <p>It reaches into the compiler in four places &mdash; quoting a symbol emits a call to the
+    intern routine rather than a raw hash, <code>make-symbol</code> allocates, <code>symbolp</code>
+    checks a tag, and the subtag test is exposed as a source-level form &mdash; and into the
+    reader, which now produces real symbols. It also quietly fixed a bug in nested
+    <code>logior</code> and <code>ash</code> that had been diagnosed as an arithmetic problem and
+    was really a hash comparison.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>modus</em> &nbsp;/&nbsp; 8 April &nbsp;/&nbsp; e4eae2f, 7fb34e4</span>
+      <h2>Modus, as a Linux program</h2>
+    </div>
+
+    <p>Until this week the compiler&rsquo;s only output was a kernel. A new target emits ELF64
+    userspace binaries instead: an entry stub sets up the runtime registers, asks Linux for a heap
+    through <code>mmap</code>, and falls into compiled Lisp. The same translator serves both
+    &mdash; a flag switches the console traps from port I/O on a serial chip to
+    <code>write</code> and <code>read</code> syscalls. The first artefact is a two-kilobyte binary
+    that prints &ldquo;Hello from Modus!&rdquo; and exits cleanly.</p>
+
+    <p>That is worth more than a demonstration. A hosted target means the compiler can be tested
+    without booting anything, which is why the ANSI ratchet was affordable the next day, and it
+    is the beginning of <code>mvm source.lisp</code> as a command you can run.</p>
+
+    <p>Talking to a hosted operating system needs a way to hold a raw address, and doing that in a
+    moving-collector Lisp needs care. The answer is a System Area Pointer: an object that wraps a
+    machine address, with a subtag placed in the byte-vector range so the collector copies the
+    wrapper during collection and never follows what is inside it. Eight opcodes go with it,
+    along with generic syscall traps and a boot stub that stashes <code>argc</code> and the first
+    few arguments where Lisp can find them. The proof is small and exactly right:
+    <code>cat</code>, implemented in Modus, reading a file and writing it to stdout.</p>
+
+    <p>Above that, the beginnings of a library that the MVM subset itself can compile &mdash;
+    hash tables built as open addressing over arrays, and <code>nreverse</code>,
+    <code>nth</code>, <code>member</code>, <code>assoc</code> and <code>append</code>.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>modus</em> &nbsp;/&nbsp; four notes deleted</span>
+      <h2>Three limitations that weren&rsquo;t</h2>
+    </div>
+
+    <p>The most quietly valuable commits of the week remove documentation. Four things the project
+    believed about its own compiler turned out, when tested, to be false:</p>
+
+    <ul class="plain">
+      <li><strong>Argument clobbering.</strong> A note warned that register parameters could be
+      overwritten during a function body, and defensive code had grown around it. The compiler
+      already stores every register parameter to a stack slot at entry &mdash; in both the host
+      and bare-metal paths &mdash; so arguments live in the frame, not in registers, for the whole
+      body. The note was causing the bug it warned about, in the form of unnecessary caution.</li>
+      <li><strong>Three-argument addition.</strong> Believed broken; the push and pop sequence
+      compiles correctly.</li>
+      <li><strong>Nested <code>let</code>.</strong> Believed broken; it is not, and the guard that
+      had been rejecting deeply nested arithmetic was removed once <code>reduce</code>,
+      <code>some</code> and <code>every</code> existed to express the check properly.</li>
+      <li><strong>&ldquo;About 25 sequential forms.&rdquo;</strong> A documented ceiling on how
+      many top-level forms would compile. Tested to a thousand. All pass.</li>
+    </ul>
+
+    <p>A stale limitation is worse than a known bug, because a known bug gets fixed and a
+    limitation gets designed around. This is the same instinct as adopting the ANSI suite: stop
+    believing things about the implementation and go and measure them.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>modus</em> &nbsp;/&nbsp; 6 April &nbsp;/&nbsp; 1fd06bd</span>
+      <h2>A ThinkPad</h2>
+    </div>
+    <p>The week opens on real hardware of a third kind. An i386 Modus kernel boots on a ThinkPad
+    T420 &mdash; from USB mass storage, presented by the Pi&nbsp;Zero&nbsp;2&nbsp;W acting as a
+    gadget, which is a pleasing use of the driver written a month earlier. The 82579LM network
+    card is brought up without resetting it, on the grounds that the BIOS has already configured
+    it and a reset loses that, and <code>(+ 1 2)</code> evaluates to 3 over SSH on a laptop with
+    no operating system on it. There is a VGA console and a PS/2 keyboard REPL that polls the
+    network between keystrokes, and an EHCI driver that enumerates the controller and then times
+    out on control transfers &mdash; reported as unfinished rather than quietly omitted.</p>
+  </section>
+
+  <footer>
+    <p><strong>Method.</strong> Commits by <em>author</em> date, 4 to 10 April 2026, across the
+    git repositories in the modus-lisp workspace &mdash; at this point, one. The log is quiet
+    between 9 March and 6 April; author and committer dates agree throughout, so that is a real
+    pause rather than an artefact of how the history was recorded. Line counts exclude generated
+    build artefacts. Produced with <code>bin/week 2026-04-11 --log</code>.</p>
+    <p><a href="../../">&larr; All issues</a></p>
+  </footer>
+
+</div>
+</body>
+</html>

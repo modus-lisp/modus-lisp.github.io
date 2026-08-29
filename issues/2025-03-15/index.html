@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>88,377 lines, then silence — This Week in Modus №1</title>
-<meta name="description" content="This Week in Modus, 8–14 March 2025: the first commit. A bare-metal Lisp operating system on Movitz, arriving complete — and then nothing for eleven and a half months.">
-<meta property="og:title" content="88,377 lines, then silence — This Week in Modus №1">
-<meta property="og:description" content="8–14 March 2025: the first commit. A bare-metal Lisp OS on Movitz, arriving complete — then nothing for eleven and a half months.">
+<title>A quick hack, on Movitz — This Week in Modus №1</title>
+<meta name="description" content="This Week in Modus, 8–14 March 2025: the first commit is a prototype — 29,000 lines of Modus on 55,000 lines of vendored Movitz, booting under QEMU into a Lisp REPL with TLS and SSH.">
+<meta property="og:title" content="A quick hack, on Movitz — This Week in Modus №1">
+<meta property="og:description" content="8–14 March 2025: the first commit is a prototype — 29,000 lines of Modus on 55,000 lines of vendored Movitz, booting under QEMU into a Lisp REPL with TLS and SSH.">
 <meta property="og:type" content="article">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -29,16 +29,18 @@
       <span>&middot;</span>
       <span><b>1 commit</b> &middot; 1 repo</span>
     </div>
-    <h1>88,377 lines,<br>then <span class="lo">silence</span></h1>
+    <h1>A quick hack,<br>on <span class="lo">Movitz</span></h1>
     <hr class="rule-fire">
-    <p class="standfirst">The first commit is 210 files and eighty-eight thousand lines, and it
-    boots x86 hardware into a Common Lisp REPL with TLS and SSH and nothing underneath it. The
-    second commit is eleven and a half months later.</p>
+    <p class="standfirst">The repository opens with a prototype: about 29,000 lines of Modus
+    standing on 55,000 lines of somebody else&rsquo;s bare-metal Lisp, booting under QEMU into a
+    REPL with TLS, SSH and ciphers. It answered the question it was built to ask, and was
+    abandoned ten days after it was filed.</p>
 
     <div class="tally">
       <div><span class="n">1</span><span class="l">Commit</span></div>
-      <div><span class="n">210</span><span class="l">Source files</span></div>
-      <div><span class="n">+88k</span><span class="l">Lines added</span></div>
+      <div><span class="n">35</span><span class="l">First-party files</span></div>
+      <div><span class="n">+29k</span><span class="l">Lines of Modus</span></div>
+      <div><span class="n">+55k</span><span class="l">Vendored Movitz</span></div>
       <div><span class="n">349</span><span class="l">Days to the next</span></div>
     </div>
   </header>
@@ -49,8 +51,8 @@
       <h2>Modus: bare-metal Lisp OS on Movitz</h2>
     </div>
 
-    <p>There is no scaffolding commit, no &ldquo;initial import&rdquo;, no README landing first.
-    The repository begins with a working operating system:</p>
+    <p>The repository begins with everything at once &mdash; README, licence, contributing
+    guide, and a working system &mdash; described in four lines:</p>
 
     <div class="callout">
       <p>Boots x86 hardware (or QEMU) into an interactive Common Lisp REPL over serial console.
@@ -59,16 +61,24 @@
       <span class="src">modus &mdash; abd9648, the whole commit message</span>
     </div>
 
-    <p>The foundation is Movitz, an x86 Common Lisp
-    environment that runs with no operating system beneath it &mdash; a project that had been
-    quiet for many years. Building on it means the hard part
-    &mdash; a Lisp that exists before Unix does &mdash; is already answered, and the work is
-    everything above: drivers, a network stack, ciphers, a protocol.</p>
+    <p>It reads like more than it is, and the file listing says so. Of the 88,377 lines in this
+    commit, 55,025 are a vendored copy of Movitz &mdash; an x86 Common Lisp environment, quiet for
+    many years, that runs with no operating system beneath it &mdash; and another 2,060 are the
+    binary-types library it depends on. Modus itself is 35 files and about 29,000 lines, sitting
+    on top.</p>
 
-    <p>That choice is also the reason this issue has a sequel and not a continuation. Movitz is
-    32-bit and it is somebody else&rsquo;s foundation, and a project whose whole argument is that
-    you should be able to read every layer eventually has to own the bottom one too. When work
-    resumes in February 2026, it does not resume here.</p>
+    <p>That is the correct way to start. The question worth answering first is whether a Lisp
+    machine reachable over SSH, doing its own TLS and its own ciphers, is a thing that works at
+    all &mdash; and borrowing a bare-metal Lisp answers it in weeks rather than a year. The commit
+    says it boots x86 hardware or QEMU; in practice it was a quick hack, run in an emulator, to
+    find out.</p>
+
+    <p>It found out, and that is also why this issue has a sequel rather than a continuation.
+    Movitz is 32-bit, and it is somebody else&rsquo;s floor. A project whose whole argument is
+    that you should be able to read every layer eventually has to own the bottom one, and a
+    prototype is a thing you learn from and throw away. Ten days after this was filed the rewrite
+    began, and a month after that <a href="../2026-03-14/">&#8470;&nbsp;4</a> deleted the borrowed
+    55,000 lines.</p>
 
     <h3>The gap, and how nearly it hides</h3>
 
@@ -99,8 +109,10 @@
 
   <footer>
     <p><strong>Method.</strong> Commits by <em>author</em> date, 8 to 14 March 2025, across the
-    git repositories in the modus-lisp workspace &mdash; at this point, one. The commit itself
-    reports 216 changed files; the 210 above excludes generated build artefacts. Its committer
+    git repositories in the modus-lisp workspace &mdash; at this point, one.
+    <code>bin/week</code> reports 210 files and +88,377 lines, counting the whole tree; the tally
+    above separates the 35 files and 29,022 lines under <code>modus/src</code> from the vendored
+    <code>lib/movitz</code> and <code>lib/binary-types</code> beneath them. The commit's committer
     date is 2026-02-13; see &ldquo;The gap&rdquo; above. Produced with
     <code>bin/week 2025-03-15 --log</code>.</p>
     <p><a href="../../">&larr; All issues</a></p>
