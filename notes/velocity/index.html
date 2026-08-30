@@ -1,0 +1,475 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The floor does not compound — crier</title>
+<meta name="description" content="Twenty-six weeks of modus-lisp, measured. Commits per week is the wrong number; what actually changed was that the workspace became something to build on — except at the bottom.">
+<meta property="og:title" content="The floor does not compound">
+<meta property="og:description" content="Twenty-six weeks of modus-lisp, measured. What accelerated, what did not, and why the obvious metric says the opposite.">
+<meta property="og:type" content="article">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..700&family=Newsreader:opsz,wght@6..72,300..600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../../assets/crier.css">
+<style>
+  :root { --s1: #A9522A; --s2: #2a78d6; --grid: var(--hair); --band: rgba(20,24,26,.035); }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) { --s1: #d95926; --s2: #3987e5; --band: rgba(255,255,255,.045); }
+  }
+  :root[data-theme="dark"] { --s1: #d95926; --s2: #3987e5; --band: rgba(255,255,255,.045); }
+
+  figure.fig { margin: 34px 0 30px; }
+  figure.fig figcaption {
+    font-family: var(--mono); font-size: 12px; line-height: 1.6;
+    color: var(--muted); margin-top: 10px; max-width: 68ch;
+  }
+  figure.fig figcaption b { color: var(--ink-soft); font-weight: 500; }
+  .chartwrap { overflow-x: auto; }
+  svg.chart { width: 100%; min-width: 660px; height: auto; display: block; }
+  svg.chart .s1 { fill: var(--s1); }
+  svg.chart .s2 { fill: var(--s2); }
+  svg.chart .grid { stroke: var(--grid); stroke-width: 1; }
+  svg.chart .axis { stroke: var(--muted); stroke-width: 1; }
+  svg.chart .band { fill: var(--band); }
+  svg.chart .gap  { stroke: var(--muted); stroke-width: 1; stroke-dasharray: 2 3; opacity: .8; }
+  svg.chart text  { font-family: var(--mono); fill: var(--muted); font-size: 10px; }
+  svg.chart .ytick { text-anchor: end; }
+  svg.chart .xtick, svg.chart .xdate { text-anchor: middle; }
+  svg.chart .xdate { font-size: 9px; opacity: .75; }
+  svg.chart .cat { text-anchor: end; fill: var(--ink-soft); font-size: 11px; }
+  svg.chart .val { fill: var(--ink-soft); font-size: 10px; }
+  svg.chart .bandlab { font-size: 9.5px; letter-spacing: .08em; text-transform: uppercase; opacity: .85; }
+  svg.chart .gaplab { font-size: 9px; }
+  svg.chart .peak { text-anchor: middle; fill: var(--ink-soft); font-size: 10px; font-weight: 500; }
+  svg.chart .hit { fill: transparent; cursor: crosshair; }
+  svg.chart .hit:hover { fill: var(--band); }
+
+  .legend { display: flex; gap: 18px; flex-wrap: wrap; font-family: var(--mono);
+            font-size: 11.5px; color: var(--ink-soft); margin: 0 0 10px; }
+  .legend span { display: inline-flex; align-items: center; gap: 7px; }
+  .legend i { width: 11px; height: 11px; border-radius: 2px; display: inline-block; }
+
+  #tip {
+    position: fixed; z-index: 20; pointer-events: none; opacity: 0;
+    background: var(--surface); border: 1px solid var(--hair);
+    box-shadow: 0 2px 10px rgba(0,0,0,.14);
+    padding: 8px 10px; font-family: var(--mono); font-size: 11.5px;
+    line-height: 1.5; color: var(--ink); max-width: 260px;
+  }
+  #tip b { color: var(--ink); font-weight: 500; }
+  #tip .k { color: var(--muted); }
+
+  details.data { margin: 18px 0 0; }
+  details.data summary {
+    font-family: var(--mono); font-size: 11.5px; color: var(--muted);
+    cursor: pointer; letter-spacing: .04em;
+  }
+  details.data table { width: 100%; border-collapse: collapse; margin-top: 12px;
+                       font-family: var(--mono); font-size: 11.5px; }
+  details.data th { text-align: right; font-weight: 400; color: var(--muted);
+                    border-bottom: 1px solid var(--hair); padding: 4px 8px; }
+  details.data th:first-child, details.data td:first-child { text-align: left; }
+  details.data td { text-align: right; padding: 3px 8px; border-bottom: 1px solid var(--hair);
+                    font-variant-numeric: tabular-nums; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="sitebar">
+    <a class="brand" href="../../">crier</a>
+    <nav><a href="../../issues/">Issues</a><a href="https://github.com/modus-lisp">GitHub</a></nav>
+  </div>
+
+  <header class="mast">
+    <div class="kicker">
+      <span>a note</span><span>&middot;</span><span>30 August 2026</span>
+      <span>&middot;</span><span><b>26 weeks</b> &middot; 3,417 commits</span>
+    </div>
+    <h1>The floor does<br>not <span class="lo">compound</span></h1>
+    <hr class="rule-fire">
+    <p class="standfirst">Twenty-six weeks of work, measured. Output peaked in mid-July and has
+    roughly halved since, which sounds like a slowdown and is not one. The number that fell is
+    the wrong number, and the thing that actually changed is visible in a different chart.</p>
+  </header>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow">the metric that fails</span>
+      <h2>Commits per week measures the wrong thing, three ways</h2>
+    </div>
+
+    <p>It tracks the model in use. The <code>Co-Authored-By</code> trailers run Opus&nbsp;4.6 through
+    4.7, 4.8 and 5, and both peak weeks &mdash; 437 and 414 &mdash; sit squarely in the 4.8 era. It
+    tracks how the work was chunked: <span class="mono">weft</span>&rsquo;s 256-commit week was a
+    fleet of workers each landing one CSS section against an oracle, while the 88 commits of the
+    week after contain a bare-metal SSH login that took days to earn. And it inverts during
+    integration &mdash; the broadest week in the whole record, touching 23 repositories, is also one
+    of the quietest by count.</p>
+
+    <p>Split by where the commits landed, though, it says something real.</p>
+
+    <figure class="fig">
+      <div class="legend">
+        <span><i style="background:var(--s1)"></i> modus &mdash; the language and the kernel</span>
+        <span><i style="background:var(--s2)"></i> every other repository</span>
+      </div>
+      <div class="chartwrap"><svg viewBox="0 -16 840 346" role="img" aria-labelledby="c1t" class="chart">
+<title id="c1t">Commits per week, modus versus every other repository</title>
+<rect class="band" x="46.0" y="18" width="420.0" height="266"/>
+<text class="bandlab" x="52.0" y="-4">Language bring-up</text>
+<rect class="band" x="466.0" y="18" width="240.0" height="266"/>
+<text class="bandlab" x="472.0" y="-4">Library explosion</text>
+<rect class="band" x="706.0" y="18" width="120.0" height="266"/>
+<text class="bandlab" x="712.0" y="-4">Integration</text>
+<line class="grid" x1="46" x2="826" y1="224.9" y2="224.9"/>
+<text class="ytick" x="38" y="228.9">100</text>
+<line class="grid" x1="46" x2="826" y1="165.8" y2="165.8"/>
+<text class="ytick" x="38" y="169.8">200</text>
+<line class="grid" x1="46" x2="826" y1="106.7" y2="106.7"/>
+<text class="ytick" x="38" y="110.7">300</text>
+<line class="grid" x1="46" x2="826" y1="47.6" y2="47.6"/>
+<text class="ytick" x="38" y="51.6">400</text>
+<line class="axis" x1="46" x2="826" y1="284.0" y2="284.0"/>
+<rect class="s1" x="50.8" y="283.4" width="20.4" height="1.5" rx="3"/>
+<rect class="hit" x="46.0" y="18" width="30.0" height="266" data-wk="1" data-date="2025-03-15" data-m="1" data-o="0" data-repos="1"/>
+<rect class="s1" x="80.8" y="281.6" width="20.4" height="2.4" rx="3"/>
+<rect class="hit" x="76.0" y="18" width="30.0" height="266" data-wk="2" data-date="2026-02-28" data-m="4" data-o="0" data-repos="1"/>
+<rect class="s1" x="110.8" y="282.2" width="20.4" height="1.8" rx="3"/>
+<rect class="hit" x="106.0" y="18" width="30.0" height="266" data-wk="3" data-date="2026-03-07" data-m="3" data-o="0" data-repos="1"/>
+<rect class="s1" x="140.8" y="282.2" width="20.4" height="1.8" rx="3"/>
+<rect class="hit" x="136.0" y="18" width="30.0" height="266" data-wk="4" data-date="2026-03-14" data-m="3" data-o="0" data-repos="1"/>
+<rect class="s1" x="170.8" y="254.4" width="20.4" height="29.6" rx="3"/>
+<rect class="hit" x="166.0" y="18" width="30.0" height="266" data-wk="5" data-date="2026-04-11" data-m="50" data-o="0" data-repos="1"/>
+<rect class="s1" x="200.8" y="220.8" width="20.4" height="63.2" rx="3"/>
+<rect class="hit" x="196.0" y="18" width="30.0" height="266" data-wk="6" data-date="2026-04-18" data-m="107" data-o="0" data-repos="1"/>
+<rect class="s1" x="230.8" y="235.5" width="20.4" height="48.5" rx="3"/>
+<rect class="hit" x="226.0" y="18" width="30.0" height="266" data-wk="7" data-date="2026-04-25" data-m="82" data-o="0" data-repos="1"/>
+<rect class="s1" x="260.8" y="190.0" width="20.4" height="94.0" rx="3"/>
+<rect class="hit" x="256.0" y="18" width="30.0" height="266" data-wk="8" data-date="2026-05-02" data-m="159" data-o="0" data-repos="1"/>
+<rect class="s1" x="290.8" y="247.4" width="20.4" height="36.6" rx="3"/>
+<rect class="hit" x="286.0" y="18" width="30.0" height="266" data-wk="9" data-date="2026-05-09" data-m="62" data-o="0" data-repos="1"/>
+<rect class="s1" x="320.8" y="218.4" width="20.4" height="65.6" rx="3"/>
+<rect class="hit" x="316.0" y="18" width="30.0" height="266" data-wk="10" data-date="2026-05-16" data-m="111" data-o="0" data-repos="1"/>
+<rect class="s1" x="350.8" y="232.6" width="20.4" height="51.4" rx="3"/>
+<rect class="hit" x="346.0" y="18" width="30.0" height="266" data-wk="11" data-date="2026-05-23" data-m="87" data-o="0" data-repos="1"/>
+<rect class="s1" x="380.8" y="218.4" width="20.4" height="65.6" rx="3"/>
+<rect class="hit" x="376.0" y="18" width="30.0" height="266" data-wk="12" data-date="2026-05-30" data-m="111" data-o="0" data-repos="1"/>
+<rect class="s1" x="410.8" y="181.7" width="20.4" height="102.3" rx="3"/>
+<rect class="hit" x="406.0" y="18" width="30.0" height="266" data-wk="13" data-date="2026-06-06" data-m="173" data-o="0" data-repos="1"/>
+<rect class="s1" x="440.8" y="217.2" width="20.4" height="66.8" rx="3"/>
+<rect class="hit" x="436.0" y="18" width="30.0" height="266" data-wk="14" data-date="2026-06-13" data-m="113" data-o="0" data-repos="1"/>
+<rect class="s1" x="470.8" y="174.1" width="20.4" height="109.9" rx="2"/>
+<rect class="s2" x="470.8" y="149.8" width="20.4" height="22.2" rx="3"/>
+<rect class="hit" x="466.0" y="18" width="30.0" height="266" data-wk="15" data-date="2026-06-20" data-m="186" data-o="41" data-repos="3"/>
+<rect class="s1" x="500.8" y="241.4" width="20.4" height="42.6" rx="2"/>
+<rect class="s2" x="500.8" y="210.7" width="20.4" height="28.7" rx="3"/>
+<rect class="hit" x="496.0" y="18" width="30.0" height="266" data-wk="16" data-date="2026-06-27" data-m="72" data-o="52" data-repos="4"/>
+<rect class="s1" x="530.8" y="245.0" width="20.4" height="39.0" rx="2"/>
+<rect class="s2" x="530.8" y="25.7" width="20.4" height="217.3" rx="3"/>
+<rect class="hit" x="526.0" y="18" width="30.0" height="266" data-wk="17" data-date="2026-07-04" data-m="66" data-o="371" data-repos="14"/>
+<rect class="s1" x="560.8" y="247.9" width="20.4" height="36.1" rx="2"/>
+<rect class="s2" x="560.8" y="146.3" width="20.4" height="99.7" rx="3"/>
+<rect class="hit" x="556.0" y="18" width="30.0" height="266" data-wk="18" data-date="2026-07-11" data-m="61" data-o="172" data-repos="17"/>
+<rect class="s1" x="590.8" y="258.6" width="20.4" height="25.4" rx="2"/>
+<rect class="s2" x="590.8" y="112.0" width="20.4" height="144.6" rx="3"/>
+<rect class="hit" x="586.0" y="18" width="30.0" height="266" data-wk="19" data-date="2026-07-18" data-m="43" data-o="248" data-repos="27"/>
+<rect class="s1" x="620.8" y="274.5" width="20.4" height="9.5" rx="2"/>
+<rect class="s2" x="620.8" y="39.3" width="20.4" height="233.3" rx="3"/>
+<rect class="hit" x="616.0" y="18" width="30.0" height="266" data-wk="20" data-date="2026-07-25" data-m="16" data-o="398" data-repos="29"/>
+<rect class="s1" x="650.8" y="222.5" width="20.4" height="61.5" rx="2"/>
+<rect class="s2" x="650.8" y="110.2" width="20.4" height="110.3" rx="3"/>
+<rect class="hit" x="646.0" y="18" width="30.0" height="266" data-wk="21" data-date="2026-08-01" data-m="104" data-o="190" data-repos="34"/>
+<rect class="s1" x="680.8" y="217.8" width="20.4" height="66.2" rx="2"/>
+<rect class="s2" x="680.8" y="155.1" width="20.4" height="60.7" rx="3"/>
+<rect class="hit" x="676.0" y="18" width="30.0" height="266" data-wk="22" data-date="2026-08-08" data-m="112" data-o="106" data-repos="38"/>
+<rect class="s1" x="710.8" y="177.6" width="20.4" height="106.4" rx="2"/>
+<rect class="s2" x="710.8" y="122.6" width="20.4" height="53.0" rx="3"/>
+<rect class="hit" x="706.0" y="18" width="30.0" height="266" data-wk="23" data-date="2026-08-15" data-m="180" data-o="93" data-repos="38"/>
+<rect class="s1" x="740.8" y="262.1" width="20.4" height="21.9" rx="2"/>
+<rect class="s2" x="740.8" y="203.6" width="20.4" height="56.5" rx="3"/>
+<rect class="hit" x="736.0" y="18" width="30.0" height="266" data-wk="24" data-date="2026-08-22" data-m="37" data-o="99" data-repos="42"/>
+<rect class="s1" x="770.8" y="259.8" width="20.4" height="24.2" rx="2"/>
+<rect class="s2" x="770.8" y="232.0" width="20.4" height="25.8" rx="3"/>
+<rect class="hit" x="766.0" y="18" width="30.0" height="266" data-wk="25" data-date="2026-08-29" data-m="41" data-o="47" data-repos="42"/>
+<rect class="s2" x="800.8" y="219.0" width="20.4" height="63.0" rx="3"/>
+<rect class="hit" x="796.0" y="18" width="30.0" height="266" data-wk="26" data-date="2026-09-05" data-m="0" data-o="110" data-repos="42"/>
+<text class="xtick" x="61.0" y="300">1</text>
+<text class="xdate" x="61.0" y="313">Mar 25</text>
+<text class="xtick" x="181.0" y="300">5</text>
+<text class="xdate" x="181.0" y="313">Apr 26</text>
+<text class="xtick" x="331.0" y="300">10</text>
+<text class="xdate" x="331.0" y="313">May 26</text>
+<text class="xtick" x="481.0" y="300">15</text>
+<text class="xdate" x="481.0" y="313">Jun 26</text>
+<text class="xtick" x="631.0" y="300">20</text>
+<text class="xdate" x="631.0" y="313">Jul 26</text>
+<text class="xtick" x="781.0" y="300">25</text>
+<text class="xdate" x="781.0" y="313">Aug 26</text>
+<line class="gap" x1="76.0" x2="76.0" y1="18" y2="284.0"/>
+<text class="gaplab" x="81.0" y="276.0">11 months</text>
+<text class="peak" x="541.0" y="17.7">437</text>
+</svg></div>
+      <figcaption>Commits per week by author date, week 1 to 26. <b>modus never speeds up and never
+      stops</b> &mdash; 37 to 186 commits a week from April onward, straight through the explosion
+      around it. Everything else goes from nothing to 371 in a single week and back down. The dashed
+      rule marks the eleven months between the first commit and the second.</figcaption>
+
+      <details class="data">
+        <summary>Show the data</summary>
+        <table>
+          <thead><tr><th>#</th><th>week ending</th><th>modus</th><th>other</th><th>total</th><th>repos</th></tr></thead>
+          <tbody>
+      <tr><td>1</td><td>2025-03-15</td><td>1</td><td>0</td><td>1</td><td>1</td></tr>
+      <tr><td>2</td><td>2026-02-28</td><td>4</td><td>0</td><td>4</td><td>1</td></tr>
+      <tr><td>3</td><td>2026-03-07</td><td>3</td><td>0</td><td>3</td><td>1</td></tr>
+      <tr><td>4</td><td>2026-03-14</td><td>3</td><td>0</td><td>3</td><td>1</td></tr>
+      <tr><td>5</td><td>2026-04-11</td><td>50</td><td>0</td><td>50</td><td>1</td></tr>
+      <tr><td>6</td><td>2026-04-18</td><td>107</td><td>0</td><td>107</td><td>1</td></tr>
+      <tr><td>7</td><td>2026-04-25</td><td>82</td><td>0</td><td>82</td><td>1</td></tr>
+      <tr><td>8</td><td>2026-05-02</td><td>159</td><td>0</td><td>159</td><td>1</td></tr>
+      <tr><td>9</td><td>2026-05-09</td><td>62</td><td>0</td><td>62</td><td>1</td></tr>
+      <tr><td>10</td><td>2026-05-16</td><td>111</td><td>0</td><td>111</td><td>1</td></tr>
+      <tr><td>11</td><td>2026-05-23</td><td>87</td><td>0</td><td>87</td><td>1</td></tr>
+      <tr><td>12</td><td>2026-05-30</td><td>111</td><td>0</td><td>111</td><td>1</td></tr>
+      <tr><td>13</td><td>2026-06-06</td><td>173</td><td>0</td><td>173</td><td>1</td></tr>
+      <tr><td>14</td><td>2026-06-13</td><td>113</td><td>0</td><td>113</td><td>1</td></tr>
+      <tr><td>15</td><td>2026-06-20</td><td>186</td><td>41</td><td>227</td><td>3</td></tr>
+      <tr><td>16</td><td>2026-06-27</td><td>72</td><td>52</td><td>124</td><td>4</td></tr>
+      <tr><td>17</td><td>2026-07-04</td><td>66</td><td>371</td><td>437</td><td>14</td></tr>
+      <tr><td>18</td><td>2026-07-11</td><td>61</td><td>172</td><td>233</td><td>17</td></tr>
+      <tr><td>19</td><td>2026-07-18</td><td>43</td><td>248</td><td>291</td><td>27</td></tr>
+      <tr><td>20</td><td>2026-07-25</td><td>16</td><td>398</td><td>414</td><td>29</td></tr>
+      <tr><td>21</td><td>2026-08-01</td><td>104</td><td>190</td><td>294</td><td>34</td></tr>
+      <tr><td>22</td><td>2026-08-08</td><td>112</td><td>106</td><td>218</td><td>38</td></tr>
+      <tr><td>23</td><td>2026-08-15</td><td>180</td><td>93</td><td>273</td><td>38</td></tr>
+      <tr><td>24</td><td>2026-08-22</td><td>37</td><td>99</td><td>136</td><td>42</td></tr>
+      <tr><td>25</td><td>2026-08-29</td><td>41</td><td>47</td><td>88</td><td>42</td></tr>
+      <tr><td>26</td><td>2026-09-05</td><td>0</td><td>110</td><td>110</td><td>42</td></tr>
+          </tbody>
+        </table>
+      </details>
+    </figure>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow">what the shape says</span>
+      <h2>Three projects, in sequence</h2>
+    </div>
+
+    <p><strong>Weeks 1&ndash;14 are one repository.</strong> A language being built, with nothing to
+    reuse because nothing else exists yet. Fifty to a hundred and seventy commits a week, all of it
+    modus: a garbage collector, a calling convention, a numeric tower, an object system, and a test
+    harness that had to be rebuilt after it was caught losing 17,587 tests without saying so.</p>
+
+    <p><strong>Weeks 15&ndash;22 are the explosion.</strong> The workspace goes from one repository
+    to thirty-eight. Ten appear in a single week, twice. This is where the eye-catching numbers
+    live, and where the compounding starts: each new thing is written on top of things written days
+    earlier.</p>
+
+    <p><strong>Weeks 23&ndash;26 are integration.</strong> Zero new repositories in three of the four.
+    Forty-two exist and the work is making them behave as one machine &mdash; which is where
+    <span class="mono">kiln</span>, <span class="mono">glass-sdl</span> and
+    <span class="mono">operandi-gui</span> came from. Fewer commits, more repositories touched per
+    commit, bigger consequences. It reads as a slowdown on the chart and is the opposite.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow">the measure that survives</span>
+      <h2>Hours, from nothing to working</h2>
+    </div>
+
+    <p>If commits are a bad unit, elapsed time to a verifiable capability is a good one &mdash;
+    especially here, where almost every library is graded against somebody else&rsquo;s
+    implementation, so &ldquo;working&rdquo; has a date attached rather than an opinion.</p>
+
+    <figure class="fig">
+      <div class="chartwrap"><svg viewBox="0 0 840 274" role="img" aria-labelledby="c2t" class="chart">
+<title id="c2t">Hours from a repository's first commit to a working capability</title>
+<line class="grid" x1="118.0" x2="118.0" y1="8" y2="248"/>
+<text class="xtick" x="118.0" y="264">0h</text>
+<line class="grid" x1="244.1" x2="244.1" y1="8" y2="248"/>
+<text class="xtick" x="244.1" y="264">24h</text>
+<line class="grid" x1="370.2" x2="370.2" y1="8" y2="248"/>
+<text class="xtick" x="370.2" y="264">48h</text>
+<line class="grid" x1="496.3" x2="496.3" y1="8" y2="248"/>
+<text class="xtick" x="496.3" y="264">72h</text>
+<line class="grid" x1="622.4" x2="622.4" y1="8" y2="248"/>
+<text class="xtick" x="622.4" y="264">96h</text>
+<line class="grid" x1="748.5" x2="748.5" y1="8" y2="248"/>
+<text class="xtick" x="748.5" y="264">120h</text>
+<text class="cat" x="108" y="27.0">weft</text>
+<rect class="s1" x="118" y="13.0" width="635.2" height="17" rx="3"/>
+<text class="val" x="760.2" y="27.0">120.9h</text>
+<text class="inlab" x="126" y="27.0" opacity="0">URL parser → Acid3 100/100</text>
+<rect class="hit" x="118" y="10.0" width="662" height="30" data-repo="weft" data-lab="URL parser → Acid3 100/100" data-h="120.9"/>
+<text class="cat" x="108" y="57.0">scribe</text>
+<rect class="s1" x="118" y="43.0" width="442.4" height="17" rx="3"/>
+<text class="val" x="567.4" y="57.0">84.2h</text>
+<text class="inlab" x="126" y="57.0" opacity="0">scaffold → shaping + hinting</text>
+<rect class="hit" x="118" y="40.0" width="662" height="30" data-repo="scribe" data-lab="scaffold → shaping + hinting" data-h="84.2"/>
+<text class="cat" x="108" y="87.0">shuttle</text>
+<rect class="s1" x="118" y="73.0" width="281.6" height="17" rx="3"/>
+<text class="val" x="406.6" y="87.0">53.6h</text>
+<text class="inlab" x="126" y="87.0" opacity="0">skeleton → 88% of test262</text>
+<rect class="hit" x="118" y="70.0" width="662" height="30" data-repo="shuttle" data-lab="skeleton → 88% of test262" data-h="53.6"/>
+<text class="cat" x="108" y="117.0">cairn</text>
+<rect class="s1" x="118" y="103.0" width="122.9" height="17" rx="3"/>
+<text class="val" x="247.9" y="117.0">23.4h</text>
+<text class="inlab" x="126" y="117.0" opacity="0">read a repo → serve one over SSH</text>
+<rect class="hit" x="118" y="100.0" width="662" height="30" data-repo="cairn" data-lab="read a repo → serve one over SSH" data-h="23.4"/>
+<text class="cat" x="108" y="147.0">webrtc-media</text>
+<rect class="s1" x="118" y="133.0" width="120.3" height="17" rx="3"/>
+<text class="val" x="245.3" y="147.0">22.9h</text>
+<text class="inlab" x="126" y="147.0" opacity="0">entropy coder → Safari decodes it</text>
+<rect class="hit" x="118" y="130.0" width="662" height="30" data-repo="webrtc-media" data-lab="entropy coder → Safari decodes it" data-h="22.9"/>
+<text class="cat" x="108" y="177.0">natrium</text>
+<rect class="s1" x="118" y="163.0" width="43.1" height="17" rx="3"/>
+<text class="val" x="168.1" y="177.0">8.2h</text>
+<text class="inlab" x="126" y="177.0" opacity="0">hashing floor → the NaCl set</text>
+<rect class="hit" x="118" y="160.0" width="662" height="30" data-repo="natrium" data-lab="hashing floor → the NaCl set" data-h="8.2"/>
+<text class="cat" x="108" y="207.0">reed</text>
+<rect class="s1" x="118" y="193.0" width="30.5" height="17" rx="3"/>
+<text class="val" x="155.5" y="207.0">5.8h</text>
+<text class="inlab" x="126" y="207.0" opacity="0">MP3 → the whole of Opus</text>
+<rect class="hit" x="118" y="190.0" width="662" height="30" data-repo="reed" data-lab="MP3 → the whole of Opus" data-h="5.8"/>
+<text class="cat" x="108" y="237.0">folio</text>
+<rect class="s1" x="118" y="223.0" width="11.6" height="17" rx="3"/>
+<text class="val" x="136.6" y="237.0">2.2h</text>
+<text class="inlab" x="126" y="237.0" opacity="0">PDF parser → graded against pdfium</text>
+<rect class="hit" x="118" y="220.0" width="662" height="30" data-repo="folio" data-lab="PDF parser → graded against pdfium" data-h="2.2"/>
+</svg></div>
+      <figcaption>Hours between a repository&rsquo;s first commit and the commit that demonstrates the
+      capability, from the git log. <b>A PDF renderer reached a pdfium-graded harness in two hours
+      and twelve minutes</b>; a VP8 encoder written from RFC&nbsp;6386 reached &ldquo;Safari decodes
+      our frames&rdquo; in twenty-three. The two longest are the two that had no reference to lean
+      on at the start.</figcaption>
+    </figure>
+
+    <p>These are not the durations of finished software &mdash; folio kept going for another day on
+    JBIG2, fax decoding and CJK character maps. They are the durations of the gap between
+    <em>nothing</em> and <em>a thing that passes somebody else&rsquo;s test</em>, which is the
+    interval where a project either has momentum or does not.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow">why it got faster</span>
+      <h2>There was something to build on</h2>
+    </div>
+
+    <p>The acceleration is not typing speed. It is that by July there was a substrate. Repositories
+    born before 15 July depend on a mean of <b>1.47</b> other workspace libraries; those born after,
+    <b>2.04</b>. The tails carry more than the mean: <span class="mono">weft</span> draws on nine of
+    them, <span class="mono">glass</span> on eight, <span class="mono">cairn</span> and
+    <span class="mono">loom</span> on five each.</p>
+
+    <p>The clearest single case is a chain nobody planned in advance.
+    <span class="mono">pagetree</span> was written in June as a crash-safe B-tree for a Bitcoin
+    node&rsquo;s UTXO set. In July <span class="mono">cabinet</span> became a filesystem on top of
+    it, and <span class="mono">cairn</span> &mdash; a from-scratch git &mdash; learned to keep an
+    entire repository inside a cabinet. The first link in that chain took nine hours: pagetree's
+    first commit landed at 23:39 on a Sunday and the Bitcoin node was storing its UTXO set in it by
+    08:46 the next morning. Which is what lets a git implementation run on a machine
+    with no filesystem, and why <span class="mono">kiln</span> can clone thirty-three repositories
+    into a container image that contains no <code>git</code> binary at all.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow">and why it did not</span>
+      <h2>The floor does not compound</h2>
+    </div>
+
+    <p>Look at the copper band in the first chart again. It does not bend. modus takes 37 to 186
+    commits every week from April to now, through the explosion, through the integration phase,
+    at a rate essentially independent of everything happening above it.</p>
+
+    <p>That is the honest limit on all of this. Breadth work got roughly an order of magnitude from
+    oracles, fleets and a growing substrate. Depth work &mdash; a collector, a calling convention, a
+    tag scheme, a symbol table &mdash; got about one. You cannot fan eight workers at a garbage
+    collector, because the bug is never in eight places; it is in the interaction between two, and
+    finding it is serial no matter how many hands are available.</p>
+
+    <p>The best evidence is how long wrong beliefs survived:</p>
+
+    <ul class="plain">
+      <li><strong>Four days</strong> &mdash; a reported 99.994% pass rate, found to be an artefact of
+      a harness that silently lost every test after the first crash in a chunk.</li>
+      <li><strong>Two and a half weeks</strong> &mdash; &ldquo;layout fragility&rdquo;, a suspected
+      deep instability in the compiler, which turned out to be docstrings being compiled into
+      function prologues at twenty bytes of machine code per character.</li>
+      <li><strong>Ten weeks</strong> &mdash; symbols were given home packages in week 13; the nine
+      registries <em>keyed by those symbols</em> were still matching on name alone until week 23,
+      one of them dispatching the wrong generic function in silence.</li>
+    </ul>
+
+    <p>The shallow mistakes were caught by tooling in days. The deep one needed somebody to load real
+    software and watch what broke, and no amount of parallelism shortens that.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow">what to watch</span>
+      <h2>The bottleneck is the part that cannot be parallelised</h2>
+    </div>
+    <p>Forty-one repositories compound. One does not, and it is the one underneath all of them. That
+    is not a criticism of how the work is being done &mdash; it is the shape of the problem. But it
+    means the useful question for the next twenty-six weeks is not &ldquo;how many commits&rdquo;;
+    it is whether the floor can be made to compound too. Every build check, every oracle, every
+    census before a deletion is an attempt at exactly that: turning a thing somebody has to remember
+    into a thing the machine refuses to let you get wrong.</p>
+  </section>
+
+  <footer>
+    <p><strong>Method.</strong> All figures from the git logs of the 42 repositories in the
+    modus-lisp workspace, by author date, weeks ending Saturday. Commit counts include merges. The
+    dependency figures come from <code>:depends-on</code> in each system definition, counting only
+    dependencies satisfied inside the workspace. Time-to-capability is the wall-clock interval
+    between two named commits, listed in the chart&rsquo;s data. Colours validated for
+    colour-vision deficiency against both page surfaces.
+    <a href="../../issues/">All issues</a> &middot;
+    <a href="https://github.com/modus-lisp/modus-lisp.github.io">Source</a></p>
+  </footer>
+
+</div>
+
+<div id="tip" role="status" aria-live="polite"></div>
+<script>
+(function () {
+  var tip = document.getElementById('tip');
+  function show(html, e) {
+    tip.innerHTML = html; tip.style.opacity = '1';
+    var pad = 14, w = tip.offsetWidth, h = tip.offsetHeight;
+    var x = e.clientX + pad, yy = e.clientY + pad;
+    if (x + w > innerWidth - 8) x = e.clientX - w - pad;
+    if (yy + h > innerHeight - 8) yy = e.clientY - h - pad;
+    tip.style.left = x + 'px'; tip.style.top = yy + 'px';
+  }
+  function hide() { tip.style.opacity = '0'; }
+  document.querySelectorAll('svg.chart .hit').forEach(function (el) {
+    el.addEventListener('mousemove', function (e) {
+      var d = el.dataset, html;
+      if (d.wk) {
+        var tot = (+d.m) + (+d.o);
+        html = '<b>Week ' + d.wk + '</b> &middot; ending ' + d.date + '<br>'
+             + '<span class="k">modus</span> ' + d.m + '<br>'
+             + '<span class="k">other repos</span> ' + d.o + '<br>'
+             + '<span class="k">total</span> ' + tot
+             + ' &middot; <span class="k">repos</span> ' + d.repos;
+      } else {
+        html = '<b>' + d.repo + '</b><br>' + d.lab + '<br><span class="k">'
+             + d.h + ' hours</span>';
+      }
+      show(html, e);
+    });
+    el.addEventListener('mouseleave', hide);
+  });
+  addEventListener('scroll', hide, { passive: true });
+})();
+</script>
+</body>
+</html>

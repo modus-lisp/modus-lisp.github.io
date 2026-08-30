@@ -33,7 +33,7 @@
     <hr class="rule-fire">
     <p class="standfirst">The consensus engine became a whole node &mdash; reorgs, peer discovery,
     relay, a mempool with real policy, and a wallet that can spend to taproot. A new repository
-    appeared holding a copy-on-write B-tree, and within four days it was the node&rsquo;s UTXO
+    appeared holding a copy-on-write B-tree, and withnine hours later it was the node&rsquo;s UTXO
     store. This is the first week the workspace behaves like a workspace.</p>
 
     <div class="tally">
@@ -71,13 +71,14 @@
     time. On Wednesday, a bottom-up bulk loader that builds a tree in linear time from sorted
     input.</p>
 
-    <p>And on the same Tuesday, cl-consensus put its UTXO set behind an interface with two
+    <p>And nine hours after that first commit &mdash; late Sunday night to Monday morning &mdash;
+    cl-consensus put its UTXO set behind an interface with two
     implementations and made pagetree one of them &mdash; digest-equivalent to the existing store,
     checked against a real block download rather than a unit test, with a migration tool for
     converting an existing database and a streaming build path for deep backlogs.</p>
 
     <p>That is the first time in this dispatch that a library has been written for one project and
-    consumed by another within the same week, and it is the pattern that will define the workspace
+    consumed by another overnight, and it is the pattern that will define the workspace
     from here. A B+tree is a general thing. A UTXO set is a specific thing that needs one. Keeping
     them apart means the tree can be used again, and means its correctness is somebody&rsquo;s job
     rather than a footnote in a node.</p>
