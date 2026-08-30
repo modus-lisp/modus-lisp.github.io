@@ -65,7 +65,8 @@
     font-family: var(--mono); font-size: 11.5px; color: var(--muted);
     cursor: pointer; letter-spacing: .04em;
   }
-  details.data table { width: 100%; border-collapse: collapse; margin-top: 12px;
+  details.data .tablewrap { overflow-x: auto; }
+  details.data table { width: 100%; min-width: 420px; border-collapse: collapse; margin-top: 12px;
                        font-family: var(--mono); font-size: 11.5px; }
   details.data th { text-align: right; font-weight: 400; color: var(--muted);
                     border-bottom: 1px solid var(--hair); padding: 4px 8px; }
@@ -87,7 +88,7 @@
       <span>a note</span><span>&middot;</span><span>30 August 2026</span>
       <span>&middot;</span><span><b>26 weeks</b> &middot; 3,417 commits</span>
     </div>
-    <h1>The floor does<br>not <span class="lo">compound</span></h1>
+    <h1>The floor<br>does not<br><span class="lo">compound</span></h1>
     <hr class="rule-fire">
     <p class="standfirst">Twenty-six weeks of work, measured. Output peaked in mid-July and has
     roughly halved since, which sounds like a slowdown and is not one. The number that fell is
@@ -218,6 +219,7 @@
 
       <details class="data">
         <summary>Show the data</summary>
+        <div class="tablewrap">
         <table>
           <thead><tr><th>#</th><th>week ending</th><th>modus</th><th>other</th><th>total</th><th>repos</th></tr></thead>
           <tbody>
@@ -249,6 +251,7 @@
       <tr><td>26</td><td>2026-09-05</td><td>0</td><td>110</td><td>110</td><td>42</td></tr>
           </tbody>
         </table>
+        </div>
       </details>
     </figure>
   </section>
