@@ -20,6 +20,7 @@ explained.
 | `issues/index.html` | The archive — every issue, grouped by month. |
 | `issues/YYYY-MM-DD/index.html` | One issue of **This Week in Modus** — what moved, across every repo, and why it was hard. The date is the Saturday that closes the week. |
 | `bin/week` | Everything an issue is made of: the ledger, and every commit subject grouped by repo. |
+| `bin/ci` | The last CI run for every repository in the org, worst first. `--bad` for only the problems. |
 | `assets/crier.css` | The whole design system. Tokens, then chrome, then prose. There is no second stylesheet. |
 | `.nojekyll` | Tells Pages to serve the files as written rather than running Jekyll over them. |
 
