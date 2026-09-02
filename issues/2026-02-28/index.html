@@ -85,6 +85,21 @@
     entering the REPL so that the collector scans the right stack. That is the first appearance
     of a theme this dispatch will keep returning to: almost every hard bug in Modus is a
     disagreement about what the garbage collector can see.</p>
+
+    <figure class="plate">
+      <img src="../../assets/img/selfhost-2026-02-24.png" width="1612" height="1406"
+           alt="A terminal showing a table: Gen0 to Gen1 build, 13,239,158 bytes; Gen1 tests, 15 of 15 pass; Gen1 to Gen2 build, 13,239,158 bytes, identical size; Gen2 tests, 15 of 15 pass. Below it, key achievements and a root-cause note about rt-compile-defun.">
+      <figcaption><b>The round trip closing, the day before it was committed.</b> Generation one
+      and generation two come out at 13,239,158 bytes each &mdash; the same number twice, which is
+      what reproducible means here &mdash; and both pass 15 of 15. The root cause underneath it is
+      the kind this dispatch keeps finding: <code>rt-compile-defun</code> took
+      <code>(car rest2)</code> and so compiled only the <em>first</em> body form of a multi-form
+      <code>defun</code>, silently dropping the rest. Nothing had objected, because nothing was
+      checking.
+      <span class="prov">nostr &mdash; 923e329f, 2026-02-24 &middot; c73b202 is authored the
+      following day. The author&rsquo;s own account of the stretch: a fifteen-hour run, a short
+      check-in, then another eight or so &mdash; about twenty-five hours end to end.</span></figcaption>
+    </figure>
   </section>
 
   <section>

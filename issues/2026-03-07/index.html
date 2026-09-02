@@ -102,6 +102,18 @@
     resolution and an HTTP server on port 80, and actors scheduling all of it. It boots over
     <code>rpiboot</code> with no SD card at all, and redeploys over the UART bootloader.</p>
 
+    <figure class="plate">
+      <img src="../../assets/img/colors-2026-03-02.jpg" width="1300" height="1284"
+           alt="A photograph of a monitor showing a colour test pattern: red, green and blue rectangles across the top, a white bar across the middle, and yellow, magenta and cyan rectangles below, all on a dark blue background. A Raspberry Pi Zero 2 W is held up in front of the screen, wired over USB.">
+      <figcaption><b>Six colours and a background, out of a GPU nobody documented for this.</b>
+      A 640&times;480 32-bit framebuffer obtained through the VideoCore mailbox property tags, with
+      the pixel order corrected to BGR &mdash; driven from bare-metal Lisp on the board being held
+      up in front of it. The exchange, in full: <em>&ldquo;How do the colors look now?&rdquo;</em>
+      &mdash; <em>&ldquo;boom! red green blue, background bar, white bar, yellow magenta cyan, dark
+      blue background.&rdquo;</em>
+      <span class="prov">nostr &mdash; 43e4cd6a, 2026-03-02 04:54:49Z</span></figcaption>
+    </figure>
+
     <p>Two of the fixes name a constraint that only exists when a Lisp is the network stack. USB
     Ethernet has a five-second watchdog; a cold boot that computes its crypto keys when first
     asked will blow through it, so the keys are pre-computed at boot &mdash; and the long crypto
