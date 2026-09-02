@@ -1,24 +1,25 @@
 /* crier — the modus-lisp dispatch.
    One stylesheet for the whole site.  Tokens first, then chrome, then prose.
 
-   Three theme states, not two: an explicit choice stamps data-theme on <html>,
-   and the default "system" setting stamps nothing at all — so the palette is
-   defined on bare :root, redefined under prefers-color-scheme for the unstamped
-   case, and redefined again under [data-theme="dark"] so the stamp wins too. */
+   The site is dark, always.  One palette on :root — no media query, no
+   data-theme stamp.  color-scheme tells the browser to match its own chrome
+   (scrollbars, form controls, caret) to it. */
 
 :root {
-  --ground:    #E7EAE8;   /* fired-ash paper */
-  --surface:   #F4F6F4;
-  --sunken:    #DDE2DF;
-  --ink:       #14181A;
-  --ink-soft:  #3E4745;
-  --muted:     #667470;
-  --hair:      #CBD2CE;
-  --fire:      #A9522A;   /* kiln */
-  --fire-dim:  #C57A50;
-  --glass:     #256C77;   /* glass */
-  --glass-dim: #4E939C;
-  --shadow:    0 1px 0 rgba(20,24,26,.05);
+  color-scheme: dark;
+
+  --ground:    #0E1214;   /* fired ash, cooled */
+  --surface:   #161B1E;
+  --sunken:    #1C2326;
+  --ink:       #E6EBE9;
+  --ink-soft:  #C0C9C6;
+  --muted:     #889693;
+  --hair:      #262F32;
+  --fire:      #E28B57;   /* kiln */
+  --fire-dim:  #A6633F;
+  --glass:     #6FBFC9;   /* glass */
+  --glass-dim: #4A8891;
+  --shadow:    0 1px 0 rgba(0,0,0,.3);
 
   --display: "Archivo", "Helvetica Neue", Arial, sans-serif;
   --body:    "Newsreader", Georgia, "Times New Roman", serif;
@@ -26,38 +27,6 @@
 
   --measure: 65ch;
   --page:    860px;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --ground:    #0E1214;
-    --surface:   #161B1E;
-    --sunken:    #1C2326;
-    --ink:       #E6EBE9;
-    --ink-soft:  #C0C9C6;
-    --muted:     #889693;
-    --hair:      #262F32;
-    --fire:      #E28B57;
-    --fire-dim:  #A6633F;
-    --glass:     #6FBFC9;
-    --glass-dim: #4A8891;
-    --shadow:    0 1px 0 rgba(0,0,0,.3);
-  }
-}
-
-:root[data-theme="dark"] {
-  --ground:    #0E1214;
-  --surface:   #161B1E;
-  --sunken:    #1C2326;
-  --ink:       #E6EBE9;
-  --ink-soft:  #C0C9C6;
-  --muted:     #889693;
-  --hair:      #262F32;
-  --fire:      #E28B57;
-  --fire-dim:  #A6633F;
-  --glass:     #6FBFC9;
-  --glass-dim: #4A8891;
-  --shadow:    0 1px 0 rgba(0,0,0,.3);
 }
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -456,3 +425,51 @@ footer a { color: var(--muted); }
   .bar { animation: grow .7s cubic-bezier(.2,.7,.3,1) both; transform-origin: left center; }
   @keyframes grow { from { transform: scaleX(0); } to { transform: scaleX(1); } }
 }
+
+/* ---------------------------------------------------------------- plates
+
+   Photographs and screenshots carried in from elsewhere.  Every plate says
+   where it came from and when, because a picture taken in July is not
+   evidence about March unless it admits to being July. */
+
+figure.plate { margin: 34px 0 30px; }
+
+figure.plate img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--hair);
+  background: var(--sunken);
+}
+
+figure.plate.inset img { padding: 10px; }
+
+figure.plate figcaption {
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.65;
+  color: var(--muted);
+  margin-top: 10px;
+  max-width: 72ch;
+}
+
+figure.plate figcaption b { color: var(--ink-soft); font-weight: 500; }
+figure.plate figcaption a { color: var(--muted); }
+
+figure.plate .prov {
+  display: block;
+  margin-top: 4px;
+  color: var(--glass-dim);
+}
+
+/* two plates abreast on wide screens, stacked on narrow */
+.plates {
+  display: grid;
+  gap: 26px;
+  margin: 34px 0 30px;
+  grid-template-columns: 1fr;
+}
+@media (min-width: 700px) {
+  .plates.two { grid-template-columns: 1fr 1fr; }
+}
+.plates figure.plate { margin: 0; }

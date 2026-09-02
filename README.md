@@ -84,8 +84,9 @@ next one to write is simply the next Saturday.
 - **Every claim comes out of the commit log.** Counts are counted, not estimated; a
   quoted REPL transcript is one that actually ran. The method footnote at the bottom of an
   issue says what was measured and what was excluded, so a number can be checked.
-- **A reverted commit is a fact too.** Issue №1 reports a 3× speedup and its revert two
-  paragraphs later, because that is what the week contained.
+- **A reverted commit is a fact too.** №7's best commit adds no code: three attempts at a
+  runtime `car`/`cdr` check, all reverted, with the cost of each written down. A week that
+  ended where it started still says something about the shape of the problem.
 - **Name the root cause, not the symptom.** The interesting sentence is almost never
   "fixed a crash"; it is which register the bootloader left set, or which comparison
   happens before the allocation.
@@ -96,10 +97,23 @@ next one to write is simply the next Saturday.
   February 2026, because the repository was created on the way back from a break. The gap was
   real, and the log alone would not have shown it. Check `%cd` against `%ad` before drawing a
   conclusion from a date, and ask a human when the repository cannot answer.
-- **Length follows the week.** №17 is 437 commits and runs six sections; №1 is one commit and
-  runs three paragraphs. A single-repo week gets no ledger table, because a one-row table is
-  furniture. Nothing here is printed and nothing is sold against it, so there is no length to
-  hit.
+
+  The reverse case is sharper: a single dated commit can hold a fortnight. Everything Modus
+  did in February 2026 on the Movitz base — SSH, a TCP stack, the long-mode experiments — is
+  inside `abd9648`, which is dated March 2025. One point in a log, two weeks of work.
+- **A second source is allowed, and must announce itself.** The archive is built from the
+  commit log, and where a claim comes from anywhere else the issue says so in its own
+  footnote. №1 uses the author's nostr notes (4,955 events for `576d23dc…`, pulled from nine
+  relays, deduplicated by event id) because the log cannot show an eleven-month gap it does
+  not record. Quote a note with its event id and its UTC timestamp so a reader can fetch it;
+  store images in `assets/img/` rather than hotlinking them, and verify the hash when the
+  host is content-addressed. A note is evidence of what was said and when — never silently
+  evidence of what was built.
+- **Length follows the week.** №17 is 437 commits and runs six sections. №1 is a single
+  commit and would run three paragraphs on the log alone; it is long because the evidence for
+  what that commit actually contains lies outside the log. A single-repo week gets no ledger
+  table, because a one-row table is furniture. Nothing here is printed and nothing is sold
+  against it, so there is no length to hit.
 
 ## Licence
 

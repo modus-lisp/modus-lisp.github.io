@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>A quick hack, on Movitz — This Week in Modus №1</title>
-<meta name="description" content="This Week in Modus, 8–14 March 2025: the first commit is a prototype — 29,000 lines of Modus on 55,000 lines of vendored Movitz, booting under QEMU into a Lisp REPL with TLS and SSH.">
+<meta name="description" content="This Week in Modus, 8–14 March 2025: the first commit is a prototype — 29,000 lines of Modus on 55,000 lines of vendored Movitz, booting under QEMU into a Lisp REPL with TLS and SSH. It was never mentioned to anyone.">
 <meta property="og:title" content="A quick hack, on Movitz — This Week in Modus №1">
-<meta property="og:description" content="8–14 March 2025: the first commit is a prototype — 29,000 lines of Modus on 55,000 lines of vendored Movitz, booting under QEMU into a Lisp REPL with TLS and SSH.">
+<meta property="og:description" content="8–14 March 2025: the first commit is a prototype — 29,000 lines of Modus on 55,000 lines of vendored Movitz. It was never mentioned to anyone for eleven months.">
 <meta property="og:type" content="article">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -33,8 +33,8 @@
     <hr class="rule-fire">
     <p class="standfirst">The repository opens with a prototype: about 29,000 lines of Modus
     standing on 55,000 lines of somebody else&rsquo;s bare-metal Lisp, booting under QEMU into a
-    REPL with TLS, SSH and ciphers. It answered the question it was built to ask, and was
-    abandoned ten days after it was filed.</p>
+    REPL with TLS, SSH and ciphers. It answered the question it was built to ask. Then it was
+    put down for eleven months, and nobody was told it existed.</p>
 
     <div class="tally">
       <div><span class="n">1</span><span class="l">Commit</span></div>
@@ -107,6 +107,138 @@
     reminder that a gap between two issue numbers is a gap in a log, and a log is not the work.</p>
   </section>
 
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow">outside the log &nbsp;/&nbsp; March 2025 &ndash; February 2026</span>
+      <h2>Eleven months, in public, without a word</h2>
+    </div>
+
+    <p>Everything above comes out of one commit, which is all this repository contains for the
+    period. But the author posts to nostr several times a day, and has since 2023, so there is a
+    second record of these eleven months written by the same hand at the time &mdash; roughly
+    4,900 notes, none of them retrospective. It says three things the log cannot.</p>
+
+    <p><b>The first is that the hack was silent.</b> Not under-discussed &mdash; absent. Across
+    every note from 8 to 22 March 2025 the subjects are DeepSeek on a dual-socket EPYC box, agent
+    tooling, Ross Ulbricht, whether nostr needs relays. There is no Lisp machine, no Movitz, no
+    bare metal, no oblique hint. A system that boots into a REPL and answers SSH was built that
+    week and mentioned to nobody.</p>
+
+    <p>The nearest thing to an announcement is an accident of timing. The last note before the
+    first Modus commit lands three minutes and forty-three seconds ahead of it, and is about
+    something else entirely:</p>
+
+    <div class="callout">
+      <p>People say, &ldquo;Why would you talk to an AI like a person?&rdquo;</p>
+      <p>But, like, have you tried it?</p>
+      <span class="src">nostr &mdash; 3e8160c6, 2025-03-11 02:31:47Z &middot; abd9648 is authored 02:35:30Z</span>
+    </div>
+
+    <p><b>The second is that the shelving was deliberate, and the wanting survived it.</b> The
+    project goes quiet in the log after March. In the notes it keeps surfacing, in a register that
+    is unmistakably about this:</p>
+
+    <div class="callout">
+      <p>It&rsquo;s academic. I still long for a new Symbolics Genera. Might get around to that
+      after I fix Bitcoin and Nostr.</p>
+      <span class="src">nostr &mdash; 197a4a74, 2025-05-19</span>
+    </div>
+
+    <p>Two weeks earlier he had posted a photograph of Genera itself, mid-conversation about
+    screen layout &mdash; the machine the project is trying to deserve comparison with, running
+    its own documentation browser:</p>
+
+    <figure class="plate">
+      <img src="../../assets/img/genera-2025-05-04.jpg" width="800" height="636"
+           alt="A photograph of a CRT displaying Symbolics Genera: a Document Examiner window showing the Genera Workbook preface, with panes for current candidates, bookmarks, and a command area along the bottom.">
+      <figcaption><b>Genera, photographed off the glass.</b> The Document Examiner with the
+      Genera Workbook open; candidates and bookmarks stacked at the right, commands along the
+      bottom, a status line reading <code>DIS-LOCAL-HOST&rsquo;s console idle 5 minutes</code>.
+      Posted as an argument about screen layout &mdash; &ldquo;huge, mostly square screen with
+      only a few focused areas&rdquo; &mdash; two weeks before the note above.
+      <span class="prov">nostr &mdash; 5267e7fe, 2025-05-04 15:33:03Z</span></figcaption>
+    </figure>
+
+    <p>And a month after that, in a conversation about which language an AI would choose to
+    improve itself in, the project gets named for what it then was:</p>
+
+    <div class="callout">
+      <p>It was practically a trick question, and I totally agree. You and I have a half baked
+      project to recreate Symbolics Genera.</p>
+      <span class="src">nostr &mdash; 48243c60, 2025-06-04</span>
+    </div>
+
+    <p>In May it is a thing to get to after two other things. In June it is half baked. Then
+    nothing for eight months. This is what shelved looks like from the inside, and it is the part
+    of the story a repository is structurally incapable of holding: the log records that no work
+    happened, and cannot record that it was still wanted.</p>
+
+    <h3>The February the log filed under March</h3>
+
+    <p><b>The third thing is the one that actually changes the numbers.</b> The work resumes in
+    February 2026 &mdash; and it resumes on <em>this</em> system, the Movitz one, for two weeks
+    before a line of it is committed. On 9 February, four days before the repository exists:</p>
+
+    <div class="callout">
+      <p>i hope y&rsquo;all are out there doing the dumbest things you can come up with too.
+      here&rsquo;s me ssh-ing into a bare metal common-lisp</p>
+      <span class="src">nostr &mdash; 25fa84b0, 2026-02-09 03:45:05Z, with an OpenSSH transcript attached</span>
+    </div>
+
+    <p>Forty-five seconds later, a summary of that week&rsquo;s work: TCP with TIME protocol, an
+    ARP fix for QEMU, an HTTP client, a 3000&times; throughput optimisation, buffer pooling, a DMA
+    fix moving the region to 64MB to stop it corrupting the heap. Two days after that, the
+    64-bit experiments that decide the project&rsquo;s direction &mdash; and the screenshot names
+    the floor it is standing on:</p>
+
+    <figure class="plate">
+      <img src="../../assets/img/longmode-2026-02-11.png" width="1194" height="976"
+           alt="A terminal transcript reading IT WORKS!, then a decoded output string, then the stages of a round trip: entered 64-bit long mode, 64-bit code ran, return initiated, compatibility mode reached, paging disabled, RDMSR/WRMSR sequence, EFER.LME cleared, halted in 32-bit protected mode. Below, three next steps, the first of which is to restore Movitz's GDT.">
+      <figcaption><b>The round trip, twelve days before Modus64.</b> 32-bit to 64-bit long mode
+      and back down through compatibility mode to protected mode, each stage confirmed by a letter
+      in the output string. The next steps are what matter here: <code>1. Restore Movitz&rsquo;s
+      GDT</code>. In February 2026 the work is still standing on the borrowed floor, and the
+      commit that records it will be dated March 2025.
+      <span class="prov">nostr &mdash; 1a7d3d1e, 2026-02-11 19:25:27Z &middot; verified against the
+      blossom content hash <code>fdbf9b22&hellip;</code></span></figcaption>
+    </figure>
+
+    <p>The repository is created on 13 February. The commit is written at 16:19:27Z. The
+    announcement goes out three minutes and forty-six seconds later &mdash; almost exactly the
+    interval that separated the last note from the first commit, eleven months before:</p>
+
+    <div class="console">
+      <span class="cap">the two ends of the gap, to the second</span>
+<pre>2025-03-11 02:31:47Z   nostr    "have you tried it?"
+2025-03-11 02:35:30Z   abd9648  authored                     <span class="ret">+3m 43s</span>
+        &#8230; 339 days &#8230;
+2026-02-13 16:19:27Z   abd9648  committed
+2026-02-13 16:23:13Z   nostr    "modus: bare metal lisp"     <span class="ret">+3m 46s</span></pre>
+    </div>
+
+    <p>Three days later the Ed25519 constants get precomputed at build time rather than derived
+    at boot &mdash; roughly 254 squarings per field inversion, replaced by writing forty integers
+    into memory. Boot to SSH-ready falls from about forty seconds to 1.3. A week after that, on
+    23 February, Modus64 begins and none of this code survives.</p>
+
+    <p>So the two weeks of February 2026 in which this system was finished, demonstrated and
+    optimised are inside <code>abd9648</code>, and <code>abd9648</code> is dated 11 March 2025.
+    <code>bin/week</code> reads author dates, correctly and by design, and therefore files that
+    fortnight under this issue &mdash; a week in which, on the evidence of the log alone, one
+    commit appeared and nothing else happened. The dispatch that covers February 2026 is
+    <a href="../2026-02-28/">&#8470;&nbsp;2</a>, and it does not mention the SSH server, the
+    3000&times; TCP optimisation, or the long-mode round trip, because by its own rules it could
+    not see them.</p>
+
+    <p>None of this makes the author dates wrong. Dating the commit to when the older work was
+    written is the honest choice, and it is the choice that makes the eleven-month gap visible at
+    all. It does mean the granularity is a lie in one direction: a commit is a box, and a box
+    holds whatever was put in it whenever that happened. The house rule stands and has now been
+    paid for &mdash; <em>a gap in the numbers is not necessarily a gap in the work</em> &mdash;
+    with the addition that the reverse is also true. A single dated point in a log can be a
+    fortnight of work wearing one timestamp.</p>
+  </section>
+
   <footer>
     <p><strong>Method.</strong> Commits by <em>author</em> date, 8 to 14 March 2025, across the
     git repositories in the modus-lisp workspace &mdash; at this point, one.
@@ -115,6 +247,17 @@
     <code>lib/movitz</code> and <code>lib/binary-types</code> beneath them. The commit's committer
     date is 2026-02-13; see &ldquo;The gap&rdquo; above. Produced with
     <code>bin/week 2025-03-15 --log</code>.</p>
+    <p><strong>The second source.</strong> The section &ldquo;Eleven months, in public&rdquo; is
+    the only part of this archive that rests on anything other than the git history. It uses the
+    author&rsquo;s own nostr notes &mdash; 4,955 events for
+    <code>576d23dc&hellip;9f5848f9</code> (<code>ynniv@ynniv.com</code>), pulled from nine relays
+    and deduplicated by event id, spanning 2013 to the present. Every note is quoted with its
+    event id and its own UTC timestamp so it can be checked against any relay that still carries
+    it; every image is stored here rather than hotlinked, and the one from a content-addressed
+    host was verified against its hash. Timestamps in this section are UTC, matching git's
+    <code>%aI</code>. Notes are evidence of what was said and when, which is not the same as
+    evidence of what was built &mdash; where the two are used together it is said plainly which
+    is which.</p>
     <p><a href="../">&larr; All issues</a> &middot; <a href="../../">crier</a></p>
   </footer>
 
