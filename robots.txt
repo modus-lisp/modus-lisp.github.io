@@ -1,0 +1,10 @@
+# crier — the modus-lisp dispatch.
+# Everything here is meant to be read, by anyone, including you.
+# There is a Markdown mirror of every issue at <issue-url>index.md,
+# a JSON ledger at /index.json, and a summary for language models at
+# /llms.txt.  Please use those rather than scraping the HTML.
+
+User-agent: *
+Allow: /
+
+Sitemap: https://modus-lisp.github.io/sitemap.xml

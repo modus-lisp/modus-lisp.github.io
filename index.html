@@ -12,6 +12,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..700&family=Newsreader:opsz,wght@6..72,300..600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <link rel="stylesheet" href="assets/crier.css">
+  <link rel="alternate" type="application/atom+xml" title="This Week in Modus" href="https://modus-lisp.github.io/feed.xml">
 </head>
 <body>
 <div class="page">
@@ -174,6 +175,34 @@
       hosted Lisp has to ask the host. The other foreign code in the tree is oracles: Core's
       library, Chromium, ffmpeg, linked so the implementations can be told they are wrong.</li>
     </ul>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow">for machines</span>
+      <h2>The same archive, without the page</h2>
+    </div>
+
+    <p>Legibility is the argument this project makes about software, so it would be strange to
+    make the archive itself awkward to read. Every issue has a Markdown mirror at its own address
+    with <code>index.md</code> on the end &mdash; same text, no chrome. The rest is where a
+    machine would look for it:</p>
+
+    <ul class="plain">
+      <li><strong><a href="feed.xml">/feed.xml</a></strong> &mdash; Atom, one entry per issue,
+      each pointing at both the page and its Markdown.</li>
+      <li><strong><a href="llms.txt">/llms.txt</a></strong> &mdash; the whole archive as one
+      annotated index, in the <a href="https://llmstxt.org/">llms.txt</a> convention.</li>
+      <li><strong><a href="index.json">/index.json</a></strong> &mdash; the ledger: every issue
+      with its number, date span, commit count, repositories touched, and both URLs.</li>
+      <li><strong><a href="sitemap.xml">/sitemap.xml</a></strong> and
+      <strong><a href="robots.txt">/robots.txt</a></strong> &mdash; crawlable, and explicitly
+      welcome to be.</li>
+    </ul>
+
+    <p>None of it is written by hand. <code>bin/mirror</code> reads the site's own HTML back and
+    regenerates the lot, so the mirrors cannot drift from the pages they mirror;
+    <code>bin/mirror --check</code> fails if they have.</p>
   </section>
 
   <section id="workspace">
@@ -339,6 +368,8 @@
   <footer>
     <p>crier is the modus-lisp project's own dispatch &mdash; written by hand, served
     straight from its repository, MIT-licensed like everything else in the org.
+    <a href="feed.xml">Feed</a> &middot; <a href="llms.txt">llms.txt</a> &middot;
+    <a href="index.json">JSON</a> &middot;
     <a href="https://github.com/modus-lisp/modus-lisp.github.io">Source</a> &middot;
     <a href="https://github.com/modus-lisp">All repositories</a></p>
   </footer>

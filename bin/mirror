@@ -1,0 +1,621 @@
+#!/usr/bin/env python3
+"""mirror — generate the machine-readable half of crier.
+
+The site is hand-written HTML.  This reads it back and emits everything a
+machine would rather have than a page: a feed, a sitemap, a JSON ledger, an
+llms.txt index, and a Markdown mirror of every issue.  Nothing here is a
+source of truth — delete the lot and re-run and you get it back.
+
+    bin/mirror            write everything
+    bin/mirror --check    exit 1 if anything is stale (for CI)
+
+Run it after adding or editing an issue.
+"""
+
+import html
+import html.parser
+import json
+import os
+import re
+import subprocess
+import sys
+from datetime import datetime, timezone
+
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BASE = "https://modus-lisp.github.io"
+TITLE = "crier — This Week in Modus"
+SUBTITLE = ("A weekly dispatch on modus-lisp: a personal computer written "
+            "from scratch in Common Lisp.")
+
+# ----------------------------------------------------------------- reading
+
+
+def read(*parts):
+    with open(os.path.join(ROOT, *parts), encoding="utf-8") as fh:
+        return fh.read()
+
+
+def text_of(fragment):
+    """Strip tags, unescape entities, collapse whitespace."""
+    t = re.sub(r"<br\s*/?>", " ", fragment, flags=re.I)
+    t = re.sub(r"<[^>]+>", "", t)
+    return re.sub(r"\s+", " ", html.unescape(t)).strip()
+
+
+def issues_from_archive():
+    """The ordered issue list, straight out of the archive page."""
+    s = read("issues", "index.html")
+    out = []
+    for m in re.finditer(
+        r'<a href="(\d{4}-\d{2}-\d{2})/">\s*'
+        r'<span class="no">(.*?)</span>\s*'
+        r'<span class="it">(.*?)</span>\s*'
+        r'<span class="dek">(.*?)</span>',
+        s, re.S,
+    ):
+        slug, no, title, dek = m.groups()
+        num = re.search(r"(\d+)", text_of(no))
+        out.append({
+            "number": int(num.group(1)) if num else None,
+            "slug": slug,
+            "title": text_of(title),
+            "dek": text_of(dek),
+        })
+    out.sort(key=lambda i: i["slug"])
+    return out
+
+
+KICKER = re.compile(r'<div class="kicker">(.*?)</div>', re.S)
+
+
+def kicker_facts(page):
+    """Date range, commit count and repo count from an issue's kicker."""
+    m = KICKER.search(page)
+    facts = {"span": None, "commits": None, "repos": None}
+    if not m:
+        return facts
+    spans = [text_of(x) for x in re.findall(r"<span>(.*?)</span>", m.group(1), re.S)]
+    spans = [x for x in spans if x and x != "·"]
+    for s in spans:
+        if re.match(r"^\d{1,2}(–\d{1,2})?\s+\w+", s) or re.search(r"\d{4}$", s):
+            if "commit" not in s and "repo" not in s:
+                facts["span"] = s
+        c = re.search(r"([\d,]+)\s+commits?\b", s)
+        if c:
+            facts["commits"] = int(c.group(1).replace(",", ""))
+        r = re.search(r"(?:(\d+)\s+of\s+)?(\d+)\s+repos?\b", s)
+        if r:
+            facts["repos"] = int(r.group(1) or r.group(2))
+    return facts
+
+
+def git_lastmod(relpath):
+    try:
+        out = subprocess.run(
+            ["git", "-C", ROOT, "log", "-1", "--format=%cI", "--", relpath],
+            capture_output=True, text=True, check=False).stdout.strip()
+        return out or None
+    except Exception:
+        return None
+
+
+# ------------------------------------------------------------- to markdown
+
+
+class Tree(html.parser.HTMLParser):
+    """Minimal DOM: nodes are (tag, attrs, children) or plain strings."""
+
+    VOID = {"meta", "link", "br", "hr", "img", "input", "source"}
+
+    def __init__(self):
+        super().__init__(convert_charrefs=True)
+        self.root = ("__root__", {}, [])
+        self.open = [self.root]
+
+    def handle_starttag(self, tag, attrs):
+        node = (tag, dict(attrs), [])
+        self.open[-1][2].append(node)
+        if tag not in self.VOID:
+            self.open.append(node)
+
+    def handle_startendtag(self, tag, attrs):
+        self.open[-1][2].append((tag, dict(attrs), []))
+
+    def handle_endtag(self, tag):
+        for i in range(len(self.open) - 1, 0, -1):
+            if self.open[i][0] == tag:
+                del self.open[i:]
+                return
+
+    def handle_data(self, data):
+        self.open[-1][2].append(data)
+
+
+def classes(node):
+    return set(node[1].get("class", "").split())
+
+
+def parse(fragment):
+    t = Tree()
+    t.feed(fragment)
+    return t.root
+
+
+WS = re.compile(r"\s+")
+
+# The page being rendered, so relative hrefs and image srcs can be made
+# absolute; a Markdown mirror gets read far from the directory it lives in.
+CURRENT = {"url": BASE + "/"}
+
+
+def absolutise(href):
+    if not href or re.match(r"^(https?:|mailto:|#|data:)", href):
+        return href
+    from urllib.parse import urljoin
+    return urljoin(CURRENT["url"], href)
+
+
+def inline(node):
+    """Render a node's contents as one line of Markdown."""
+    if isinstance(node, str):
+        return WS.sub(" ", node)
+    tag, attrs, kids = node
+    if tag in ("script", "style"):
+        return ""
+    inner = "".join(inline(k) for k in kids)
+    if tag in ("b", "strong"):
+        return f"**{inner.strip()}**" if inner.strip() else ""
+    if tag in ("i", "em"):
+        return f"*{inner.strip()}*" if inner.strip() else ""
+    if tag == "code":
+        return f"`{inner.strip()}`" if inner.strip() else ""
+    if tag == "br":
+        return " "
+    if tag == "a":
+        href = absolutise(attrs.get("href", ""))
+        text = inner.strip()
+        if not href or not text:
+            return text
+        return f"[{text}]({href})"
+    return inner
+
+
+def line(node):
+    return WS.sub(" ", inline(node)).strip()
+
+
+def blocks(node, out):
+    """Walk the document, appending Markdown blocks to `out`."""
+    tag, attrs, kids = node
+    cl = classes(node)
+
+    if tag in ("script", "style", "nav") or "sitebar" in cl:
+        return
+
+    # ---- header
+    if "mast" in cl:
+        for k in kids:
+            if isinstance(k, str):
+                continue
+            kc = classes(k)
+            if k[0] == "h1" or "kicker" in kc:
+                continue          # both are already in the front matter
+            if "standfirst" in kc:
+                t = line(k)
+                if t:
+                    out.append(t)
+            elif "tally" in kc:
+                cells = []
+                for d in k[2]:
+                    if isinstance(d, str) or d[0] != "div":
+                        continue
+                    n = l = ""
+                    for sp in d[2]:
+                        if isinstance(sp, str):
+                            continue
+                        if "n" in classes(sp):
+                            n = line(sp)
+                        elif "l" in classes(sp):
+                            l = line(sp)
+                    if n or l:
+                        cells.append((l, n))
+                if cells:
+                    out.append(
+                        "| " + " | ".join(c[0] for c in cells) + " |\n"
+                        + "|" + "---|" * len(cells) + "\n"
+                        + "| " + " | ".join(c[1] for c in cells) + " |")
+            else:
+                blocks(k, out)
+        return
+
+    # ---- leaf-ish blocks
+    if "sec-eyebrow" in cl:
+        t = re.sub(r"[*`]", "", line(node))
+        if t:
+            out.append(f"*{t}*")
+        return
+    if "callout" in cl:
+        quote, src = [], None
+        for k in kids:
+            if isinstance(k, str):
+                continue
+            if "src" in classes(k):
+                src = line(k)
+            else:
+                t = line(k)
+                if t:
+                    quote.append(t)
+        for q in quote:
+            out.append("> " + q)
+        if src:
+            out.append(f"> — {src}")
+        return
+    if "console" in cl:
+        cap, body = None, None
+        for k in kids:
+            if isinstance(k, str):
+                continue
+            if "cap" in classes(k):
+                cap = line(k)
+            elif k[0] == "pre":
+                body = "".join(inline_pre(x) for x in k[2]).strip("\n")
+        if cap:
+            out.append(f"*{cap}*")
+        if body is not None:
+            out.append("```\n" + body + "\n```")
+        return
+    if tag == "figure":
+        alt = src = cap = None
+        for k in kids:
+            if isinstance(k, str):
+                continue
+            if k[0] == "img":
+                alt = k[1].get("alt", "").strip()
+                src = absolutise(k[1].get("src", ""))
+            elif k[0] == "figcaption":
+                cap = line(k)
+        if src:
+            out.append(f"![{alt or ''}]({src})")
+        if cap:
+            out.append(f"*{cap}*")
+        return
+    if tag == "pre":
+        out.append("```\n" + "".join(inline_pre(x) for x in kids).strip("\n") + "\n```")
+        return
+    if tag in ("h1", "h2", "h3", "h4"):
+        t = line(node)
+        if t:
+            out.append("#" * int(tag[1]) + " " + t)
+        return
+    if tag == "p":
+        t = line(node)
+        if t:
+            out.append(t)
+        return
+    if tag == "li":
+        t = line(node)
+        if t:
+            out.append("- " + t)
+        return
+
+    if tag == "section":
+        out.append("---")
+
+    if tag == "footer":
+        out.append("---")
+
+    for k in kids:
+        if isinstance(k, str):
+            continue
+        blocks(k, out)
+
+
+def inline_pre(node):
+    """Like inline(), but preserves whitespace — for <pre> contents."""
+    if isinstance(node, str):
+        return node
+    tag, attrs, kids = node
+    if tag == "br":
+        return "\n"
+    return "".join(inline_pre(k) for k in kids)
+
+
+def plural(n, word):
+    return f"{n} {word}" + ("" if n == 1 else "s")
+
+
+def markdown_for(issue):
+    page = read("issues", issue["slug"], "index.html")
+    CURRENT["url"] = f"{BASE}/issues/{issue['slug']}/"
+    m = re.search(r"<body>(.*)</body>", page, re.S)
+    root = parse(m.group(1) if m else page)
+
+    out = []
+    blocks(root, out)
+
+    # tidy: drop leading/duplicate rules, collapse blanks
+    tidy = []
+    for b in out:
+        b = b.rstrip()
+        if not b:
+            continue
+        if b == "---" and (not tidy or tidy[-1] == "---"):
+            continue
+        tidy.append(b)
+    while tidy and tidy[-1] == "---":
+        tidy.pop()
+
+    meta = " · ".join(x for x in [
+        f"**This Week in Modus №{issue['number']}**",
+        issue["span"],
+        plural(issue["commits"], "commit") if issue["commits"] else None,
+        plural(issue["repos"], "repo") if issue["repos"] else None,
+    ] if x)
+
+    head = [
+        f"# {issue['title']}",
+        "",
+        meta,
+        "",
+        f"<{BASE}/issues/{issue['slug']}/>",
+        "",
+        "",
+    ]
+    return "\n".join(head) + "\n\n".join(tidy) + "\n"
+
+
+# ----------------------------------------------------------------- outputs
+
+
+def build_robots():
+    return f"""# crier — the modus-lisp dispatch.
+# Everything here is meant to be read, by anyone, including you.
+# There is a Markdown mirror of every issue at <issue-url>index.md,
+# a JSON ledger at /index.json, and a summary for language models at
+# /llms.txt.  Please use those rather than scraping the HTML.
+
+User-agent: *
+Allow: /
+
+Sitemap: {BASE}/sitemap.xml
+"""
+
+
+def build_sitemap(issues, extra):
+    rows = []
+
+    def url(loc, lastmod, priority):
+        rows.append("  <url>")
+        rows.append(f"    <loc>{loc}</loc>")
+        if lastmod:
+            rows.append(f"    <lastmod>{lastmod}</lastmod>")
+        rows.append(f"    <priority>{priority}</priority>")
+        rows.append("  </url>")
+
+    url(f"{BASE}/", git_lastmod("index.html"), "1.0")
+    url(f"{BASE}/issues/", git_lastmod("issues/index.html"), "0.8")
+    for i in issues:
+        rel = f"issues/{i['slug']}/index.html"
+        url(f"{BASE}/issues/{i['slug']}/", git_lastmod(rel), "0.6")
+    for path in extra:
+        url(f"{BASE}/{path}", git_lastmod(f"{path}index.html"), "0.5")
+    return ('<?xml version="1.0" encoding="UTF-8"?>\n'
+            '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+            + "\n".join(rows) + "\n</urlset>\n")
+
+
+def esc(s):
+    return html.escape(s, quote=True)
+
+
+def build_feed(issues):
+    latest = max((i["updated"] for i in issues if i.get("updated")), default=None)
+    now = latest or datetime.now(timezone.utc).isoformat(timespec="seconds")
+    out = ['<?xml version="1.0" encoding="UTF-8"?>',
+           '<feed xmlns="http://www.w3.org/2005/Atom">',
+           f"  <title>{esc(TITLE)}</title>",
+           f"  <subtitle>{esc(SUBTITLE)}</subtitle>",
+           f'  <link href="{BASE}/feed.xml" rel="self"/>',
+           f'  <link href="{BASE}/"/>',
+           f"  <id>{BASE}/</id>",
+           f"  <updated>{now}</updated>",
+           "  <author><name>ynniv</name></author>"]
+    for i in reversed(issues):
+        url = f"{BASE}/issues/{i['slug']}/"
+        out += ["  <entry>",
+                f"    <title>№{i['number']} — {esc(i['title'])}</title>",
+                f'    <link href="{url}"/>',
+                f"    <id>{url}</id>",
+                f"    <updated>{i.get('updated') or i['slug'] + 'T00:00:00Z'}</updated>",
+                f"    <summary>{esc(i['dek'])}</summary>",
+                f'    <link rel="alternate" type="text/markdown" href="{url}index.md"/>',
+                "  </entry>"]
+    out.append("</feed>")
+    return "\n".join(out) + "\n"
+
+
+def build_json(issues):
+    return json.dumps({
+        "title": TITLE,
+        "description": SUBTITLE,
+        "home": BASE + "/",
+        "feed": BASE + "/feed.xml",
+        "generated_from": "the site's own HTML, by bin/mirror",
+        "count": len(issues),
+        "issues": [{
+            "number": i["number"],
+            "date": i["slug"],
+            "span": i["span"],
+            "title": i["title"],
+            "summary": i["dek"],
+            "commits": i["commits"],
+            "repos": i["repos"],
+            "url": f"{BASE}/issues/{i['slug']}/",
+            "markdown": f"{BASE}/issues/{i['slug']}/index.md",
+        } for i in issues],
+    }, indent=2) + "\n"
+
+
+def build_llms(issues, notes):
+    total = sum(i["commits"] or 0 for i in issues)
+    lines = [
+        "# crier — This Week in Modus",
+        "",
+        f"> {SUBTITLE} Weekly, one issue per week that had commits, "
+        f"numbered from the project's first working week in March 2025. "
+        f"{len(issues)} issues covering {total:,} commits.",
+        "",
+        "Every claim in an issue comes out of the git commit log of the "
+        "modus-lisp repositories; where an issue uses anything else it says "
+        "so in its own method footnote. Counts are counted, not estimated. "
+        "Each issue below links to a Markdown mirror of the full text.",
+        "",
+        "## Issues",
+        "",
+    ]
+    for i in reversed(issues):
+        # the dek already ends with the commit count, so the parenthetical
+        # only carries the date span
+        lines.append(f"- [№{i['number']} — {i['title']}]"
+                     f"({BASE}/issues/{i['slug']}/index.md): {i['dek']}"
+                     + (f" ({i['span']})" if i["span"] else ""))
+    if notes:
+        lines += ["", "## Notes", ""]
+        for n in notes:
+            lines.append(f"- [{n['title']}]({BASE}/{n['path']}): {n['summary']}")
+    lines += [
+        "",
+        "## Data",
+        "",
+        f"- [Issue ledger, JSON]({BASE}/index.json): every issue with its date, "
+        "commit count, repository count and URLs.",
+        f"- [Atom feed]({BASE}/feed.xml)",
+        "- [Source](https://github.com/modus-lisp/modus-lisp.github.io): the site, "
+        "and the tools that measure the weeks (`bin/week`, `bin/ci`, `bin/mirror`).",
+        "",
+    ]
+    return "\n".join(lines)
+
+
+def find_notes():
+    out = []
+    ndir = os.path.join(ROOT, "notes")
+    if not os.path.isdir(ndir):
+        return out
+    for name in sorted(os.listdir(ndir)):
+        page = os.path.join(ndir, name, "index.html")
+        if not os.path.isfile(page):
+            continue
+        s = read("notes", name, "index.html")
+        t = re.search(r"<title>(.*?)</title>", s, re.S)
+        d = re.search(r'<meta name="description" content="(.*?)"', s, re.S)
+        out.append({
+            "path": f"notes/{name}/",
+            "title": text_of(t.group(1)).split(" — ")[0] if t else name,
+            "summary": html.unescape(d.group(1)) if d else "",
+        })
+    return out
+
+
+# ------------------------------------------------------- head link injection
+
+FEED_LINK = ('<link rel="alternate" type="application/atom+xml" '
+             f'title="This Week in Modus" href="{BASE}/feed.xml">')
+
+
+def inject_head_links():
+    """Add the feed link (and, on issues, the Markdown mirror) to each head."""
+    changed = []
+    for rel in walk_html():
+        s = read(rel)
+        if "</head>" not in s:
+            continue
+        orig = s
+        if 'type="application/atom+xml"' not in s:
+            s = s.replace("</head>", "  " + FEED_LINK + "\n</head>", 1)
+        if rel.startswith("issues/") and rel.endswith("/index.html") \
+                and rel != "issues/index.html" and 'type="text/markdown"' not in s:
+            s = s.replace("</head>",
+                          '  <link rel="alternate" type="text/markdown" href="index.md">\n</head>', 1)
+        if s != orig:
+            write(rel, s)
+            changed.append(rel)
+    return changed
+
+
+def walk_html():
+    for base, dirs, files in os.walk(ROOT):
+        # prune VCS dirs in place; note the repo itself is named *.github.io,
+        # so a substring test on the path would skip the entire site.
+        dirs[:] = [d for d in dirs if d not in (".git", ".github")]
+        for f in files:
+            if f.endswith(".html"):
+                yield os.path.relpath(os.path.join(base, f), ROOT)
+
+
+# ------------------------------------------------------------------- driver
+
+
+WRITTEN = []
+
+
+def write(relpath, content):
+    path = os.path.join(ROOT, relpath)
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    old = None
+    if os.path.exists(path):
+        with open(path, encoding="utf-8") as fh:
+            old = fh.read()
+    if old == content:
+        return False
+    with open(path, "w", encoding="utf-8") as fh:
+        fh.write(content)
+    WRITTEN.append(relpath)
+    return True
+
+
+def main():
+    check = "--check" in sys.argv
+
+    issues = issues_from_archive()
+    if not issues:
+        sys.exit("mirror: found no issues in issues/index.html")
+    for i in issues:
+        page = read("issues", i["slug"], "index.html")
+        i.update(kicker_facts(page))
+        i["updated"] = git_lastmod(f"issues/{i['slug']}/index.html")
+
+    notes = find_notes()
+
+    if not check:
+        touched = inject_head_links()
+        if touched:
+            print(f"head links added to {len(touched)} page(s)")
+
+    for i in issues:
+        write(f"issues/{i['slug']}/index.md", markdown_for(i))
+    write("robots.txt", build_robots())
+    write("sitemap.xml", build_sitemap(issues, [n["path"] for n in notes]))
+    write("feed.xml", build_feed(issues))
+    write("index.json", build_json(issues))
+    write("llms.txt", build_llms(issues, notes))
+
+    if check:
+        if WRITTEN:
+            print("stale:\n  " + "\n  ".join(WRITTEN))
+            sys.exit(1)
+        print("mirror: up to date")
+        return
+
+    if WRITTEN:
+        print(f"wrote {len(WRITTEN)} file(s):")
+        for w in WRITTEN:
+            print("  " + w)
+    else:
+        print("mirror: nothing to do")
+    total = sum(i["commits"] or 0 for i in issues)
+    print(f"\n{len(issues)} issues · {total:,} commits · {len(notes)} note(s)")
+
+
+if __name__ == "__main__":
+    main()

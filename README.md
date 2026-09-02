@@ -21,13 +21,20 @@ explained.
 | `issues/YYYY-MM-DD/index.html` | One issue of **This Week in Modus** — what moved, across every repo, and why it was hard. The date is the Saturday that closes the week. |
 | `bin/week` | Everything an issue is made of: the ledger, and every commit subject grouped by repo. |
 | `bin/ci` | The last CI run for every repository in the org, worst first. `--bad` for only the problems. |
+| `bin/mirror` | Regenerates the machine-readable half of the site from the site itself. `--check` fails if it is stale. |
 | `assets/crier.css` | The whole design system. Tokens, then chrome, then prose. There is no second stylesheet. |
 | `.nojekyll` | Tells Pages to serve the files as written rather than running Jekyll over them. |
+| `issues/*/index.md`, `feed.xml`, `llms.txt`, `index.json`, `sitemap.xml`, `robots.txt` | **Derived.** Written by `bin/mirror`; never edit them by hand. |
 
-No generator, no build step, no dependencies. A page is a file you can open with `file://`,
-which is the same reason everything else in this org is written the way it is. If a
-generator ever arrives it will be [weft](https://github.com/modus-lisp/weft) and
-[scribe](https://github.com/modus-lisp/scribe) rendering it, not npm.
+Every page is written by hand, and a page is a file you can open with `file://` — which is
+the same reason everything else in this org is written the way it is. There is no build step
+between an issue and the web.
+
+There is one generator, and it runs the other way. `bin/mirror` reads the finished HTML and
+emits the machine-readable mirror of it: a Markdown copy of every issue, an Atom feed, an
+llms.txt index, a JSON ledger, a sitemap. The HTML stays the source of truth, so the mirror
+cannot drift from it — and if it does, `bin/mirror --check` says so and exits non-zero.
+Delete every generated file and re-run; you get them all back.
 
 ## Publishing
 
@@ -109,6 +116,10 @@ next one to write is simply the next Saturday.
   store images in `assets/img/` rather than hotlinking them, and verify the hash when the
   host is content-addressed. A note is evidence of what was said and when — never silently
   evidence of what was built.
+- **The archive should be as readable to a machine as to a person.** This project's argument
+  is that legibility is a security property; an archive that can only be read by rendering it
+  would be a small hypocrisy. Every issue has a Markdown mirror at `index.md` beside it, and
+  the whole ledger is in `index.json`. Run `bin/mirror` after writing or editing an issue.
 - **Length follows the week.** №17 is 437 commits and runs six sections. №1 is a single
   commit and would run three paragraphs on the log alone; it is long because the evidence for
   what that commit actually contains lies outside the log. A single-repo week gets no ledger

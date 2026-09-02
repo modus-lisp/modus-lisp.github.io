@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>crier — This Week in Modus</title>
+  <subtitle>A weekly dispatch on modus-lisp: a personal computer written from scratch in Common Lisp.</subtitle>
+  <link href="https://modus-lisp.github.io/feed.xml" rel="self"/>
+  <link href="https://modus-lisp.github.io/"/>
+  <id>https://modus-lisp.github.io/</id>
+  <updated>2026-09-01T22:27:14-04:00</updated>
+  <author><name>ynniv</name></author>
+  <entry>
+    <title>№25 — The Pi Zero answers the doorbell</title>
+    <link href="https://modus-lisp.github.io/issues/2026-08-29/"/>
+    <id>https://modus-lisp.github.io/issues/2026-08-29/</id>
+    <updated>2026-08-29T13:53:12-04:00</updated>
+    <summary>A real OpenSSH client logs in to bare-metal Modus on Pi Zero 2 W silicon, then downloads a library and runs it — and the desktop above it learns its own name and its own resolution. 97 commits.</summary>
+    <link rel="alternate" type="text/markdown" href="https://modus-lisp.github.io/issues/2026-08-29/index.md"/>
+  </entry>
+  <entry>
+    <title>№24 — The stack learns to leave home</title>
+    <link href="https://modus-lisp.github.io/issues/2026-08-22/"/>
+    <id>https://modus-lisp.github.io/issues/2026-08-22/</id>
+    <updated>2026-08-29T13:53:12-04:00</updated>
+    <summary>kiln and glass-sdl appear, the CL stack runs a REPL on real Pi Zero silicon, one HTTP client replaces four, and half a dozen repos stop assuming whose home directory they are in. 136 commits.</summary>
+    <link rel="alternate" type="text/markdown" href="https://modus-lisp.github.io/issues/2026-08-22/index.md"/>
+  </entry>
+  <entry>
+    <title>№23 — Two packages, one variable</title>
+    <link href="https://modus-lisp.github.io/issues/2026-08-15/"/>
+    <id>https://modus-lisp.github.io/issues/2026-08-15/</id>
+    <updated>2026-08-29T13:53:12-04:00</updated>
+    <summary>Nine of Modus&#x27;s name-keyed registries turn out to be blind to packages, one of them mis-dispatching in silence; the build starts checking itself; and alexandria finishes at 230/230. 273 commits.</summary>
+    <link rel="alternate" type="text/markdown" href="https://modus-lisp.github.io/issues/2026-08-15/index.md"/>
+  </entry>
+  <entry>
+    <title>№22 — Speech, both ways</title>
+    <link href="https://modus-lisp.github.io/issues/2026-08-08/"/>
+    <id>https://modus-lisp.github.io/issues/2026-08-08/</id>
+    <updated>2026-08-29T13:53:12-04:00</updated>
+    <summary>A text-to-speech engine, a speech recognizer, and a desktop that types what it hears into whichever window has focus. Underneath, the JIT stops falling back to the interpreter. 218 commits.</summary>
+    <link rel="alternate" type="text/markdown" href="https://modus-lisp.github.io/issues/2026-08-08/index.md"/>
+  </entry>
+  <entry>
+    <title>№21 — 629 bytes of desktop</title>
+    <link href="https://modus-lisp.github.io/issues/2026-08-01/"/>
+    <id>https://modus-lisp.github.io/issues/2026-08-01/</id>
+    <updated>2026-08-30T15:16:16-04:00</updated>
+    <summary>A VP8 encoder written from the RFC goes from its first entropy coder to Safari decoding a live Lisp desktop, in twenty-three hours. Also a PDF renderer, three audio decoders, and Acid3 at 100/100. 294 commits.</summary>
+    <link rel="alternate" type="text/markdown" href="https://modus-lisp.github.io/issues/2026-08-01/index.md"/>
+  </entry>
+  <entry>
+    <title>№20 — Modus compiles Modus</title>
+    <link href="https://modus-lisp.github.io/issues/2026-07-25/"/>
+    <id>https://modus-lisp.github.io/issues/2026-07-25/</id>
+    <updated>2026-08-29T13:53:12-04:00</updated>
+    <summary>The SBCL-free self-hosting cycle closes, held up at the last by one uninitialised counter. weft lands 256 spec sections, a VNC drag goes from 18 fps to 76, and a Lisp desktop appears in a browser tab. 414 commits.</summary>
+    <link rel="alternate" type="text/markdown" href="https://modus-lisp.github.io/issues/2026-07-25/index.md"/>
+  </entry>
+  <entry>
+    <title>№19 — Ten repositories in seven days</title>
+    <link href="https://modus-lisp.github.io/issues/2026-07-18/"/>
+    <id>https://modus-lisp.github.io/issues/2026-07-18/</id>
+    <updated>2026-09-01T22:27:14-04:00</updated>
+    <summary>glass, cairn, conch, natrium, cram, cabinet, operandi and three more are created in one week — and immediately start depending on each other. 291 commits.</summary>
+    <link rel="alternate" type="text/markdown" href="https://modus-lisp.github.io/issues/2026-07-18/index.md"/>
+  </entry>
+  <entry>
+    <title>№18 — Two things deleted</title>
+    <link href="https://modus-lisp.github.io/issues/2026-07-11/"/>
+    <id>https://modus-lisp.github.io/issues/2026-07-11/</id>
+    <updated>2026-08-29T13:53:12-04:00</updated>
+    <summary>Modus removes its tree-walking evaluator and keeps the bytecode one; cl-tor removes OpenSSL, five days after seal was born, and starts hosting an onion service. 233 commits.</summary>
+    <link rel="alternate" type="text/markdown" href="https://modus-lisp.github.io/issues/2026-07-11/index.md"/>
+  </entry>
+  <entry>
+    <title>№17 — Build the oracle first</title>
+    <link href="https://modus-lisp.github.io/issues/2026-07-04/"/>
+    <id>https://modus-lisp.github.io/issues/2026-07-04/</id>
+    <updated>2026-08-29T13:53:12-04:00</updated>
+    <summary>Ten repositories appear — a web engine that finishes at Acid3 100/100, a JavaScript engine at 88% of test262, a text rasterizer with hinting — and every one of them starts by building the thing that will grade it. 437 commits.</summary>
+    <link rel="alternate" type="text/markdown" href="https://modus-lisp.github.io/issues/2026-07-04/index.md"/>
+  </entry>
+  <entry>
+    <title>№16 — A node, and something to keep it in</title>
+    <link href="https://modus-lisp.github.io/issues/2026-06-27/"/>
+    <id>https://modus-lisp.github.io/issues/2026-06-27/</id>
+    <updated>2026-08-30T15:16:16-04:00</updated>
+    <summary>cl-consensus becomes a whole Bitcoin node with a wallet, pagetree arrives and is its UTXO store nine hours later, and Modus rebuilds the numeric tower around real float types. 124 commits.</summary>
+    <link rel="alternate" type="text/markdown" href="https://modus-lisp.github.io/issues/2026-06-27/index.md"/>
+  </entry>
+  <entry>
+    <title>№15 — Zero divergence</title>
+    <link href="https://modus-lisp.github.io/issues/2026-06-20/"/>
+    <id>https://modus-lisp.github.io/issues/2026-06-20/</id>
+    <updated>2026-08-29T13:53:12-04:00</updated>
+    <summary>A from-scratch Bitcoin consensus engine agrees exactly with Core&#x27;s own compiled library on the taproot vectors, and Modus builds a collector that can let foreign code hold a pointer into the heap. 227 commits.</summary>
+    <link rel="alternate" type="text/markdown" href="https://modus-lisp.github.io/issues/2026-06-20/index.md"/>
+  </entry>
+  <entry>
+    <title>№14 — The frontier is a form number</title>
+    <link href="https://modus-lisp.github.io/issues/2026-06-13/"/>
+    <id>https://modus-lisp.github.io/issues/2026-06-13/</id>
+    <updated>2026-08-29T13:53:12-04:00</updated>
+    <summary>Modus starts loading real ASDF one form at a time and treats where it stops as the thing to improve, while five garbage-collector roots turn out never to have been scanned. 113 commits.</summary>
+    <link rel="alternate" type="text/markdown" href="https://modus-lisp.github.io/issues/2026-06-13/index.md"/>
+  </entry>
+  <entry>
+    <title>№13 — A Lisp that loads</title>
+    <link href="https://modus-lisp.github.io/issues/2026-06-06/"/>
+    <id>https://modus-lisp.github.io/issues/2026-06-06/</id>
+    <updated>2026-08-29T13:53:12-04:00</updated>
+    <summary>Modus becomes an image that reads Lisp rather than a compiler that emits a program. Symbols learn which package they belong to, integers lose their size limit, and the layout cascade stops reproducing. 173 commits.</summary>
+    <link rel="alternate" type="text/markdown" href="https://modus-lisp.github.io/issues/2026-06-06/index.md"/>
+  </entry>
+  <entry>
+    <title>№12 — The suite, unmodified</title>
+    <link href="https://modus-lisp.github.io/issues/2026-05-30/"/>
+    <id>https://modus-lisp.github.io/issues/2026-05-30/</id>
+    <updated>2026-08-29T13:53:12-04:00</updated>
+    <summary>Enough runtime macro machinery to load the ANSI files as they are rather than as rewritten — and on AArch64, the discovery that NIL and the fixnum zero had been the same bit pattern. 111 commits.</summary>
+    <link rel="alternate" type="text/markdown" href="https://modus-lisp.github.io/issues/2026-05-30/index.md"/>
+  </entry>
+  <entry>
+    <title>№11 — An object system, and a number system</title>
+    <link href="https://modus-lisp.github.io/issues/2026-05-23/"/>
+    <id>https://modus-lisp.github.io/issues/2026-05-23/</id>
+    <updated>2026-08-29T13:53:12-04:00</updated>
+    <summary>CLOS stops being a set of stubs and becomes a real protocol, and the numeric tower gets IEEE floats, complex numbers and transcendentals computed as exact rationals. 87 commits.</summary>
+    <link rel="alternate" type="text/markdown" href="https://modus-lisp.github.io/issues/2026-05-23/index.md"/>
+  </entry>
+  <entry>
+    <title>№10 — Every wedge root-caused</title>
+    <link href="https://modus-lisp.github.io/issues/2026-05-16/"/>
+    <id>https://modus-lisp.github.io/issues/2026-05-16/</id>
+    <updated>2026-08-29T13:53:12-04:00</updated>
+    <summary>The bare-metal harness removes every one of its pre-stamped failure ranges by bisecting each wedge to its cause — 1,602 passing to 5,529, and no band-aids left. 111 commits.</summary>
+    <link rel="alternate" type="text/markdown" href="https://modus-lisp.github.io/issues/2026-05-16/index.md"/>
+  </entry>
+  <entry>
+    <title>№9 — The bug was a docstring</title>
+    <link href="https://modus-lisp.github.io/issues/2026-05-09/"/>
+    <id>https://modus-lisp.github.io/issues/2026-05-09/</id>
+    <updated>2026-08-29T13:53:12-04:00</updated>
+    <summary>Two weeks of layout fragility root-caused to docstrings being compiled into function prologues — and the ANSI suite ported to bare metal, where there is no fork to isolate it with. 62 commits.</summary>
+    <link rel="alternate" type="text/markdown" href="https://modus-lisp.github.io/issues/2026-05-09/index.md"/>
+  </entry>
+  <entry>
+    <title>№8 — A heuristic is a bug you haven&#x27;t hit yet</title>
+    <link href="https://modus-lisp.github.io/issues/2026-05-02/"/>
+    <id>https://modus-lisp.github.io/issues/2026-05-02/</id>
+    <updated>2026-08-29T13:53:12-04:00</updated>
+    <summary>Tests that pass or fail depending on where the code sits in memory, a fuzzer built to catch them, and three type predicates that had never checked anything — they had been ruling things out. 159 commits.</summary>
+    <link rel="alternate" type="text/markdown" href="https://modus-lisp.github.io/issues/2026-05-02/index.md"/>
+  </entry>
+  <entry>
+    <title>№7 — Lost: none</title>
+    <link href="https://modus-lisp.github.io/issues/2026-04-25/"/>
+    <id>https://modus-lisp.github.io/issues/2026-04-25/</id>
+    <updated>2026-08-29T13:53:12-04:00</updated>
+    <summary>The harness stops losing tests entirely, and the reason so many were crashing turns out to be that closures and symbols had the same shape — so calling one could call the other. 82 commits.</summary>
+    <link rel="alternate" type="text/markdown" href="https://modus-lisp.github.io/issues/2026-04-25/index.md"/>
+  </entry>
+  <entry>
+    <title>№6 — Counting what actually ran</title>
+    <link href="https://modus-lisp.github.io/issues/2026-04-18/"/>
+    <id>https://modus-lisp.github.io/issues/2026-04-18/</id>
+    <updated>2026-08-29T13:53:12-04:00</updated>
+    <summary>A Common Lisp runtime built in layers, a copying collector in x64 assembly, a reported 99.994% on the ANSI suite — and then the discovery that 17,587 of those tests had never run. 107 commits.</summary>
+    <link rel="alternate" type="text/markdown" href="https://modus-lisp.github.io/issues/2026-04-18/index.md"/>
+  </entry>
+  <entry>
+    <title>№5 — Somebody else&#x27;s tests</title>
+    <link href="https://modus-lisp.github.io/issues/2026-04-11/"/>
+    <id>https://modus-lisp.github.io/issues/2026-04-11/</id>
+    <updated>2026-09-01T22:27:14-04:00</updated>
+    <summary>Modus stops grading itself and wires up Paul Dietz&#x27;s ANSI suite, symbols become real objects with identity, the compiler learns to emit Linux binaries, and three documented limitations turn out not to exist. 50 commits.</summary>
+    <link rel="alternate" type="text/markdown" href="https://modus-lisp.github.io/issues/2026-04-11/index.md"/>
+  </entry>
+  <entry>
+    <title>№4 — The Fixpoint of Theseus</title>
+    <link href="https://modus-lisp.github.io/issues/2026-03-14/"/>
+    <id>https://modus-lisp.github.io/issues/2026-03-14/</id>
+    <updated>2026-08-29T13:53:12-04:00</updated>
+    <summary>Five SHA-256 comparisons prove the compiler leaves no fingerprint of the machine that ran it: a 32-bit image builds a 64-bit one bit-identical to the 64-bit build. Then Movitz is deleted. 3 commits.</summary>
+    <link rel="alternate" type="text/markdown" href="https://modus-lisp.github.io/issues/2026-03-14/index.md"/>
+  </entry>
+  <entry>
+    <title>№3 — A Pi with no SD card</title>
+    <link href="https://modus-lisp.github.io/issues/2026-03-07/"/>
+    <id>https://modus-lisp.github.io/issues/2026-03-07/</id>
+    <updated>2026-09-01T22:27:14-04:00</updated>
+    <summary>Modus leaves the emulator: real Pi Zero 2 W silicon, booted over USB, reached by SSH across a USB Ethernet gadget it implements itself. The compiler compiles its own 759 functions. 3 commits.</summary>
+    <link rel="alternate" type="text/markdown" href="https://modus-lisp.github.io/issues/2026-03-07/index.md"/>
+  </entry>
+  <entry>
+    <title>№2 — Nine architectures in four commits</title>
+    <link href="https://modus-lisp.github.io/issues/2026-02-28/"/>
+    <id>https://modus-lisp.github.io/issues/2026-02-28/</id>
+    <updated>2026-09-01T22:27:14-04:00</updated>
+    <summary>Work resumes after eleven months, and not where it stopped. A 64-bit rewrite with actors and SMP, a kernel that recompiles itself from source it carries inside, and a portable bytecode ISA with nine backends. 4 commits.</summary>
+    <link rel="alternate" type="text/markdown" href="https://modus-lisp.github.io/issues/2026-02-28/index.md"/>
+  </entry>
+  <entry>
+    <title>№1 — A quick hack, on Movitz</title>
+    <link href="https://modus-lisp.github.io/issues/2025-03-15/"/>
+    <id>https://modus-lisp.github.io/issues/2025-03-15/</id>
+    <updated>2026-09-01T22:21:31-04:00</updated>
+    <summary>The first commit is a prototype: 29,000 lines of Modus on 55,000 lines of somebody else&#x27;s bare-metal Lisp, booting under QEMU into a REPL with TLS and SSH. It was built in silence, shelved for eleven months, and its date hides a fortnight of work that happened in 2026. 1 commit.</summary>
+    <link rel="alternate" type="text/markdown" href="https://modus-lisp.github.io/issues/2025-03-15/index.md"/>
+  </entry>
+</feed>
