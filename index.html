@@ -33,7 +33,7 @@
       <span>&middot;</span>
       <span>from the bare metal up</span>
       <span>&middot;</span>
-      <span><b>42 repositories</b></span>
+      <span><b>43 repositories</b></span>
     </div>
     <h1>Modus<span class="lo">&#8209;Lisp</span></h1>
     <hr class="rule-fire">
@@ -56,6 +56,13 @@
     them. Every week of the project has an issue.</p>
     <h3 class="month">Latest</h3>
     <ol class="issues">
+      <li>
+        <a href="issues/2026-09-05/">
+          <span class="no">&#8470;&nbsp;26<br>5 Sep 26</span>
+          <span class="it">Thirty gates in a day</span>
+          <span class="dek">Thirty repositories get their first CI workflow in a single day, and every failure it turns up is in the harness rather than the code. Underneath, Modus runs a real <code>quickload</code> with cabinet as its only filesystem. 256 commits.</span>
+        </a>
+      </li>
       <li>
         <a href="issues/2026-08-29/">
           <span class="no">&#8470;&nbsp;25<br>29 Aug 26</span>
@@ -82,13 +89,6 @@
           <span class="no">&#8470;&nbsp;22<br>8 Aug 26</span>
           <span class="it">Speech, both ways</span>
           <span class="dek">A text-to-speech engine, a speech recognizer, and a desktop that types what it hears into whichever window has focus. Underneath, the JIT stops falling back to the interpreter. 218 commits.</span>
-        </a>
-      </li>
-      <li>
-        <a href="issues/2026-08-01/">
-          <span class="no">&#8470;&nbsp;21<br>1 Aug 26</span>
-          <span class="it">629 bytes of desktop</span>
-          <span class="dek">A VP8 encoder written from the RFC goes from its first entropy coder to Safari decoding a live Lisp desktop, in twenty-three hours. Also a PDF renderer, three audio decoders, and Acid3 at 100/100. 294 commits.</span>
         </a>
       </li>
     </ol>
@@ -207,7 +207,7 @@
 
   <section id="workspace">
     <div class="sec-head">
-      <span class="sec-eyebrow">42 repositories, one machine</span>
+      <span class="sec-eyebrow">43 repositories, one machine</span>
       <h2>The workspace</h2>
     </div>
     <p>Each piece is a library in its own right, clean-room and in portable Common Lisp, and each
@@ -240,6 +240,8 @@
           a C library, on purpose.</dd>
           <dt><a href="https://github.com/modus-lisp/glass-mcclim">glass-mcclim</a></dt>
           <dd>McCLIM support kept outside glass, so glass need not know McCLIM exists.</dd>
+          <dt><a href="https://github.com/modus-lisp/glass-webrtc">glass-webrtc</a></dt>
+          <dd>The gateway that puts a glass desktop through a browser&rsquo;s WebRTC stack.</dd>
           <dt><a href="https://github.com/modus-lisp/warp">warp</a></dt>
           <dd>A delta protocol rather than a renderer: keyed, budgeted, staleness-annotated
           updates over typed projections, with a separate encoding per consumer. A browser's DOM

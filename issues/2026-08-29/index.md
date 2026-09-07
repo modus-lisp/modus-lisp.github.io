@@ -1,6 +1,6 @@
 # The Pi Zero answers the doorbell
 
-**This Week in Modus №25** · 22–29 August 2026 · 97 commits · 7 repos
+**This Week in Modus №25** · 22–28 August 2026 · 97 commits · 7 repos
 
 <https://modus-lisp.github.io/issues/2026-08-29/>
 

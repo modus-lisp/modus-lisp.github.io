@@ -1,12 +1,13 @@
 # crier — This Week in Modus
 
-> A weekly dispatch on modus-lisp: a personal computer written from scratch in Common Lisp. Weekly, one issue per week that had commits, numbered from the project's first working week in March 2025. 25 issues covering 3,810 commits.
+> A weekly dispatch on modus-lisp: a personal computer written from scratch in Common Lisp. Weekly, one issue per week that had commits, numbered from the project's first working week in March 2025. 26 issues covering 4,066 commits.
 
 Every claim in an issue comes out of the git commit log of the modus-lisp repositories; where an issue uses anything else it says so in its own method footnote. Counts are counted, not estimated. Each issue below links to a Markdown mirror of the full text.
 
 ## Issues
 
-- [№25 — The Pi Zero answers the doorbell](https://modus-lisp.github.io/issues/2026-08-29/index.md): A real OpenSSH client logs in to bare-metal Modus on Pi Zero 2 W silicon, then downloads a library and runs it — and the desktop above it learns its own name and its own resolution. 97 commits. (22–29 August 2026)
+- [№26 — Thirty gates in a day](https://modus-lisp.github.io/issues/2026-09-05/index.md): Thirty repositories get their first CI workflow in a single day, and every failure it turns up is in the harness rather than the code. Underneath, Modus runs a real quickload with cabinet as its only filesystem. 256 commits. (29 August – 4 September 2026)
+- [№25 — The Pi Zero answers the doorbell](https://modus-lisp.github.io/issues/2026-08-29/index.md): A real OpenSSH client logs in to bare-metal Modus on Pi Zero 2 W silicon, then downloads a library and runs it — and the desktop above it learns its own name and its own resolution. 97 commits. (22–28 August 2026)
 - [№24 — The stack learns to leave home](https://modus-lisp.github.io/issues/2026-08-22/index.md): kiln and glass-sdl appear, the CL stack runs a REPL on real Pi Zero silicon, one HTTP client replaces four, and half a dozen repos stop assuming whose home directory they are in. 136 commits. (15–21 August 2026)
 - [№23 — Two packages, one variable](https://modus-lisp.github.io/issues/2026-08-15/index.md): Nine of Modus's name-keyed registries turn out to be blind to packages, one of them mis-dispatching in silence; the build starts checking itself; and alexandria finishes at 230/230. 273 commits. (8–14 August 2026)
 - [№22 — Speech, both ways](https://modus-lisp.github.io/issues/2026-08-08/index.md): A text-to-speech engine, a speech recognizer, and a desktop that types what it hears into whichever window has focus. Underneath, the JIT stops falling back to the interpreter. 218 commits. (1–7 August 2026)

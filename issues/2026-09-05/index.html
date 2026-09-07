@@ -1,0 +1,352 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Thirty gates in a day — This Week in Modus №26</title>
+<meta name="description" content="This Week in Modus, 29 August–4 September 2026: thirty repositories get their first CI workflow in one day and every bug it finds is in the harness; and Modus runs a real quickload with cabinet as its only filesystem.">
+<meta property="og:title" content="Thirty gates in a day — This Week in Modus №26">
+<meta property="og:description" content="29 August–4 September 2026: thirty repositories gain a gate in one day, and Modus installs a library from the network onto a filesystem with no operating system underneath it.">
+<meta property="og:type" content="article">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..700&family=Newsreader:opsz,wght@6..72,300..600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../../assets/crier.css">
+  <link rel="alternate" type="application/atom+xml" title="This Week in Modus" href="https://modus-lisp.github.io/feed.xml">
+  <link rel="alternate" type="text/markdown" href="index.md">
+</head>
+<body>
+<div class="page">
+
+  <div class="sitebar">
+    <a class="brand" href="../../">crier</a>
+    <nav><a href="../">Issues</a><a href="https://github.com/modus-lisp">GitHub</a></nav>
+  </div>
+
+  <header class="mast">
+    <div class="kicker">
+      <span>This Week in Modus &mdash; &#8470;&nbsp;26</span>
+      <span>&middot;</span>
+      <span>29 August &ndash; 4 September 2026</span>
+      <span>&middot;</span>
+      <span><b>256 commits</b> &middot; 36 of 43 repos</span>
+    </div>
+    <h1>Thirty gates<br>in a <span class="lo">day</span></h1>
+    <hr class="rule-fire">
+    <p class="standfirst">On Sunday, seven repositories in this workspace ran their tests when you
+    pushed. By Monday night, thirty-seven did &mdash; and every bug that turned up was in the new
+    harness rather than in anything it was measuring. Underneath that, the floor reached the thing
+    it has been walking toward since July: a real <code>quickload</code>, fetching a real library
+    off the network, onto a filesystem with no operating system beneath it.</p>
+
+    <div class="tally">
+      <div><span class="n">256</span><span class="l">Commits</span></div>
+      <div><span class="n">36</span><span class="l">Repositories</span></div>
+      <div><span class="n">30</span><span class="l">First gates</span></div>
+      <div><span class="n">39</span><span class="l">Green, of 46</span></div>
+      <div><span class="n">59</span><span class="l">On modus</span></div>
+    </div>
+  </header>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow">thirty repositories &nbsp;/&nbsp; 30 August</span>
+      <h2>The gates that already existed</h2>
+    </div>
+
+    <p>Nearly every repository here already had tests. Most had oracles &mdash; the compressors
+    check themselves against zlib, the font stack against <code>ttx</code> and HarfBuzz, the curve
+    library against real signatures. What almost none of them had was anything that ran those tests
+    when somebody pushed. The suites were written and nobody was pressing the button.</p>
+
+    <p>Thirty repositories got their first workflow file on 30 August. The commit subject repeats,
+    and it is the honest one:</p>
+
+    <div class="callout">
+      <p>ci: run the gates that already existed</p>
+      <span class="src">the subject in twelve repositories; three more say &ldquo;run the tests that were already here&rdquo;</span>
+    </div>
+
+    <p>That is the shape of the day. In fifteen repositories the work was writing no tests at all.
+    Four got a gate they genuinely did not have &mdash; pigment, warp, warren and webrtc-media
+    &mdash; and the rest is thirty <code>gates.yml</code> files, a fixture path corrected in one
+    place, an <code>ASDF</code> load added in another, and then the tail that always follows:
+    making a harness that has never run agree with thirty repositories that have never been run by
+    one.</p>
+
+    <h3>Four reasons a green repository goes red</h3>
+
+    <p>The striking part is that every failure found on 30 August was in the harness. Not one was
+    a test that had been quietly failing. Each was found once, in one repository, then fixed in all
+    of them, which is why the same subject appears in as many as twenty-four repositories at once.
+    Ninety-five of the week&rsquo;s 256 commits are CI commits.</p>
+
+    <div class="callout">
+      <p><code>--script</code> implies <code>--no-userinit</code>, so quicklisp&rsquo;s init file
+      never loads and a library installed by the step above is invisible to the gate; it also does
+      not load ASDF, which a gate whose first form is <code>(asdf:load-system &hellip;)</code>
+      needs. Both failures look like the repo&rsquo;s fault and are the harness&rsquo;s &mdash;
+      warp went red on &ldquo;Component bordeaux-threads not found&rdquo; with bordeaux-threads
+      installed one step earlier.</p>
+      <span class="src">cabinet &mdash; bc9eef0, <em>ci: do not run gates under --script</em> &mdash; the same commit landed in fifteen repositories</span>
+    </div>
+
+    <p>The other three are the same class. A gate run from a directory the runner had discovered
+    and then truncated, fixed by giving it a source registry and keeping discovered paths whole. A
+    test that assumed its own system was loaded, in a process where nothing had loaded it. And an
+    oracle reading <code>chipz</code> and <code>salza2</code> symbols in a process where neither
+    had been quickloaded, because nothing in the repository declares a dependency that only the
+    oracle needs.</p>
+
+    <p>The fourth has an argument attached:</p>
+
+    <div class="callout">
+      <p>The one step here that reaches the network. A transient failure in it is
+      indistinguishable from a broken repository: loom went red on &ldquo;Connection reset by
+      peer&rdquo; partway through the install and was diagnosed as having a non-hermetic test
+      suite &mdash; it does not, and its suite never ran that day. A badge that goes red on
+      somebody else&rsquo;s CDN teaches people to ignore it.</p>
+      <span class="src">cabinet &mdash; b1aecf8, <em>ci: retry the quicklisp install</em></span>
+    </div>
+
+    <p>Three repositories reverted their own gate the same day rather than leave a red badge up
+    while the harness was still wrong &mdash; cairn, loom and operandi each carry a
+    <code>Revert &ldquo;ci: run the gates that already existed&rdquo;</code>, and two of the three
+    landed again once the four fixes above were in. A gate that is wrong about the code is worse
+    than no gate, and the week treats it that way.</p>
+
+    <p>Where that leaves the organisation, measured rather than asserted: <b>46 repositories, 39
+    green, one failing, six with no CI at all.</b> The one failure is operandi, whose gate is
+    reverted and whose last run is therefore still the red one.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>modus</em> &nbsp;/&nbsp; 59 commits &nbsp;/&nbsp; 29 August &ndash; 3 September</span>
+      <h2>quickload, onto a filesystem that is not there</h2>
+    </div>
+
+    <p>Since <a href="../2026-07-04/">&#8470;&nbsp;17</a> the same target has been visible at the
+    end of a long corridor: for a Lisp machine to install software the way every other Lisp does,
+    <code>quickload</code> has to work &mdash; and <code>quickload</code> wants a filesystem, which
+    a machine with no operating system does not have. cabinet is the answer the workspace already
+    built for something else: a hierarchical filesystem living inside one pagetree keyspace,
+    written for the Bitcoin node&rsquo;s storage and reused here.</p>
+
+    <p>This week the two meet, in a single seam under Common Lisp&rsquo;s own
+    <code>open</code> and <code>load</code>:</p>
+
+    <div class="callout">
+      <p>The full unmodified-client flow: client sources loaded FROM cabinet,
+      <code>ql-dist:install-dist</code> fetches the mirror over hosted sockets and writes the dist
+      INTO cabinet, the release tarball saves byte-perfect, gunzip and minitar unpack into cabinet,
+      and ASDF loads all 18 alexandria files from cabinet &mdash; <code>FLATTEN</code> &rArr;
+      <code>(1 2 3 4)</code>.</p>
+      <span class="src">modus &mdash; e338d38, <em>HOSTED WORKS: genuine ql:quickload of alexandria with cabinet as the ONLY filesystem</em></span>
+    </div>
+
+    <p>An unmodified quicklisp client, reaching a real mirror, unpacking a real tarball, into a
+    filesystem that is a B-tree in a keyspace. Nothing was taught that it was not talking to a
+    disk.</p>
+
+    <h3>The bug that made the tests lie</h3>
+
+    <p>Getting there needed the week&rsquo;s best root cause, and it is a good example of why this
+    dispatch reads commit messages rather than diffs. aarch64 Linux has no <code>open</code>,
+    <code>stat</code>, <code>unlink</code>, <code>rename</code> or <code>mkdir</code> syscalls
+    &mdash; only the <code>*at</code> variants &mdash; so eleven <code>%sys-*</code> functions are
+    overridden for that architecture. Each override faithfully reproduced the syscall shape. Each
+    one dropped the first branch of the original: the test for whether a cabinet is mounted.</p>
+
+    <div class="callout">
+      <p>THE FAILURE WAS SILENT AND DATA-WRONG, NOT A CRASH. For a path the host also has, the real
+      open succeeded and returned the HOST file&rsquo;s bytes. Measured with a sentinel: cabinet
+      holds <code>CABINET-SENTINEL-42</code>; before this commit aarch64
+      <code>with-open-file</code> returned the host&rsquo;s &ldquo;2021-02-13&rdquo; while x64
+      returned the sentinel.</p>
+      <span class="src">modus &mdash; fc74cd7a, <em>#283 FIX</em></span>
+    </div>
+
+    <p>So on aarch64 every file operation went to the real kernel even with a cabinet mounted, and
+    the passing tests were passing because they were reading the host&rsquo;s files. x64 has no
+    such override, which is exactly why x64 was correct and aarch64 was not &mdash; the two
+    architectures were not running the same code, and only one of them was being believed. The same
+    week closes two more of the same family: aarch64 runtime-JIT allocations now set their GC
+    bitmap bits, so CLOS objects built at runtime survive collection on the Pi &mdash; validated on
+    silicon, nine collections deep &mdash; and the JIT&rsquo;s constant vector is ported to
+    aarch64, replacing a stopgap that rejected every page carrying a constant because baked
+    literals went stale when the collector fired mid-thunk.</p>
+
+    <h3>A merge that reports its own scope</h3>
+
+    <p>When the branch lands on 1 September the merge commit is a gate result rather than an
+    announcement, and it is worth quoting for the last paragraph:</p>
+
+    <div class="console">
+      <span class="cap">modus &mdash; dcf10cdb, cabinet-fs &rarr; main</span>
+<pre>passed 17515 -> <span class="ret">17519</span>   CHUNK-CRASH 0 -> 0   FILE-WEDGE 30 -> 30
+
+The single lost test is 24718 = COMPILE.5 &mdash; a REVEAL rather than a
+regression: the defect predates the branch and was invisible only because
+CL:COMPILE did not compile, so the compiled-literal path never ran.
+
+16 of the 17 commits are aa64 / cabinet / library-loading work that the
+x64 ANSI gate is structurally blind to.</pre>
+    </div>
+
+    <p>Four tests gained, one lost, the lost one explained and filed, and then the admission that
+    the gate it just passed cannot see most of what the branch did. That last line is the
+    discipline: a green gate is evidence about the things the gate can measure, and saying which
+    those are is part of reporting the result.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>cl-transport</em> &nbsp;/&nbsp; a30b756, 895e8ed, 4dc9862</span>
+      <h2>What may leave, and how</h2>
+    </div>
+
+    <p>The transport library already knew how bytes travel &mdash; direct, through SOCKS5, through
+    Tor, or through any backend registered at runtime. Nothing used that to decide whether they
+    <em>may</em>. This week it does, and the placement is the whole design.</p>
+
+    <p>The obvious place to enforce a network policy is where a carrier is chosen. That is the
+    place the commit rejects, in one sentence:</p>
+
+    <div class="callout">
+      <p>Declaring is not enforcing, and a policy expressed only where carriers are chosen governs
+      exactly the callers that already agreed to be governed.</p>
+      <span class="src">cl-transport &mdash; a30b756</span>
+    </div>
+
+    <p>So the gate sits lower, on <code>socket-connect</code> and <code>socket-send</code>, where
+    seal, weft, conch, usocket and any quicklisp library nobody here has read all end up anyway.
+    The halves meet at a default: <code>*carrier*</code> is <code>:raw</code> unless something
+    bound it, and <code>:raw</code> means <em>nobody dialled this</em>. That single default is what
+    lets a policy of <code>require * via cl-transport</code> mean what it says &mdash; code that
+    opened its own socket carries <code>:raw</code>, satisfies no carrier requirement, and is
+    refused.</p>
+
+    <p>Which makes it a migration tool as much as a policy. Turn the requirement on, and every path
+    in the workspace still opening its own socket names itself in the log, so moving the rest of
+    the org onto one dialler becomes a list to work through rather than a refactor to plan. kiln
+    already arms it before anything dials out.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>glass</em>, <em>glass-sdl</em> &nbsp;/&nbsp; 56 commits</span>
+      <h2>A seat has a density</h2>
+    </div>
+
+    <p>The desktop work splits cleanly in two. The first half is HiDPI, approached carefully: scale
+    goes on the <em>seat</em> &mdash; the thing a viewer sits at &mdash; and not on the
+    framebuffer, for a stated reason. A framebuffer is a rectangle of real pixels, which is a good
+    definition and should not acquire a second kind of pixel. Screen width and height stay device
+    pixels and every drawing primitive still takes them; the scale says only what a layout number
+    is multiplied by before it becomes one.</p>
+
+    <p>It is a rational rather than an integer, because 3/2 is a scale real displays use and
+    rounding it away at the door would make fractional scaling unreachable later rather than merely
+    unimplemented. The multiply-and-round lives in exactly two places, so a value is rounded once
+    &mdash; a title bar rounded up beside contents rounded down is a one-pixel seam nobody can find
+    afterwards. The commit is candid about what it is worth today:</p>
+
+    <div class="callout">
+      <p>Both are the kind of change whose whole value is that it changes nothing today, which is
+      also what the gate asserts.</p>
+      <span class="src">glass &mdash; 2bb70e9</span>
+    </div>
+
+    <p>Downstream: pop-up menus that scale and carry the density their pixels were drawn at, damage
+    measured at the density it was drawn at, and a magnifier for applications that do not know
+    about density &mdash; which, the commit notes, is nearly all of them. On the glass-sdl side the
+    window is created in points, asks the panel for its pixels, and keeps the two apart. A macOS
+    quirk gets handled on the way: the platform blocks the event loop while a window is being
+    dragged, so the desktop learns to draw during the drag, drop frames rather than sizes on a slow
+    one, and stop replaying the drag once the mouse comes up.</p>
+
+    <p>The second half is sound, both directions. This machine&rsquo;s speakers, then its
+    microphone, then a <em>Mixer</em> window &mdash; what is playing, who is listening, what is
+    silent &mdash; and a music player &ldquo;in the shape everybody already knows&rdquo;. The
+    microphone gets three postures rather than a boolean, can be offered rather than opened, gives
+    itself back, and leaves the indicator lit a moment longer the way a camera light does.
+    Dictation stays aimed at the window you pointed it at and says where the words are going; a
+    local viewer counts as a keyboard, so dictation stops requiring a VNC server to reach a desktop
+    running on the same machine.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>glass</em> &nbsp;/&nbsp; c43e559, 5d392c3</span>
+      <h2>A running image, showing its own source</h2>
+    </div>
+
+    <p>Two commits give the control socket back what a form printed, then add
+    <code>source-of</code> &mdash; so a running desktop can be asked what a function&rsquo;s
+    definition looks like:</p>
+
+    <div class="console">
+      <span class="cap">glass &mdash; c43e559</span>
+<pre>kiln eval "(source-of #'cl-transport.gate:connections)"
+kiln eval "(disassemble #'cl-transport.gate::loopback-p)"</pre>
+    </div>
+
+    <p>The implementation choice is the point. Common Lisp can hand back a function&rsquo;s form
+    without reading any file, and the commit refuses to:</p>
+
+    <div class="callout">
+      <p>The text is read back <em>out of the file</em> the definition was compiled from, rather
+      than reconstructed. <code>function-lambda-expression</code> can hand back a form, but it is
+      re-printed with macros expanded, formatting invented and every comment gone &mdash; and in
+      this codebase the comments carry the reasoning, so that is precisely the half worth having
+      and the half that is lost.</p>
+      <span class="src">glass &mdash; c43e559</span>
+    </div>
+
+    <p>Reading the file tells the truth about the file, which may have moved on from the image;
+    reconstructing the form tells the truth about the image, and throws away why any of it is the
+    way it is. This project keeps choosing the reasoning.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>glass-webrtc</em>, <em>webrtc-data</em> &nbsp;/&nbsp; 1 September</span>
+      <h2>A demo directory becomes a repository</h2>
+    </div>
+
+    <p>The forty-third repository in the workspace is not new work. <code>glass-webrtc</code>
+    &mdash; the gateway that puts a glass desktop through a browser&rsquo;s WebRTC stack &mdash;
+    had been living in <code>webrtc-data/demo/</code>, and this week it moved out with its history:
+    125 commits, reaching back well before the move, into a repository of its own with an ASDF
+    system instead of a script. webrtc-data loses 31,241 lines and keeps a pointer.</p>
+
+    <p>warp follows it, the devices file the monitor reads moving too, and kiln re-locks against
+    the new address. It is the pattern from <a href="../2026-07-18/">&#8470;&nbsp;19</a> onwards:
+    a thing that has become load-bearing stops being a subdirectory of the thing it was first
+    demonstrated with.</p>
+  </section>
+
+  <footer>
+    <p><strong>Method.</strong> Commits by <em>author</em> date, 29 August to 4 September 2026,
+    across the 43 git repositories in the modus-lisp workspace, counting each repository&rsquo;s
+    default branch. Line counts exclude generated acceptance-gate artefacts and committed scratch
+    dumps. Produced with <code>bin/week 2026-09-05 --log</code>.</p>
+    <p><strong>A correction to the tool.</strong> <code>bin/week</code> counted whatever branch a
+    repository happened to have checked out, which is not the same thing as what landed: a
+    repository sitting on a feature branch reports that branch&rsquo;s work as the week&rsquo;s,
+    and one whose branch is behind reports nothing at all. It now counts <code>main</code> or
+    <code>master</code> explicitly, and prints anything it finds in a repository but not on that
+    branch rather than silently omitting it. This issue is the first measured that way; earlier
+    issues were not, and their figures stand as published.</p>
+    <p><strong>CI figures.</strong> &ldquo;30 first gates&rdquo; counts repositories whose earliest
+    commit adding <code>.github/workflows/</code> is dated 30 August 2026. The
+    green/failing/ungated numbers are the newest workflow run per repository across the whole
+    organisation, read with <code>bin/ci</code> on 6 September 2026 &mdash; 46 repositories, which
+    is more than the 43 cloned here.</p>
+    <p><a href="../">&larr; All issues</a> &middot; <a href="../../">crier</a></p>
+  </footer>
+
+</div>
+</body>
+</html>

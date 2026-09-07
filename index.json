@@ -4,7 +4,7 @@
   "home": "https://modus-lisp.github.io/",
   "feed": "https://modus-lisp.github.io/feed.xml",
   "generated_from": "the site's own HTML, by bin/mirror",
-  "count": 25,
+  "count": 26,
   "issues": [
     {
       "number": 1,
@@ -273,13 +273,24 @@
     {
       "number": 25,
       "date": "2026-08-29",
-      "span": "22\u201329 August 2026",
+      "span": "22\u201328 August 2026",
       "title": "The Pi Zero answers the doorbell",
       "summary": "A real OpenSSH client logs in to bare-metal Modus on Pi Zero 2 W silicon, then downloads a library and runs it \u2014 and the desktop above it learns its own name and its own resolution. 97 commits.",
       "commits": 97,
       "repos": 7,
       "url": "https://modus-lisp.github.io/issues/2026-08-29/",
       "markdown": "https://modus-lisp.github.io/issues/2026-08-29/index.md"
+    },
+    {
+      "number": 26,
+      "date": "2026-09-05",
+      "span": "29 August \u2013 4 September 2026",
+      "title": "Thirty gates in a day",
+      "summary": "Thirty repositories get their first CI workflow in a single day, and every failure it turns up is in the harness rather than the code. Underneath, Modus runs a real quickload with cabinet as its only filesystem. 256 commits.",
+      "commits": 256,
+      "repos": 36,
+      "url": "https://modus-lisp.github.io/issues/2026-09-05/",
+      "markdown": "https://modus-lisp.github.io/issues/2026-09-05/index.md"
     }
   ]
 }
