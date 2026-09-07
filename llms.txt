@@ -6,7 +6,7 @@ Every claim in an issue comes out of the git commit log of the modus-lisp reposi
 
 ## Issues
 
-- [№26 — A Lightning node in 34 hours](https://modus-lisp.github.io/issues/2026-09-05/index.md): An empty repository becomes a Lightning node that Core Lightning punishes for cheating, in thirty-four hours. Thirty repositories get their first CI gate, and Modus runs a real quickload with cabinet as its only filesystem. 304 commits. (29 August – 4 September 2026)
+- [№26 — Lightning, in 34 hours](https://modus-lisp.github.io/issues/2026-09-05/index.md): An empty repository becomes a Lightning node that Core Lightning punishes for cheating, in thirty-four hours. Thirty repositories get their first CI gate, and Modus runs a real quickload with cabinet as its only filesystem. 304 commits. (29 August – 4 September 2026)
 - [№25 — The Pi Zero answers the doorbell](https://modus-lisp.github.io/issues/2026-08-29/index.md): A real OpenSSH client logs in to bare-metal Modus on Pi Zero 2 W silicon, then downloads a library and runs it — and the desktop above it learns its own name and its own resolution. 97 commits. (22–28 August 2026)
 - [№24 — The stack learns to leave home](https://modus-lisp.github.io/issues/2026-08-22/index.md): kiln and glass-sdl appear, the CL stack runs a REPL on real Pi Zero silicon, one HTTP client replaces four, and half a dozen repos stop assuming whose home directory they are in. 136 commits. (15–21 August 2026)
 - [№23 — Two packages, one variable](https://modus-lisp.github.io/issues/2026-08-15/index.md): Nine of Modus's name-keyed registries turn out to be blind to packages, one of them mis-dispatching in silence; the build starts checking itself; and alexandria finishes at 230/230. 273 commits. (8–14 August 2026)

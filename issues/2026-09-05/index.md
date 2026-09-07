@@ -1,4 +1,4 @@
-# A Lightning node in 34 hours
+# Lightning, in 34 hours
 
 **This Week in Modus №26** · 29 August – 4 September 2026 · 304 commits · 37 repos
 
