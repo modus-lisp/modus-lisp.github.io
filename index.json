@@ -285,10 +285,10 @@
       "number": 26,
       "date": "2026-09-05",
       "span": "29 August \u2013 4 September 2026",
-      "title": "Thirty gates in a day",
-      "summary": "Thirty repositories get their first CI workflow in a single day, and every failure it turns up is in the harness rather than the code. Underneath, Modus runs a real quickload with cabinet as its only filesystem. 256 commits.",
-      "commits": 256,
-      "repos": 36,
+      "title": "A Lightning node in 34 hours",
+      "summary": "An empty repository becomes a Lightning node that Core Lightning punishes for cheating, in thirty-four hours. Thirty repositories get their first CI gate, and Modus runs a real quickload with cabinet as its only filesystem. 304 commits.",
+      "commits": 304,
+      "repos": 37,
       "url": "https://modus-lisp.github.io/issues/2026-09-05/",
       "markdown": "https://modus-lisp.github.io/issues/2026-09-05/index.md"
     }

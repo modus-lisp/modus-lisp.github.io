@@ -96,6 +96,7 @@ print(d-datetime.timedelta(days=7))") || exit 1
   printf '%-18s %7d across %d repositories\n' TOTAL "$total" "$moved"
 
   offhead "$since" "$until"
+  uncloned "$since" "$until"
 
   [ -n "$log" ] || return 0
   for r in $(repos); do
@@ -132,6 +133,31 @@ offhead() {
     printf '\n'
   done
   [ -n "$any" ] && printf '  Run with --branches to list them.\n'
+  return 0
+}
+
+# Repositories that exist in the organisation but not in this workspace.  The
+# ledger walks directories, so a repo nobody cloned is not a quiet week — it is
+# an invisible one.  cl-payments was created and taken to a working Lightning
+# node inside the week of 2026-09-05, and the first draft of that issue did not
+# mention it, because it was never on this disk.  Needs `gh`; silent without it.
+uncloned() {
+  local since="$1" until="$2" listed any=""
+  command -v gh >/dev/null 2>&1 || return 0
+  listed=$(gh api -X GET /orgs/modus-lisp/repos --paginate -f per_page=100 \
+             --jq '.[].name' 2>/dev/null) || return 0
+  [ -n "$listed" ] || return 0
+  while read -r r; do
+    [ -z "$r" ] && continue
+    [ "$r" = "$SELF" ] && continue
+    [ -e "$ROOT/$r/.git" ] && continue
+    local n
+    n=$(gh api "/repos/modus-lisp/$r/commits?since=${since}T00:00:00Z&until=${until}T00:00:00Z&per_page=100" \
+          --jq 'length' 2>/dev/null) || continue
+    [ "${n:-0}" -gt 0 ] || continue
+    [ -n "$any" ] || { printf '\nNOT COUNTED ABOVE — in the org, not cloned here:\n'; any=1; }
+    printf '  %-16s %3d commit(s)   git clone git@github.com:modus-lisp/%s\n' "$r" "$n" "$r"
+  done <<< "$listed"
   return 0
 }
 

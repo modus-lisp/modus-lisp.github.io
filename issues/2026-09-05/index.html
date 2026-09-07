@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Thirty gates in a day — This Week in Modus №26</title>
-<meta name="description" content="This Week in Modus, 29 August–4 September 2026: thirty repositories get their first CI workflow in one day and every bug it finds is in the harness; and Modus runs a real quickload with cabinet as its only filesystem.">
-<meta property="og:title" content="Thirty gates in a day — This Week in Modus №26">
-<meta property="og:description" content="29 August–4 September 2026: thirty repositories gain a gate in one day, and Modus installs a library from the network onto a filesystem with no operating system underneath it.">
+<title>A Lightning node in 34 hours — This Week in Modus №26</title>
+<meta name="description" content="This Week in Modus, 29 August–4 September 2026: an empty repository becomes a Lightning node that Core Lightning punishes, in 34 hours; thirty repositories get their first CI gate; and Modus runs a real quickload with cabinet as its only filesystem.">
+<meta property="og:title" content="A Lightning node in 34 hours — This Week in Modus №26">
+<meta property="og:description" content="29 August–4 September 2026: a from-scratch Lightning implementation reaches interop with Core Lightning and LND in a day and a half, thirty repositories gain a gate, and Modus installs a library onto a filesystem with no OS underneath it.">
 <meta property="og:type" content="article">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -29,24 +29,81 @@
       <span>&middot;</span>
       <span>29 August &ndash; 4 September 2026</span>
       <span>&middot;</span>
-      <span><b>256 commits</b> &middot; 36 of 43 repos</span>
+      <span><b>304 commits</b> &middot; 37 of 44 repos</span>
     </div>
-    <h1>Thirty gates<br>in a <span class="lo">day</span></h1>
+    <h1>A Lightning node,<br>in <span class="lo">34 hours</span></h1>
     <hr class="rule-fire">
-    <p class="standfirst">On Sunday, seven repositories in this workspace ran their tests when you
-    pushed. By Monday night, thirty-seven did &mdash; and every bug that turned up was in the new
-    harness rather than in anything it was measuring. Underneath that, the floor reached the thing
-    it has been walking toward since July: a real <code>quickload</code>, fetching a real library
-    off the network, onto a filesystem with no operating system beneath it.</p>
+    <p class="standfirst">A repository that did not exist on Monday spent Tuesday and half of
+    Wednesday becoming a Lightning node, and finished by getting itself punished by Core Lightning
+    for publishing a revoked commitment &mdash; which is the proof, not the bug. Around it: thirty
+    repositories gained their first CI gate in a day, and every failure that turned up was in the
+    new harness rather than the code. And the floor reached the thing it has been walking toward
+    since July &mdash; a real <code>quickload</code>, fetching a real library off the network, onto
+    a filesystem with no operating system beneath it.</p>
 
     <div class="tally">
-      <div><span class="n">256</span><span class="l">Commits</span></div>
-      <div><span class="n">36</span><span class="l">Repositories</span></div>
-      <div><span class="n">30</span><span class="l">First gates</span></div>
+      <div><span class="n">304</span><span class="l">Commits</span></div>
+      <div><span class="n">37</span><span class="l">Repositories</span></div>
+      <div><span class="n">34h</span><span class="l">To a Lightning node</span></div>
+      <div><span class="n">30</span><span class="l">First CI gates</span></div>
       <div><span class="n">39</span><span class="l">Green, of 46</span></div>
-      <div><span class="n">59</span><span class="l">On modus</span></div>
     </div>
   </header>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>cl-payments</em> &nbsp;/&nbsp; 48 commits &nbsp;/&nbsp; 1&ndash;2 September</span>
+      <h2>Phase 0 to punished, in a day and a half</h2>
+    </div>
+
+    <p>The repository did not exist before 1 September. Its first commit is at 02:18 UTC that
+    morning and reads <em>Phase 0-1: BOLT&nbsp;#1 wire + BOLT&nbsp;#8 Noise_XK transport</em>
+    &mdash; the byte format two Lightning nodes speak, and the encrypted handshake they speak it
+    over. Thirty-four hours later this had happened:</p>
+
+    <div class="console">
+      <span class="cap">cl-payments &mdash; the first thirty-four hours</span>
+<pre>01 Sep 02:18   74f8f5f   BOLT #1 wire + BOLT #8 Noise_XK transport
+01 Sep 11:06   553662b   BOLT #9 feature bits + the BOLT #1 peer protocol
+01 Sep 19:18   5fe3f8a   BOLT #2 channel establishment — a real channel is open
+02 Sep 04:53   e61acf4   BOLT #11 invoices, reproducing the spec's examples byte for byte
+02 Sep 05:14   d16b99b   Phase 6 complete: cl-payments pays
+02 Sep 12:06   18314b1   <span class="ret">force-close and sweep, and Core Lightning punishes our
+                         revoked commitment</span></pre>
+    </div>
+
+    <p>That last line is the one worth reading twice, because it looks like a failure and is the
+    strongest result in it. Lightning&rsquo;s security rests on penalties: if a node publishes an
+    old channel state &mdash; a commitment it has already revoked &mdash; the counterparty is
+    supposed to detect it and take the whole channel balance. Getting Core Lightning to
+    <em>successfully punish you</em> means your revoked commitment was well-formed enough to be
+    recognised, your revocation secrets were derived correctly, and the reference implementation
+    agreed with you about what cheating looks like. You cannot fake that by getting the happy path
+    right.</p>
+
+    <p>The rest of the week&rsquo;s 48 commits close the same loop from the other side: the daemon
+    watches the chain and punishes in its turn, an old commitment of its own on chain is treated as
+    forfeit rather than swept every block, anchor channels are negotiated and used end to end
+    between two daemons, second-stage HTLCs get inputs of their own, and there are watchtowers. The
+    Sphinx onion of BOLT&nbsp;#4 and the commitment format of BOLT&nbsp;#3 are both checked byte for
+    byte against the specification&rsquo;s own appendix vectors.</p>
+
+    <p>And it is graded by things with no stake in it. The README&rsquo;s own summary &mdash; <em>a
+    from-scratch Lightning Network implementation in Common Lisp, verified against Core Lightning
+    and LND on a private signet</em> &mdash; names two independent reference implementations and a
+    real chain, with the chain view itself validated by
+    <a href="https://github.com/modus-lisp/cl-consensus">cl-consensus</a>, the workspace&rsquo;s own
+    Bitcoin node. A payment is forwarded <em>between two Core Lightning nodes</em>, which means both
+    neighbours believed it. LND interop arrives on its own commit, for
+    <code>channel_reestablish</code> and <code>announce_channel</code>. This is the pattern
+    <a href="../2026-07-04/">&#8470;&nbsp;17</a> named as the house rule: build the oracle before
+    the feature, and never let the thing that wrote the code be the thing that grades it.</p>
+
+    <p>The one dependency worth noting points back into the same week: <em>deps: pin secp256k1-fast
+    to the pushed thread-safety fix</em>. The curve library made <code>CT-MUL-G</code> usable from
+    more than one thread on 1 September, and a Lightning daemon signing on several connections at
+    once is what needed it.</p>
+  </section>
 
   <section>
     <div class="sec-head">
@@ -79,7 +136,7 @@
     <p>The striking part is that every failure found on 30 August was in the harness. Not one was
     a test that had been quietly failing. Each was found once, in one repository, then fixed in all
     of them, which is why the same subject appears in as many as twenty-four repositories at once.
-    Ninety-five of the week&rsquo;s 256 commits are CI commits.</p>
+    Ninety-five of the week&rsquo;s 304 commits are CI commits.</p>
 
     <div class="callout">
       <p><code>--script</code> implies <code>--no-userinit</code>, so quicklisp&rsquo;s init file
@@ -329,16 +386,24 @@ kiln eval "(disassemble #'cl-transport.gate::loopback-p)"</pre>
 
   <footer>
     <p><strong>Method.</strong> Commits by <em>author</em> date, 29 August to 4 September 2026,
-    across the 43 git repositories in the modus-lisp workspace, counting each repository&rsquo;s
+    across the 44 repositories of the modus-lisp organisation, counting each repository&rsquo;s
     default branch. Line counts exclude generated acceptance-gate artefacts and committed scratch
-    dumps. Produced with <code>bin/week 2026-09-05 --log</code>.</p>
-    <p><strong>A correction to the tool.</strong> <code>bin/week</code> counted whatever branch a
-    repository happened to have checked out, which is not the same thing as what landed: a
-    repository sitting on a feature branch reports that branch&rsquo;s work as the week&rsquo;s,
-    and one whose branch is behind reports nothing at all. It now counts <code>main</code> or
-    <code>master</code> explicitly, and prints anything it finds in a repository but not on that
-    branch rather than silently omitting it. This issue is the first measured that way; earlier
-    issues were not, and their figures stand as published.</p>
+    dumps. Produced with <code>bin/week 2026-09-05 --log</code>, plus the GitHub API for
+    cl-payments. The organisation&rsquo;s <code>.github</code> profile repository and this site are
+    not counted, on the grounds that a dispatch does not report on itself.</p>
+    <p><strong>Two corrections to the tool, both made this week.</strong> <code>bin/week</code>
+    counted whatever branch a repository happened to have checked out, which is not what landed: a
+    repository sitting on a feature branch reports that branch&rsquo;s work as the week&rsquo;s, and
+    one whose branch is behind reports nothing at all. It now counts <code>main</code> or
+    <code>master</code> explicitly, and prints what it finds off that branch rather than omitting it
+    silently.</p>
+    <p>The second was worse, and this issue was published with it. The ledger walks the directories
+    in one workspace, so a repository nobody has cloned is not a quiet week &mdash; it is an
+    invisible one. cl-payments was created, taken to interop with two reference implementations and
+    pushed inside this week, and the first version of this issue did not mention it, because it was
+    never on the disk being measured. <code>bin/week</code> now asks the organisation what
+    repositories exist and names any it cannot see. Earlier issues were measured before either fix
+    and their figures stand as published.</p>
     <p><strong>CI figures.</strong> &ldquo;30 first gates&rdquo; counts repositories whose earliest
     commit adding <code>.github/workflows/</code> is dated 30 August 2026. The
     green/failing/ungated numbers are the newest workflow run per repository across the whole

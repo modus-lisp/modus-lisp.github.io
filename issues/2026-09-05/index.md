@@ -1,14 +1,42 @@
-# Thirty gates in a day
+# A Lightning node in 34 hours
 
-**This Week in Modus №26** · 29 August – 4 September 2026 · 256 commits · 36 repos
+**This Week in Modus №26** · 29 August – 4 September 2026 · 304 commits · 37 repos
 
 <https://modus-lisp.github.io/issues/2026-09-05/>
 
-On Sunday, seven repositories in this workspace ran their tests when you pushed. By Monday night, thirty-seven did — and every bug that turned up was in the new harness rather than in anything it was measuring. Underneath that, the floor reached the thing it has been walking toward since July: a real `quickload`, fetching a real library off the network, onto a filesystem with no operating system beneath it.
+A repository that did not exist on Monday spent Tuesday and half of Wednesday becoming a Lightning node, and finished by getting itself punished by Core Lightning for publishing a revoked commitment — which is the proof, not the bug. Around it: thirty repositories gained their first CI gate in a day, and every failure that turned up was in the new harness rather than the code. And the floor reached the thing it has been walking toward since July — a real `quickload`, fetching a real library off the network, onto a filesystem with no operating system beneath it.
 
-| Commits | Repositories | First gates | Green, of 46 | On modus |
+| Commits | Repositories | To a Lightning node | First CI gates | Green, of 46 |
 |---|---|---|---|---|
-| 256 | 36 | 30 | 39 | 59 |
+| 304 | 37 | 34h | 30 | 39 |
+
+---
+
+*cl-payments / 48 commits / 1–2 September*
+
+## Phase 0 to punished, in a day and a half
+
+The repository did not exist before 1 September. Its first commit is at 02:18 UTC that morning and reads *Phase 0-1: BOLT #1 wire + BOLT #8 Noise_XK transport* — the byte format two Lightning nodes speak, and the encrypted handshake they speak it over. Thirty-four hours later this had happened:
+
+*cl-payments — the first thirty-four hours*
+
+```
+01 Sep 02:18   74f8f5f   BOLT #1 wire + BOLT #8 Noise_XK transport
+01 Sep 11:06   553662b   BOLT #9 feature bits + the BOLT #1 peer protocol
+01 Sep 19:18   5fe3f8a   BOLT #2 channel establishment — a real channel is open
+02 Sep 04:53   e61acf4   BOLT #11 invoices, reproducing the spec's examples byte for byte
+02 Sep 05:14   d16b99b   Phase 6 complete: cl-payments pays
+02 Sep 12:06   18314b1   force-close and sweep, and Core Lightning punishes our
+                         revoked commitment
+```
+
+That last line is the one worth reading twice, because it looks like a failure and is the strongest result in it. Lightning’s security rests on penalties: if a node publishes an old channel state — a commitment it has already revoked — the counterparty is supposed to detect it and take the whole channel balance. Getting Core Lightning to *successfully punish you* means your revoked commitment was well-formed enough to be recognised, your revocation secrets were derived correctly, and the reference implementation agreed with you about what cheating looks like. You cannot fake that by getting the happy path right.
+
+The rest of the week’s 48 commits close the same loop from the other side: the daemon watches the chain and punishes in its turn, an old commitment of its own on chain is treated as forfeit rather than swept every block, anchor channels are negotiated and used end to end between two daemons, second-stage HTLCs get inputs of their own, and there are watchtowers. The Sphinx onion of BOLT #4 and the commitment format of BOLT #3 are both checked byte for byte against the specification’s own appendix vectors.
+
+And it is graded by things with no stake in it. The README’s own summary — *a from-scratch Lightning Network implementation in Common Lisp, verified against Core Lightning and LND on a private signet* — names two independent reference implementations and a real chain, with the chain view itself validated by [cl-consensus](https://github.com/modus-lisp/cl-consensus), the workspace’s own Bitcoin node. A payment is forwarded *between two Core Lightning nodes*, which means both neighbours believed it. LND interop arrives on its own commit, for `channel_reestablish` and `announce_channel`. This is the pattern [№ 17](https://modus-lisp.github.io/issues/2026-07-04/) named as the house rule: build the oracle before the feature, and never let the thing that wrote the code be the thing that grades it.
+
+The one dependency worth noting points back into the same week: *deps: pin secp256k1-fast to the pushed thread-safety fix*. The curve library made `CT-MUL-G` usable from more than one thread on 1 September, and a Lightning daemon signing on several connections at once is what needed it.
 
 ---
 
@@ -28,7 +56,7 @@ That is the shape of the day. In fifteen repositories the work was writing no te
 
 ### Four reasons a green repository goes red
 
-The striking part is that every failure found on 30 August was in the harness. Not one was a test that had been quietly failing. Each was found once, in one repository, then fixed in all of them, which is why the same subject appears in as many as twenty-four repositories at once. Ninety-five of the week’s 256 commits are CI commits.
+The striking part is that every failure found on 30 August was in the harness. Not one was a test that had been quietly failing. Each was found once, in one repository, then fixed in all of them, which is why the same subject appears in as many as twenty-four repositories at once. Ninety-five of the week’s 304 commits are CI commits.
 
 > `--script` implies `--no-userinit`, so quicklisp’s init file never loads and a library installed by the step above is invisible to the gate; it also does not load ASDF, which a gate whose first form is `(asdf:load-system …)` needs. Both failures look like the repo’s fault and are the harness’s — warp went red on “Component bordeaux-threads not found” with bordeaux-threads installed one step earlier.
 
@@ -162,9 +190,11 @@ warp follows it, the devices file the monitor reads moving too, and kiln re-lock
 
 ---
 
-**Method.** Commits by *author* date, 29 August to 4 September 2026, across the 43 git repositories in the modus-lisp workspace, counting each repository’s default branch. Line counts exclude generated acceptance-gate artefacts and committed scratch dumps. Produced with `bin/week 2026-09-05 --log`.
+**Method.** Commits by *author* date, 29 August to 4 September 2026, across the 44 repositories of the modus-lisp organisation, counting each repository’s default branch. Line counts exclude generated acceptance-gate artefacts and committed scratch dumps. Produced with `bin/week 2026-09-05 --log`, plus the GitHub API for cl-payments. The organisation’s `.github` profile repository and this site are not counted, on the grounds that a dispatch does not report on itself.
 
-**A correction to the tool.** `bin/week` counted whatever branch a repository happened to have checked out, which is not the same thing as what landed: a repository sitting on a feature branch reports that branch’s work as the week’s, and one whose branch is behind reports nothing at all. It now counts `main` or `master` explicitly, and prints anything it finds in a repository but not on that branch rather than silently omitting it. This issue is the first measured that way; earlier issues were not, and their figures stand as published.
+**Two corrections to the tool, both made this week.** `bin/week` counted whatever branch a repository happened to have checked out, which is not what landed: a repository sitting on a feature branch reports that branch’s work as the week’s, and one whose branch is behind reports nothing at all. It now counts `main` or `master` explicitly, and prints what it finds off that branch rather than omitting it silently.
+
+The second was worse, and this issue was published with it. The ledger walks the directories in one workspace, so a repository nobody has cloned is not a quiet week — it is an invisible one. cl-payments was created, taken to interop with two reference implementations and pushed inside this week, and the first version of this issue did not mention it, because it was never on the disk being measured. `bin/week` now asks the organisation what repositories exist and names any it cannot see. Earlier issues were measured before either fix and their figures stand as published.
 
 **CI figures.** “30 first gates” counts repositories whose earliest commit adding `.github/workflows/` is dated 30 August 2026. The green/failing/ungated numbers are the newest workflow run per repository across the whole organisation, read with `bin/ci` on 6 September 2026 — 46 repositories, which is more than the 43 cloned here.
 

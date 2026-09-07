@@ -5,21 +5,21 @@
   <link href="https://modus-lisp.github.io/feed.xml" rel="self"/>
   <link href="https://modus-lisp.github.io/"/>
   <id>https://modus-lisp.github.io/</id>
-  <updated>2026-09-01T23:00:39-04:00</updated>
+  <updated>2026-09-06T21:50:25-04:00</updated>
   <author><name>ynniv</name></author>
   <entry>
-    <title>№26 — Thirty gates in a day</title>
+    <title>№26 — A Lightning node in 34 hours</title>
     <link href="https://modus-lisp.github.io/issues/2026-09-05/"/>
     <id>https://modus-lisp.github.io/issues/2026-09-05/</id>
-    <updated>2026-09-05T00:00:00Z</updated>
-    <summary>Thirty repositories get their first CI workflow in a single day, and every failure it turns up is in the harness rather than the code. Underneath, Modus runs a real quickload with cabinet as its only filesystem. 256 commits.</summary>
+    <updated>2026-09-06T21:50:25-04:00</updated>
+    <summary>An empty repository becomes a Lightning node that Core Lightning punishes for cheating, in thirty-four hours. Thirty repositories get their first CI gate, and Modus runs a real quickload with cabinet as its only filesystem. 304 commits.</summary>
     <link rel="alternate" type="text/markdown" href="https://modus-lisp.github.io/issues/2026-09-05/index.md"/>
   </entry>
   <entry>
     <title>№25 — The Pi Zero answers the doorbell</title>
     <link href="https://modus-lisp.github.io/issues/2026-08-29/"/>
     <id>https://modus-lisp.github.io/issues/2026-08-29/</id>
-    <updated>2026-09-01T23:00:39-04:00</updated>
+    <updated>2026-09-06T21:50:25-04:00</updated>
     <summary>A real OpenSSH client logs in to bare-metal Modus on Pi Zero 2 W silicon, then downloads a library and runs it — and the desktop above it learns its own name and its own resolution. 97 commits.</summary>
     <link rel="alternate" type="text/markdown" href="https://modus-lisp.github.io/issues/2026-08-29/index.md"/>
   </entry>
