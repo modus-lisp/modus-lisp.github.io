@@ -33,7 +33,7 @@
       <span>&middot;</span>
       <span>from the bare metal up</span>
       <span>&middot;</span>
-      <span><b>44 repositories</b></span>
+      <span><b>46 repositories</b></span>
     </div>
     <h1>Modus<span class="lo">&#8209;Lisp</span></h1>
     <hr class="rule-fire">
@@ -56,6 +56,13 @@
     them. Every week of the project has an issue.</p>
     <h3 class="month">Latest</h3>
     <ol class="issues">
+      <li>
+        <a href="issues/2026-09-12/">
+          <span class="no">&#8470;&nbsp;27<br>12 Sep 26</span>
+          <span class="it">A DVD plays, bit-exact</span>
+          <span class="dek">Two new repositories take the media stack from one video codec to eight in a week, every one bit-exact against ffmpeg or a conformance suite; the decoder written on Sunday drives Modus's compiler from 3 to 60 fps on a Pi 5 by Thursday; and the browser client stops needing node. 296 commits.</span>
+        </a>
+      </li>
       <li>
         <a href="issues/2026-09-05/">
           <span class="no">&#8470;&nbsp;26<br>5 Sep 26</span>
@@ -82,13 +89,6 @@
           <span class="no">&#8470;&nbsp;23<br>15 Aug 26</span>
           <span class="it">Two packages, one variable</span>
           <span class="dek">Nine of Modus's name-keyed registries turn out to be blind to packages, one of them mis-dispatching in silence; the build starts checking itself; and alexandria finishes at 230/230. 273 commits.</span>
-        </a>
-      </li>
-      <li>
-        <a href="issues/2026-08-08/">
-          <span class="no">&#8470;&nbsp;22<br>8 Aug 26</span>
-          <span class="it">Speech, both ways</span>
-          <span class="dek">A text-to-speech engine, a speech recognizer, and a desktop that types what it hears into whichever window has focus. Underneath, the JIT stops falling back to the interpreter. 218 commits.</span>
         </a>
       </li>
     </ol>
@@ -207,7 +207,7 @@
 
   <section id="workspace">
     <div class="sec-head">
-      <span class="sec-eyebrow">44 repositories, one machine</span>
+      <span class="sec-eyebrow">46 repositories, one machine</span>
       <h2>The workspace</h2>
     </div>
     <p>Each piece is a library in its own right, clean-room and in portable Common Lisp, and each
@@ -275,9 +275,12 @@
           <dd>A PDF parser and renderer.</dd>
           <dt><a href="https://github.com/modus-lisp/reed">reed</a></dt>
           <dd>Audio codecs &mdash; decoders for the formats a podcast arrives in.</dd>
+          <dt><a href="https://github.com/modus-lisp/reel">reel</a></dt>
+          <dd>Video codecs &mdash; H.264, VP8, VP9, MPEG-1/2, MPEG-4, Theora, FFV1, HEVC &mdash; each bit-exact against ffmpeg or its conformance suite.</dd>
+          <dt><a href="https://github.com/modus-lisp/cassette">cassette</a></dt>
+          <dd>Containers &mdash; MP4, Matroska/WebM, AVI, Ogg, MPEG streams &mdash; and a player that hands the tracks to reel and reed.</dd>
           <dt><a href="https://github.com/modus-lisp/webp-pure">webp-pure</a></dt>
-          <dd>A standalone WebP/VP8 decoder to RGB. pigment reaches for it; it stands
-          alone because a video codec's key-frame path is worth having on its own.</dd>
+          <dd>WebP decoding to RGB, on reel&rsquo;s VP8 key-frame path. pigment reaches for it.</dd>
         </dl>
       </div>
 
@@ -318,7 +321,7 @@
           <dt><a href="https://github.com/modus-lisp/webrtc-data">webrtc-data</a></dt>
           <dd>A WebRTC data-channel peer: SDP, ICE, DTLS, SCTP.</dd>
           <dt><a href="https://github.com/modus-lisp/webrtc-media">webrtc-media</a></dt>
-          <dd>The media plane &mdash; SRTP/SRTCP, RTP framing, G.711, a VP8 encoder.</dd>
+          <dd>The media plane &mdash; SRTP/SRTCP, RTP framing, G.711; the VP8 encoder moved to reel.</dd>
         </dl>
       </div>
 

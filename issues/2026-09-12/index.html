@@ -1,0 +1,326 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A DVD plays, bit-exact — This Week in Modus №27</title>
+<meta name="description" content="This Week in Modus, 5–11 September 2026: two new repositories take the media stack from one video codec to eight, every one checked against ffmpeg or a conformance suite; the decoder written on Sunday drives Modus's compiler from 3 to 60 fps on a Pi 5 by Thursday; and the browser client stops needing node.">
+<meta property="og:title" content="A DVD plays, bit-exact — This Week in Modus №27">
+<meta property="og:description" content="5–11 September 2026: H.264 High profile, VP9, MPEG-1/2, MPEG-4, Theora and FFV1 in a week, all bit-exact; the compiler goes 3 → 60 fps on a Pi 5 chasing them; and shuttle puts esbuild and npm out of the deploy path.">
+<meta property="og:type" content="article">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..700&family=Newsreader:opsz,wght@6..72,300..600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../../assets/crier.css">
+  <link rel="alternate" type="application/atom+xml" title="This Week in Modus" href="https://modus-lisp.github.io/feed.xml">
+  <link rel="alternate" type="text/markdown" href="index.md">
+</head>
+<body>
+<div class="page">
+
+  <div class="sitebar">
+    <a class="brand" href="../../">crier</a>
+    <nav><a href="../">Issues</a><a href="https://github.com/modus-lisp">GitHub</a></nav>
+  </div>
+
+  <header class="mast">
+    <div class="kicker">
+      <span>This Week in Modus &mdash; &#8470;&nbsp;27</span>
+      <span>&middot;</span>
+      <span>5&ndash;11 September 2026</span>
+      <span>&middot;</span>
+      <span><b>296 commits</b> &middot; 17 of 46 repos</span>
+    </div>
+    <h1>A DVD plays,<br>bit-<span class="lo">exact</span></h1>
+    <hr class="rule-fire">
+    <p class="standfirst">On Saturday the workspace could decode one video codec. By Friday it
+    could decode eight, in five containers, with four new audio codecs beside them &mdash; and
+    every one of them is checked sample-for-sample against ffmpeg, a conformance suite, or the
+    reference encoder&rsquo;s own checksum. The decoder written on Sunday became the benchmark
+    that drove Modus&rsquo;s compiler from 3 to 60 frames a second on a Pi&nbsp;5 by Thursday,
+    after a profiler overturned the conclusion everyone had drawn about where the time went. And
+    the browser client is now built by a JavaScript engine this project wrote.</p>
+
+    <div class="tally">
+      <div><span class="n">296</span><span class="l">Commits</span></div>
+      <div><span class="n">17</span><span class="l">Repositories</span></div>
+      <div><span class="n">2</span><span class="l">New this week</span></div>
+      <div><span class="n">3&rarr;60</span><span class="l">fps, Pi 5</span></div>
+      <div><span class="n">37</span><span class="l">Green, of 48</span></div>
+    </div>
+  </header>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>reel</em>, <em>cassette</em>, <em>reed</em> &nbsp;/&nbsp; 128 commits &nbsp;/&nbsp; 6&ndash;9 September</span>
+      <h2>One codec to eight, against an oracle each</h2>
+    </div>
+
+    <p>Two repositories were created on 7 September and between them account for forty per cent
+    of the week. Neither is quite new work: <em>reel</em> gathers the VP8 encoder and decoder that
+    had been living in webrtc-media and webp-pure, and <em>cassette</em> is webm-pure renamed,
+    for a reason its first commit states plainly &mdash; it was about to read MP4 as well, and a
+    repository named for its first format would then be lying. A cassette holds several tracks
+    wound together and hands them back in step, which is what a container is. reel is the codecs;
+    cassette is the boxes they arrive in; reed, already here, is sound.</p>
+
+    <p>Then the week happens to them. On Sunday reel has one video codec. Its road map, written
+    on Monday, is candid about scope: H.264 High profile first because that is what x264 emits,
+    MPEG-2 next because it is most of what any archive holds, and &mdash; in so many words &mdash;
+    <em>&ldquo;HEVC nowhere, because it is larger than all of H.264.&rdquo;</em> By Friday:</p>
+
+    <div class="console">
+      <span class="cap">reel &mdash; what decodes, and what each was checked against</span>
+<pre>H.264     Baseline, Main, High &mdash; intra, P, B, CABAC, weighted prediction, 8x8
+          <span class="ret">bit-exact</span> against ffmpeg; the whole JVT conformance suite swept
+VP9       all thirty-four libvpx conformance vectors, <span class="ret">bit-exact</span>
+MPEG-1/2  <span class="ret">bit-exact</span> against ffmpeg
+MPEG-4    Part 2, Simple and Advanced Simple &mdash; the DivX/XviD era &mdash; complete
+Theora    frame decoder <span class="ret">bit-exact</span> against ffmpeg
+FFV1      versions 0 and 1, both entropy coders
+HEVC      intra pictures <span class="ret">bit-exact</span>; the first inter stream decodes exactly
+
+cassette  MP4, Matroska/WebM, AVI, Ogg, MPEG program and transport streams
+reed      AC-3, FLAC, Vorbis, MPEG audio Layer II, streaming AAC</pre>
+    </div>
+
+    <p>&ldquo;HEVC nowhere&rdquo; lasted two days. That is not the road map being wrong; it is
+    the road map being an honest estimate of cost, and the cost turning out to be payable.</p>
+
+    <p>The refrain in the commit subjects is <em>bit-exact</em>, and it is doing real work. Each
+    decoder is graded against something with no stake in it: ffmpeg for most of the video,
+    libvpx&rsquo;s own test vectors for VP9, the JVT suite for H.264, the encoder&rsquo;s embedded
+    MD5 for FLAC, and for Vorbis a correlation of <code>1.000000</code> against libvorbis. Where
+    the oracle disagrees with the specification the road map says so &mdash; one commit is titled
+    <em>what the conformance suites say, including where it is wrong</em>. And when something does
+    not decode it refuses by shape rather than guessing: <em>a video track that will not parse
+    loses the picture, not the file</em>, and several refusals are kept in the suite as tests, so
+    that a future decoder that stops refusing is noticed.</p>
+
+    <p>Put together, on Tuesday: <em>an MPEG program stream with MPEG-2 video and AC-3 audio
+    plays with sound</em>. That is a DVD. The container, the picture and the sound were all
+    written in the same seven days, and a DVD has been silent in this workspace for exactly as long
+    as the workspace has existed.</p>
+
+    <h3>The arrays were never fixnums</h3>
+
+    <p>Halfway through, every decoder in reel got between 1.3 and 2.2 times faster with no
+    algorithmic change and every sample unchanged. The commit that found it is worth reading for
+    anyone who writes numeric Lisp:</p>
+
+    <div class="callout">
+      <p>SBCL upgrades <code>(simple-array fixnum)</code> to <code>(signed-byte 64)</code>
+      storage, so a value loaded from one is wider than a fixnum and the compiler cannot prove
+      otherwise &mdash; every sum of two of them was an out-of-line call into generic arithmetic,
+      and a video decoder is nothing but sums of values loaded from arrays. Declaring them
+      thirty-two bits wide, which is what they hold, is fourteen per cent on its own and halves
+      the memory they touch.</p>
+      <span class="src">reel &mdash; 087edb3, <em>vp9: twice as fast, bit-identical &mdash; the arrays were never fixnums</em></span>
+    </div>
+
+    <p>VP9 at 640&times;360 goes from 125 to 222 frames a second; 1080p from 13.7 to 26.8. H.264
+    had already gone from 20.6 to 118 fps on Monday, the first jump described as <em>&ldquo;by
+    telling the compiler what was already true.&rdquo;</em> Two of the week&rsquo;s largest
+    speedups were declarations.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>modus</em> &nbsp;/&nbsp; 73 commits &nbsp;/&nbsp; 5&ndash;10 September</span>
+      <h2>The decoder that taught the compiler</h2>
+    </div>
+
+    <p>The velocity note argued that the libraries compound and the floor does not &mdash; that
+    the operating system underneath is the one layer where nothing written last week makes this
+    week faster. This week is the clearest counterexample so far, and it runs the other way: a
+    library written on Sunday made the floor twenty times faster by Thursday.</p>
+
+    <p>The benchmark is reel&rsquo;s VP8 decoder, thirty frames of a small clip, running on
+    Modus&rsquo;s own compiler on a Raspberry Pi&nbsp;5. On Wednesday it managed three frames
+    a second. The commits that follow are a two-day argument with a profiler, and the docs record
+    each step: 3, 4, 5, 30, 37, 48, 51, 56, 60. The interesting moment is in the middle, when the
+    argument was being lost:</p>
+
+    <div class="callout">
+      <p>What remains between 37 and 60 fps is uniform per-operation cost: every variable read is
+      a frame load and every binary op is ~12 instructions. The next step is register allocation
+      across a basic block, not another dispatch fix.</p>
+      <span class="src">modus &mdash; docs/jit-fnaddr-rejection.md, as it stood at 37 fps</span>
+    </div>
+
+    <div class="callout">
+      <p>That conclusion was wrong, and a sampling profile said so. <code>perf</code> on the
+      Pi&nbsp;5 put only ~45% of the decode in reel&rsquo;s kernels. The rest was runtime library
+      work the phase timers and op histograms could not see: every global-variable reference
+      probing the globals table by hash, <code>expand-cl-loop</code>&rsquo;s unbound
+      termination-flag gensym turning every <code>loop while</code> exit into a <em>global</em>
+      write, <code>FILL</code>&rsquo;s generic element loop plus ~200 instructions of keyword
+      parsing on each 16-element coefficient block, keyword literals re-interned on every
+      evaluation, and rank-2 declared <code>aref</code>s through <code>APPLY</code>.</p>
+      <span class="src">modus &mdash; bfd7af5a, the same file, one commit later</span>
+    </div>
+
+    <p>Every item on that list became a general fix in the compiler rather than a special case for
+    the decoder: a runtime-compiled global read bakes its <code>(key . value)</code> cell as a
+    constant and does <code>cdr</code> in place; the loop flag is LET-bound; <code>fill</code> and
+    <code>replace</code> on a declared array compile to bounded typed loops; rank-2
+    <code>aref</code> gets fixed-arity primitives; <code>length</code> on a declared simple array
+    stops paying a 30&nbsp;ns dispatch. The instruction-count work everyone had been doing
+    <em>changed nothing on the Pi</em>, and the doc says so under the heading &ldquo;the useful
+    negative result.&rdquo;</p>
+
+    <p>The rank-2 probe also found a correctness bug that predates all of it: the compile-time
+    <code>setf</code> expansion for <code>aref</code> kept only the <em>first</em> subscript, so
+    <code>(setf (aref a i j) v)</code> inside a function stored at flat index <code>i</code>.
+    Toplevel forms took a different path and were right, which is why nothing had noticed.</p>
+
+    <p>Sixty frames a second on 10 September, keyframe 37&nbsp;ms, inter frames 15&nbsp;ms, the
+    same Y-plane checksum on x64 and aarch64. Then the first three commits of a SIMD plan: packed
+    single-float vectors as a new heap subtag, native <code>fcvt</code> for element access, and
+    single-float arithmetic emitting <code>fadd</code>/<code>fmul</code> directly.</p>
+
+    <h3>Three hosts, and a heap that survives</h3>
+
+    <p>Two other threads land on <code>main</code>. Modus now bootstraps under Clozure CL and
+    under ABCL &mdash; Armed Bear, on the JVM &mdash; as well as SBCL, and a script runs the
+    self-hosting fixpoint across all three. The compiler that produces the bare-metal image is
+    no longer defined by one host&rsquo;s idea of Common Lisp.</p>
+
+    <p>And <em>save-and-die</em>: a heap snapshot and restore, validated first under QEMU and then
+    on a real Pi&nbsp;Zero&nbsp;2&nbsp;W, with alexandria restored from a saved core on the board.
+    The follow-on is a turnkey SSH-REPL image for the Zero locked to a user&rsquo;s Ed25519 key,
+    and restored cores now come up with the JIT on by default. Last week&rsquo;s
+    <a href="../2026-09-05/">quickload over cabinet</a> put a library <em>onto</em> the machine;
+    this week the machine can be put down and picked up again with the library still in it.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>shuttle</em>, <em>glass-webrtc</em> &nbsp;/&nbsp; 39 commits</span>
+      <h2>Nothing in this repo runs node any more</h2>
+    </div>
+
+    <p>shuttle is the JavaScript engine. This week it grows the half of ECMAScript modules a
+    bundler needs &mdash; the static graph &mdash; and then the runtime half: live bindings, cycles,
+    namespaces, dynamic import, top-level await and the evaluation order it forces. The module
+    portion of test262 goes from 543 to 561 of 566, and the commit names the four engine bugs
+    behind the last eighteen.</p>
+
+    <p>On top of the module graph, a bundler: one script out of many modules, and
+    <em>&ldquo;esbuild is out of the deploy path.&rdquo;</em> Then a minifier that deletes what
+    carries no meaning and proves it over the whole test corpus. Then npm itself &mdash; a
+    resolver that walks a dependency graph, verifies every byte, and lays out
+    <code>node_modules</code>, with a semver implementation graded against the semver that npm
+    resolves with. The grading is the reason for the week&rsquo;s largest single file: 82,909 lines
+    of <code>semver-cases.tsv</code>, which is an oracle and not code, and is why shuttle&rsquo;s
+    line count in the ledger below reads six figures.</p>
+
+    <p>glass-webrtc, the gateway that puts a glass desktop into a browser, is the first customer.
+    It vendors its browser client&rsquo;s dependencies, builds them with shuttle, and then:</p>
+
+    <div class="callout">
+      <p>Both python builds are gone. The four artefacts are unchanged in kind, and both pages
+      render IDENTICALLY to the esbuild output in headless Chromium, with zero page errors on
+      either.</p>
+      <span class="src">glass-webrtc &mdash; ce9efbb, <em>delete the python builds: nothing in this repo runs node any more</em></span>
+    </div>
+
+    <p>One more detail from the same commit, because it is the kind this project notices: the
+    gzipped payload is written with a zero mtime, so an unchanged payload is a byte-identical
+    file. The gateway hashes what it reads, and <em>&ldquo;a hash that moved because a clock moved
+    would push a pointless transfer to every phone.&rdquo;</em> cram grew the gzip
+    <em>container</em> &mdash; not just the decoder &mdash; and the tar half of
+    <code>.tar.gz</code>, this week, for exactly this. Then shuttle&rsquo;s minifier halves what
+    crosses the data channel.</p>
+
+    <p>shuttle&rsquo;s test262 harness is also made honest this week, and that is its own story:
+    negative tests are now scored on the error they <em>declare</em> rather than on whether
+    anything went wrong, scripts get a module host, and the commit subjects say what that cost
+    &mdash; <em>four bugs the honest harness uncovered</em>, <em>four more the harness finally
+    showed</em>, and a full-corpus number recorded with a note on <em>why it is lower than the last
+    one</em>. A conformance figure that went down because the grader got stricter is the right
+    direction.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>webp-pure</em>, <em>webrtc-media</em>, <em>warren</em> &nbsp;/&nbsp; 7 and 8 September</span>
+      <h2>Three gates go red for a true reason</h2>
+    </div>
+
+    <p>Last week thirty repositories got their first CI gate, and every failure that turned up was
+    in the harness. This week three of those gates went red for a reason that is real:</p>
+
+    <div class="console">
+      <span class="cap">webp-pure, webrtc-media, warren &mdash; the newest run of each</span>
+<pre>LOAD-ERR Component <span class="ret">:REEL</span> not found, required by #&lt;SYSTEM "webp-pure"&gt;
+Component <span class="ret">"reel"</span> not found, required by #&lt;SYSTEM "webrtc-media"&gt;
+Component <span class="ret">:REEL</span> not found, required by #&lt;SYSTEM "webp-pure"&gt;   (via warren)</pre>
+    </div>
+
+    <p>VP8 moved out of webp-pure and webrtc-media into reel on Sunday, and the three systems
+    that now depend on reel say so &mdash; but the workflows that check out sibling repositories
+    were not told, so a clean runner cannot find it. Anyone cloning webp-pure fresh this week
+    would hit the same wall. The fix is one line in each <code>gates.yml</code>; the point is that
+    a week ago nothing would have said anything at all.</p>
+
+    <p>The mirror image is less comfortable. reel and cassette, 119 commits between them and the
+    week&rsquo;s largest body of new code, have no gate. Neither does glass-webrtc. The org stands
+    at 48 repositories, 37 green, 4 failing, 7 with no CI &mdash; and the four failures are the
+    three above plus operandi, whose reverted gate still shows its last red run.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow">the rest &nbsp;/&nbsp; <em>warp</em>, <em>cl-transport</em>, <em>kiln</em>, <em>cl-payments</em></span>
+      <h2>Also this week</h2>
+    </div>
+
+    <p><b>warp</b> gets a widget catalogue &mdash; twelve widgets, twenty types, <em>nothing
+    undeclared</em> &mdash; photographed reproducibly by a script, which immediately caught three
+    the client was not painting. The principle is stated in a subject line: <em>a widget is a
+    declared cell layout, not a shape you guess from the data</em>. Its media player, a warp
+    client, plays MP4 video now, and knows the difference between a picture that is missing and
+    one that never started.</p>
+
+    <p><b>cl-transport</b> absorbs the connectivity stack: STUN and TURN move in from webrtc-data,
+    ICE follows them, and ICE <em>&ldquo;stops knowing what SDP is,&rdquo;</em> which is a layering
+    fix disguised as a move. Two hex formatters go back the other way, because their only caller
+    stayed behind.</p>
+
+    <p><b>kiln</b> re-dumps its image four times in one day to keep up with reel &mdash; the
+    allocation fixes, the speedup, Main profile, MP4 in the media player &mdash; and the default
+    window becomes a Lisp listener rather than a shell on the host. <b>glass</b> gets a Media item
+    in its root menu.</p>
+
+    <p><b>cl-payments</b>, last week&rsquo;s Lightning node, has a quiet week and its first pull
+    request: <code>fsync</code> on durable writes, and a shachain reload that is a true inverse of
+    the save.</p>
+  </section>
+
+  <footer>
+    <p><strong>Method.</strong> Commits by <em>author</em> date, 5 to 11 September 2026, across
+    the 46 repositories of the modus-lisp organisation, counting each repository&rsquo;s default
+    branch as the union of the local branch and <code>origin/</code>. The organisation&rsquo;s
+    <code>.github</code> profile repository and this site are not counted. Produced with
+    <code>bin/week 2026-09-12 --log</code>.</p>
+    <p><strong>Line counts.</strong> The ledger&rsquo;s ADDED column exaggerates three
+    repositories this week and the reader should discount them: shuttle&rsquo;s 89,049 includes
+    82,909 lines of a semver oracle (<code>inspect/semver-cases.tsv</code>), cassette&rsquo;s
+    23,978 includes the 17,027-line text of RFC 6386 kept as a test vector, and
+    glass-webrtc&rsquo;s 30,358 is mostly vendored JavaScript under <code>vendor/</code>. None of
+    those is code anyone here wrote. reel&rsquo;s 36,822 is.</p>
+    <p><strong>The tool, again.</strong> Two weeks ago <code>bin/week</code> counted whatever
+    branch was checked out; last week it learned to count the default branch and to ask the
+    organisation about repositories it could not see. This week it found the local modus clone 86
+    commits behind origin and kiln 20 behind &mdash; a quiet week that was not &mdash; so it now
+    counts the local default branch and its <code>origin/</code> counterpart together, and prints
+    which clones are behind so that anyone reading source to write an issue knows they are reading
+    last week&rsquo;s. Both new repositories were already cloned here, which is the first time in
+    three weeks the ledger has not been missing one.</p>
+    <p><a href="../">&larr; All issues</a> &middot; <a href="../../">crier</a></p>
+  </footer>
+
+</div>
+</body>
+</html>

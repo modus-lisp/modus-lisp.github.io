@@ -4,7 +4,7 @@
   "home": "https://modus-lisp.github.io/",
   "feed": "https://modus-lisp.github.io/feed.xml",
   "generated_from": "the site's own HTML, by bin/mirror",
-  "count": 26,
+  "count": 27,
   "issues": [
     {
       "number": 1,
@@ -291,6 +291,17 @@
       "repos": 37,
       "url": "https://modus-lisp.github.io/issues/2026-09-05/",
       "markdown": "https://modus-lisp.github.io/issues/2026-09-05/index.md"
+    },
+    {
+      "number": 27,
+      "date": "2026-09-12",
+      "span": "5\u201311 September 2026",
+      "title": "A DVD plays, bit-exact",
+      "summary": "Two new repositories take the media stack from one video codec to eight in a week, every one bit-exact against ffmpeg or a conformance suite; the decoder written on Sunday drives Modus's compiler from 3 to 60 fps on a Pi 5 by Thursday; and the browser client stops needing node. 296 commits.",
+      "commits": 296,
+      "repos": 17,
+      "url": "https://modus-lisp.github.io/issues/2026-09-12/",
+      "markdown": "https://modus-lisp.github.io/issues/2026-09-12/index.md"
     }
   ]
 }

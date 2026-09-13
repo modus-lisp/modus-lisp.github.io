@@ -5,13 +5,21 @@
   <link href="https://modus-lisp.github.io/feed.xml" rel="self"/>
   <link href="https://modus-lisp.github.io/"/>
   <id>https://modus-lisp.github.io/</id>
-  <updated>2026-09-06T21:55:28-04:00</updated>
+  <updated>2026-09-07T15:35:54-04:00</updated>
   <author><name>ynniv</name></author>
+  <entry>
+    <title>№27 — A DVD plays, bit-exact</title>
+    <link href="https://modus-lisp.github.io/issues/2026-09-12/"/>
+    <id>https://modus-lisp.github.io/issues/2026-09-12/</id>
+    <updated>2026-09-12T00:00:00Z</updated>
+    <summary>Two new repositories take the media stack from one video codec to eight in a week, every one bit-exact against ffmpeg or a conformance suite; the decoder written on Sunday drives Modus&#x27;s compiler from 3 to 60 fps on a Pi 5 by Thursday; and the browser client stops needing node. 296 commits.</summary>
+    <link rel="alternate" type="text/markdown" href="https://modus-lisp.github.io/issues/2026-09-12/index.md"/>
+  </entry>
   <entry>
     <title>№26 — Lightning, in 34 hours</title>
     <link href="https://modus-lisp.github.io/issues/2026-09-05/"/>
     <id>https://modus-lisp.github.io/issues/2026-09-05/</id>
-    <updated>2026-09-06T21:55:28-04:00</updated>
+    <updated>2026-09-07T15:35:54-04:00</updated>
     <summary>An empty repository becomes a Lightning node that Core Lightning punishes for cheating, in thirty-four hours. Thirty repositories get their first CI gate, and Modus runs a real quickload with cabinet as its only filesystem. 304 commits.</summary>
     <link rel="alternate" type="text/markdown" href="https://modus-lisp.github.io/issues/2026-09-05/index.md"/>
   </entry>

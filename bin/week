@@ -27,11 +27,14 @@ usage() { awk 'NR>1 && /^#/ {sub(/^# ?/, ""); print; next} NR>1 {exit}' "${BASH_
 repos() { for d in "$ROOT"/*/; do r=$(basename "$d"); [ -e "$d/.git" ] || continue
             [ "$r" = "$SELF" ] && continue; echo "$r"; done; }
 
-# The ref a week is counted on: the repository's default branch, whatever is
-# checked out.  Not HEAD — a repo sitting on a feature branch would otherwise
-# report that branch's work as the week's, or (if the branch is behind) report
-# nothing.  Not origin/… either: work merged to main and not yet pushed is
-# ordinary lag on a weekly publication, and belongs in the week it was merged.
+# The refs a week is counted on: the repository's default branch, as the union
+# of the local branch and its origin/ counterpart.  Not HEAD — a repo sitting
+# on a feature branch would otherwise report that branch's work as the week's,
+# or nothing.  Not the local branch alone: a clone that has not been pulled
+# since Tuesday reports a quiet week that was not (modus, 86 behind, week of
+# 2026-09-12).  Not origin/ alone: work merged locally and not yet pushed is
+# ordinary lag on a weekly and belongs in the week it was merged (modus, 59
+# ahead, week of 2026-09-05).  Both, walked together, is what landed.
 mainref() {
   local r="$1" b
   for b in main master; do
@@ -39,12 +42,17 @@ mainref() {
   done
   echo HEAD
 }
+mainrefs() {
+  local r="$1" b; b=$(mainref "$r")
+  printf '%s' "$b"
+  git -C "$ROOT/$r" rev-parse --verify -q "refs/remotes/origin/$b" >/dev/null && printf ' origin/%s' "$b"
+}
 
 # Commits whose AUTHOR date falls in [since, until).  git's own --since/--until
 # read the committer date, which a rebase or a history rewrite resets to the day
 # of the rewrite — so a week's work would land in whatever week it was replayed.
-in_week() { git -C "$ROOT/$1" log "$(mainref "$1")" ${4:+"$4"} --format='%ad %H' --date=short |
-              awk -v s="$2" -v u="$3" '$1 >= s && $1 < u {print $2}'; }
+in_week() { git -C "$ROOT/$1" log $(mainrefs "$1") ${4:+"$4"} --format='%ad %H' --date=short |
+              awk -v s="$2" -v u="$3" '$1 >= s && $1 < u {print $2}' | sort -u; }
 
 # ---------------------------------------------------------------- --list
 
@@ -95,6 +103,7 @@ print(d-datetime.timedelta(days=7))") || exit 1
   printf -- '---------------------------------------------------------\n'
   printf '%-18s %7d across %d repositories\n' TOTAL "$total" "$moved"
 
+  behind
   offhead "$since" "$until"
   uncloned "$since" "$until"
 
@@ -104,6 +113,22 @@ print(d-datetime.timedelta(days=7))") || exit 1
     [ -z "$h" ] || { printf '\n######## %s (%s)\n' "$r" "$(printf '%s\n' "$h" | wc -l | tr -d ' ')"
                      git -C "$ROOT/$r" log --no-walk --format='  %ad %h %s' --date=short $h; }
   done
+}
+
+# Clones whose default branch is behind origin.  The count above already
+# includes origin/, so the numbers are right — but the working copy is not,
+# and anyone reading source to write an issue is reading last week's.
+behind() {
+  local any=""
+  for r in $(repos); do
+    local b n; b=$(mainref "$r")
+    git -C "$ROOT/$r" rev-parse --verify -q "refs/remotes/origin/$b" >/dev/null || continue
+    n=$(git -C "$ROOT/$r" rev-list --count "$b..origin/$b" 2>/dev/null)
+    [ "${n:-0}" -gt 0 ] || continue
+    [ -n "$any" ] || { printf '\nCOUNTED, BUT THE CLONE IS BEHIND — run git fetch && git merge --ff-only first if reading source:\n'; any=1; }
+    printf '  %-16s %3d commit(s) behind origin/%s\n' "$r" "$n" "$b"
+  done
+  return 0
 }
 
 # Commits in the window that exist in the repository but are not on its default
