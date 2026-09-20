@@ -543,14 +543,23 @@ def inject_head_links():
     return changed
 
 
+# The pages that are crier's to edit.  Other things live in this repository
+# — repl/ is a browser REPL for Modus with its own HTML — and a dispatch has no
+# business injecting <link> tags into them.  Enumerate, do not walk.
+OWN_DIRS = ("issues", "notes")
+
+
 def walk_html():
-    for base, dirs, files in os.walk(ROOT):
-        # prune VCS dirs in place; note the repo itself is named *.github.io,
-        # so a substring test on the path would skip the entire site.
-        dirs[:] = [d for d in dirs if d not in (".git", ".github")]
-        for f in files:
-            if f.endswith(".html"):
-                yield os.path.relpath(os.path.join(base, f), ROOT)
+    yield "index.html"
+    for d in OWN_DIRS:
+        top = os.path.join(ROOT, d)
+        if not os.path.isdir(top):
+            continue
+        for base, dirs, files in os.walk(top):
+            dirs[:] = [x for x in dirs if x not in (".git", ".github")]
+            for f in files:
+                if f.endswith(".html"):
+                    yield os.path.relpath(os.path.join(base, f), ROOT)
 
 
 # ------------------------------------------------------------------- driver
