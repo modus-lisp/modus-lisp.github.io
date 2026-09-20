@@ -4,7 +4,7 @@
   "home": "https://modus-lisp.github.io/",
   "feed": "https://modus-lisp.github.io/feed.xml",
   "generated_from": "the site's own HTML, by bin/mirror",
-  "count": 27,
+  "count": 28,
   "issues": [
     {
       "number": 1,
@@ -302,6 +302,17 @@
       "repos": 17,
       "url": "https://modus-lisp.github.io/issues/2026-09-12/",
       "markdown": "https://modus-lisp.github.io/issues/2026-09-12/index.md"
+    },
+    {
+      "number": 28,
+      "date": "2026-09-19",
+      "span": "12\u201318 September 2026",
+      "title": "The honest figure",
+      "summary": "Reel's decoder runs on a bare-metal Pi Zero 2 W with the display driven from the ARM; Linux is netbooted onto the same board to put SBCL and libvpx on identical silicon; a 150\u00d7 claim is retracted to 5\u00d7; and two days of compiler work take Modus from 37 to 16 million instructions a frame. 157 commits.",
+      "commits": 157,
+      "repos": 9,
+      "url": "https://modus-lisp.github.io/issues/2026-09-19/",
+      "markdown": "https://modus-lisp.github.io/issues/2026-09-19/index.md"
     }
   ]
 }

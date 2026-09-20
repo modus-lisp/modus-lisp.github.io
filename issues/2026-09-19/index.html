@@ -1,0 +1,321 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The honest figure — This Week in Modus №28</title>
+<meta name="description" content="This Week in Modus, 12–18 September 2026: reel's VP8 decoder runs on a bare-metal Pi Zero 2 W with the display driven from the ARM, Linux is netbooted onto the same board to measure SBCL and libvpx on identical silicon, a 150× claim is retracted to 5×, and two days of compiler work take Modus from 37 to 16 million instructions a frame.">
+<meta property="og:title" content="The honest figure — This Week in Modus №28">
+<meta property="og:description" content="12–18 September 2026: same silicon, three decoders — libvpx 1.39 ms/frame, SBCL 18.4, Modus 49.2 — and the whole gap is instruction count. Then two days later Modus retires fewer instructions per frame than SBCL.">
+<meta property="og:type" content="article">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..700&family=Newsreader:opsz,wght@6..72,300..600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../../assets/crier.css">
+  <link rel="alternate" type="application/atom+xml" title="This Week in Modus" href="https://modus-lisp.github.io/feed.xml">
+  <link rel="alternate" type="text/markdown" href="index.md">
+</head>
+<body>
+<div class="page">
+
+  <div class="sitebar">
+    <a class="brand" href="../../">crier</a>
+    <nav><a href="../">Issues</a><a href="https://github.com/modus-lisp">GitHub</a></nav>
+  </div>
+
+  <header class="mast">
+    <div class="kicker">
+      <span>This Week in Modus &mdash; &#8470;&nbsp;28</span>
+      <span>&middot;</span>
+      <span>12&ndash;18 September 2026</span>
+      <span>&middot;</span>
+      <span><b>157 commits</b> &middot; 9 of 46 repos</span>
+    </div>
+    <h1>The honest<br><span class="lo">figure</span></h1>
+    <hr class="rule-fire">
+    <p class="standfirst">Seventy per cent of this week is one repository, and most of that is one
+    document: a runbook kept while getting last week&rsquo;s video decoder onto a bare-metal
+    Pi&nbsp;Zero&nbsp;2&nbsp;W, with the display driven straight from the ARM. It records a board
+    running at half its clock because nobody had ever raised it, a display fault that took sixteen
+    probes to find and did not exist, and a &ldquo;150&times; slower than SBCL&rdquo; that was
+    file I/O in the timer. Then Linux is netbooted onto the same board so that SBCL and libvpx can
+    be measured on identical silicon &mdash; and the gap turns out to be instruction count, all of
+    it. Two days later the instruction count is below SBCL&rsquo;s.</p>
+
+    <div class="tally">
+      <div><span class="n">157</span><span class="l">Commits</span></div>
+      <div><span class="n">9</span><span class="l">Repositories</span></div>
+      <div><span class="n">2.7&times;</span><span class="l">SBCL, same A53</span></div>
+      <div><span class="n">7&rarr;27</span><span class="l">fps on the Zero</span></div>
+      <div><span class="n">37&rarr;16M</span><span class="l">Instructions a frame</span></div>
+    </div>
+  </header>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>modus</em> &nbsp;/&nbsp; hvs &nbsp;/&nbsp; 12 and 16 September</span>
+      <h2>Pixels, from the ARM</h2>
+    </div>
+
+    <p>A Raspberry Pi&rsquo;s display belongs to its GPU firmware. The ARM asks the VideoCore for
+    a framebuffer over a mailbox and draws into what it is given, and that is how every hobby OS
+    on the platform puts anything on screen, including Modus until this week. What lands on
+    Wednesday is the other way round: the ARM programs the Hardware Video Scaler itself &mdash;
+    the display list, the pixel valve, the HDMI PHY &mdash; and the firmware is out of the
+    path.</p>
+
+    <p>The commit subjects are a fair record of what that took. <em>VERDICT &mdash; ARM-side
+    FRAMEBUFFER_RELEASE cannot render.</em> <em>BREAKTHROUGH &mdash; 128-bit STP writes a full HVS
+    register.</em> <em>CPRMAN is invisible to the ARM; NOTIFY_DISPLAY_DONE is what kills
+    scanout.</em> <em>full HVS+PV+HDMI bring-up from the ARM; last blocker = PHY RNG_PWRDN.</em>
+    And then, the same afternoon: <em>PIXELS ON SCREEN</em>.</p>
+
+    <p>By evening it is a real display path. A hardware double buffer whose flip retargets the live
+    plane pointer in one or two microseconds; non-cacheable back buffers that fill a full screen in
+    9.75&nbsp;ms, which is the DRAM ceiling; a <em>hardware-scaled</em> YUV plane, so a 640&times;360
+    decode is scaled to the panel by the HVS rather than by anything Lisp does; and 60&nbsp;Hz
+    measured &mdash; 600 frames in 10.005 seconds, 0.84&nbsp;ms of CPU per frame. A stubborn 4:1
+    write narrowing turns out to be the Device memory mapping, which is the sort of thing you only
+    learn by owning the page tables.</p>
+
+    <p>That night reel&rsquo;s VP8 decoder draws its first frames onto that plane, from a native
+    core built under QEMU and netbooted to the board. Seven frames a second.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>modus</em> &nbsp;/&nbsp; docs/reel-on-zero/BOARD-RUNBOOK.md &nbsp;/&nbsp; 17 September</span>
+      <h2>A day on the board</h2>
+    </div>
+
+    <p>Thursday is fifty-nine commits, nearly all to one file, and it is the most legible day in this
+    archive because the file is a runbook: every measurement, every hypothesis, every retraction,
+    in the order they happened. Three of its findings are worth the whole week.</p>
+
+    <p><b>The board was running at 600&nbsp;MHz.</b> The Pi firmware boots the ARM at its idle
+    clock and expects the operating system to raise it. There was no operating system, so nobody
+    had &mdash; through every measurement of the previous month. One mailbox call takes the decoder
+    from 208.6 to 125.6&nbsp;ms a frame, and the image now raises the clock at boot and prints
+    <code>ARMCLK=</code> as a required marker so that it can never silently not happen again.</p>
+
+    <p><b>The display fault that was not.</b> Sixteen consecutive runbook entries chase garbage on
+    screen: the display list is read back and matches what was written; literals are checked;
+    the non-cacheable window is exonerated; the copy is bisected against a known-good session;
+    <em>no single-variable theory left</em>. Then:</p>
+
+    <div class="callout">
+      <p>RESOLVED &mdash; no display fault; cam.ivf frame 0 really is a noise strip over pink. The
+      two cores carried different clips. Rule: render the reference frame on the host before
+      judging the board.</p>
+      <span class="src">modus &mdash; e08ae570</span>
+    </div>
+
+    <p>The known-good core had been decoding a colour-bar test clip; the new one was decoding a
+    camera clip whose first frame is, in fact, noise over pink. Every probe had been correct. The
+    rule that came out of it is the kind that only gets written after the afternoon that
+    earned it.</p>
+
+    <p><b>The compiler was innocent of one regression.</b> Enabling the display path made the
+    decoder 3.5 times slower &mdash; 76.5 to 273&nbsp;ms a frame &mdash; and the cause was that
+    <code>rh-init</code> was remapping memory as non-cacheable for the display buffers and the
+    blocks it remapped held reel&rsquo;s JIT-compiled code. The decoder had been running from
+    uncached memory. Two-megabyte alignment of the display buffers, and the number goes back.</p>
+
+    <p>Between those, the work that was actually planned: a NEON transpose for the loop filter
+    takes it from 18 to 8&nbsp;ms a frame; <code>let*</code> learns to stamp each binding&rsquo;s
+    declared type as it is made, so later initialisers stop tag-testing earlier variables; a
+    residual-skip path lands. The day ends at 49.2&nbsp;ms a frame, 20 frames a second, on the
+    A53 at one gigahertz.</p>
+
+    <h3>Not a hundred and fifty</h3>
+
+    <p>The runbook had been quoting Pi&nbsp;5 decode times from a harness that reported ~9,500&nbsp;ms
+    for 48 frames, and had drawn from them the remark that Modus was around 150 times slower than
+    SBCL. Late on Thursday, in bold:</p>
+
+    <div class="callout">
+      <p>CORRECTION: every hosted-A76 &ldquo;DECODE-MS&rdquo; figure quoted in this file is NOT
+      decode time. <code>internal-time-units-per-second</code> is 1000 on the hosted CLI and the
+      harness spent 6.6&nbsp;s in a <code>read-byte</code> loop loading the 100&nbsp;KB clip plus
+      ~1&nbsp;s writing I420, around ~0.3&nbsp;s of decoding. &hellip; the &ldquo;~150&times;
+      slower than SBCL&rdquo; remark was wrong: SBCL decodes vp8-std at 1.29&nbsp;ms/frame, Modus
+      on the A76 at 6.4 &mdash; about 5&times;.</p>
+      <span class="src">modus &mdash; cfc3a444, BOARD-RUNBOOK.md</span>
+    </div>
+
+    <p>Which also meant that several &ldquo;no change&rdquo; verdicts on earlier optimisations had
+    been noise, and the runbook says so, and names the driver to use instead. A number that was
+    thirty times too pessimistic, found and struck through on the same page it was written.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>modus</em> &nbsp;/&nbsp; runbook &sect;6f &nbsp;/&nbsp; 17 September, late</span>
+      <h2>Same silicon</h2>
+    </div>
+
+    <p>Five times slower than SBCL, on different chips, with different clocks, is not a figure
+    anyone can act on. So Linux is netbooted onto the Zero over the same U-Boot rig &mdash;
+    Raspberry Pi OS kernel, a busybox initramfs with SBCL in it, a shell over <code>nc</code>
+    &mdash; and the same clip is decoded three ways on the same Cortex-A53 at the same
+    gigahertz:</p>
+
+    <div class="console">
+      <span class="cap">cam.ivf, Cortex-A53 @ 1 GHz &mdash; the same board, three decoders</span>
+<pre>                          libvpx 1.15    SBCL 2.5.2    Modus
+ms / frame                    1.39          18.4         52  (hosted)  /  <span class="ret">49.2</span> (bare metal)
+IPC                           0.82          0.89         0.71
+instructions / frame        ~1.1 M         ~16 M        <span class="ret">~37 M</span>
+L1I refills / k-inst           1.4           2.0          <span class="ret">38</span>
+cycles stalled on I-cache     2.3%          1.5%         <span class="ret">30%</span>
+L1D miss / access             1.48%         0.44%        0.25%</pre>
+    </div>
+
+    <p>Three things fall out of that table, and the runbook draws each one.</p>
+
+    <p>First, bare metal costs nothing. Modus hosted on Linux and Modus on the bare board are 52
+    and 49&nbsp;ms a frame; the operating system was never the overhead. Second, the gap to SBCL is
+    2.7&times; on identical silicon &mdash; <em>&ldquo;the honest compiler-gap figure,&rdquo;</em>
+    in the runbook&rsquo;s words, and the number this project should have been quoting all along.
+    Third, and this is the one that sets the next two days:</p>
+
+    <div class="callout">
+      <p>The whole ladder is INSTRUCTION COUNT at near-identical IPC &mdash; libvpx ~1.1&nbsp;M
+      per frame, SBCL 16&nbsp;M (14&times;), Modus 37&nbsp;M (33&times;). Modus executes ~2.3&times;
+      SBCL&rsquo;s instructions AND loses 30% of its cycles to instruction-cache misses &mdash; the
+      JIT&rsquo;s code does not fit the 32&nbsp;KB L1I; SBCL&rsquo;s does. Data-side behaviour is
+      fine for both. So the codegen work has two payoffs that compound: fewer instructions and
+      smaller code.</p>
+      <span class="src">modus &mdash; BOARD-RUNBOOK.md &sect;6f</span>
+    </div>
+
+    <p>The memory system is not the problem. The branch predictor is not the problem. The
+    in-order core is not the problem. Modus emits too many instructions and they do not fit in
+    the cache, and that is the whole of it. Getting the counters that say so was its own
+    sub-plot &mdash; the A53&rsquo;s performance monitors would count nothing on the bare board, and
+    the runbook records a hypothesis about which core was being read, a claim that
+    Modus&rsquo;s own system-register reads were wrong, and then a retraction of that claim as a
+    hex slip, before the Linux detour made the question moot.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>modus</em> &nbsp;/&nbsp; compiler &nbsp;/&nbsp; 18 September</span>
+      <h2>Twenty-one million instructions, in two days</h2>
+    </div>
+
+    <p>Friday attacks the instruction count directly, and the runbook keeps a ladder:</p>
+
+    <div class="console">
+      <span class="cap">Pi 5, cam.ivf, instructions per frame &mdash; the Friday ladder</span>
+<pre>37.33 M   Thursday's figure
+29.34 M   register-resident locals: hot variables live in x4&ndash;x8, not frame slots
+27.96 M   x18 holds the convention block; SET-NARGS/GET-NARGS go 4&rarr;2 instructions
+24.19 M   reel: hygiene
+20.28 M   reel: coefficient blocks clear themselves on consume
+17.00 M   reel: NEON intra prediction
+16.14 M   reel: typed locals in decode-macroblocks
+<span class="ret">15.81 M</span>   register promotion ranks over the whole function &mdash; a nested LET's
+          hot variables win the registers from an outer loop's flags</pre>
+    </div>
+
+    <p>Thursday&rsquo;s table put SBCL at about 16 million instructions a frame. By Friday night,
+    by its own counting, Modus is under that. On the bare-metal Zero the decoder goes from 49.2
+    to 36.7&nbsp;ms a frame &mdash; 20 to 27 frames a second &mdash; with the MD5 of all 48 reference
+    frames unchanged at every step, and every probe checked against SBCL running the same
+    source.</p>
+
+    <p>Two of the steps found miscompiles, and both are the kind that only a decoder with a
+    checksum catches. The predicate deciding whether a <code>setq</code> may write straight into a
+    register was written with <code>return-from</code> inside <code>labels</code> &mdash; which
+    the self-hosted compiler does not honour, so the first version accepted every form, and
+    <code>(setq acc (+ acc (f x)))</code> evaluated the call into <code>acc</code>&rsquo;s
+    register before reading it. Rewritten without it, the predicate then let through unary minus:
+    <code>(setf v (- v))</code> compiles as <code>(- 0 v)</code>, and the constant went into
+    <code>v</code>&rsquo;s register first, so every negative coefficient in the decoder became
+    zero. Both were invisible until a narrower slot type let the surrounding function promote.</p>
+
+    <p>A third bug was older and lower. Moving the convention block&rsquo;s base into
+    <code>x18</code> meant auditing every use of that register as scratch, and the serial
+    port&rsquo;s poll loop had one: the first UART write clobbered the base, and the Pi image
+    faulted before it could print its banner. <em>ESR data abort, x18=0x60.</em></p>
+
+    <p>And one lesson that runs against the grain of everything a C programmer would try.
+    libvpx keeps its bool decoder in registers across all twenty-five blocks of a macroblock by
+    decoding them in one function. Expanding reel the same way, as a macro inside
+    <code>decode-residue</code>, cost <b>fourteen per cent</b> &mdash; five local registers cannot
+    hold the hot variables of a function four times larger, so the promotion that had made the
+    small function fast fell back to frame slots. <em>&ldquo;Small hot functions with their own
+    register budget beat one large one until the register file grows.&rdquo;</em> Reverted, and
+    recorded, under the heading <em>&ldquo;still shaving when the C algorithm shows a ton of
+    meat.&rdquo;</em></p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow">the rest &nbsp;/&nbsp; <em>shuttle</em>, <em>operandi</em>, <em>kiln</em>, <em>weft</em>, <em>loom</em></span>
+      <h2>Also this week</h2>
+    </div>
+
+    <p><b>shuttle</b> grows the Temporal calendars &mdash; as a bijection between day numbers
+    and fields, reachable from JavaScript through one gate, including the Hebrew calendar,
+    <em>&ldquo;where the months move&rdquo;</em> &mdash; and the mapped <code>arguments</code>
+    object, with the note that an arrow function has none of its own. test262 is sharded across
+    cores. The bundler learns two more output shapes: a module, and <code>--global-name</code>.</p>
+
+    <p><b>operandi</b>, the agent loop, lets its host get a word into a turn already running, stops
+    on <em>stuck</em> rather than on <em>long</em> and says so in the history, compacts with a
+    margin rather than at the line, and on exit prints the command that resumes the session.
+    operandi-gui replaces five minutes of <em>&ldquo;&hellip;thinking&hellip;&rdquo;</em> with what the
+    turn is doing.</p>
+
+    <p><b>kiln</b>: a thread that dies no longer takes the desktop with it, and the lock file is
+    refreshed from the organisation&rsquo;s live refs rather than from whatever was cloned. Which is
+    a small commit and the exact discipline this dispatch had to learn for itself three weeks
+    running. <b>weft</b> gives scripts <code>screen</code>, <code>window.name</code> and
+    <code>element.dataset</code>, and an uncaught error now says which script it came from.
+    <b>loom</b> lays a page out at the viewport the page asks for, and asks the network as a
+    phone.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow">the gates &nbsp;/&nbsp; 19 September</span>
+      <h2>One line, now five repositories</h2>
+    </div>
+
+    <p>Last week three gates went red because VP8 moved into reel and the workflows that check out
+    sibling repositories were not told. Nobody told them this week either, and the break has
+    spread the way a missing dependency does: loom and weft both depend on webp-pure, both pushed
+    on Thursday, and both now fail on <code>Component :REEL not found</code> without having
+    changed anything relevant. Five of the organisation&rsquo;s seven red badges are that one
+    line. The sixth is operandi&rsquo;s reverted gate, three weeks stale; the seventh is
+    kiln&rsquo;s fast test tripping a reader error &mdash; <em>Package does not exist</em> &mdash;
+    while its two heavier workflows pass.</p>
+
+    <p><b>48 repositories, 34 green, 7 failing, 7 with no CI.</b> reel and cassette, which between
+    them are most of what the last two issues were about, are still among the seven with
+    nothing watching them.</p>
+  </section>
+
+  <footer>
+    <p><strong>Method.</strong> Commits by <em>author</em> date, 12 to 18 September 2026, across
+    the 46 repositories of the modus-lisp organisation, counting each repository&rsquo;s default
+    branch as the union of the local branch and <code>origin/</code>. Nine local clones were
+    behind origin this morning, modus by 126 commits; the union rule means the counts above are
+    right regardless, and <code>bin/week</code> now says which clones are stale. Produced with
+    <code>bin/week 2026-09-19 --log</code>. The runbook quoted throughout is
+    <code>docs/reel-on-zero/BOARD-RUNBOOK.md</code> at <code>origin/main</code>; all figures in
+    the tables are its own.</p>
+    <p><strong>Two small tool fixes.</strong> <code>bin/week</code>&rsquo;s off-branch scan used
+    <code>git log --all</code>, which includes <code>refs/stash</code>; two stashes were reported
+    as unmerged work. It now walks <code>--branches --remotes</code>. And <code>bin/ci</code>
+    reports the newest run per repository, which for a repository with several workflows is not
+    the worst one &mdash; kiln shows as failing on <code>tests</code> while <code>image</code> and
+    <code>macos</code> pass. It should report per workflow; it does not yet.</p>
+    <p><a href="../">&larr; All issues</a> &middot; <a href="../../">crier</a></p>
+  </footer>
+
+</div>
+</body>
+</html>

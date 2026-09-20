@@ -142,7 +142,7 @@ offhead() {
   for r in $(repos); do
     local head all off
     head=$(in_week "$r" "$since" "$until" "" | sort -u)
-    all=$(git -C "$ROOT/$r" log --all --format='%ad %H' --date=short 2>/dev/null |
+    all=$(git -C "$ROOT/$r" log --branches --remotes --format='%ad %H' --date=short 2>/dev/null |
             awk -v s="$since" -v u="$until" '$1 >= s && $1 < u {print $2}' | sort -u)
     off=$(comm -13 <(printf '%s\n' "$head") <(printf '%s\n' "$all") | grep -c . )
     [ "${off:-0}" -gt 0 ] || continue
@@ -195,7 +195,7 @@ print(datetime.date.fromisoformat('$until')-datetime.timedelta(days=7))")
   printf 'ISSUE %s   covering %s .. %s — ALL REFS, not just the checkout\n' "$until" "$since" "$until"
   for r in $(repos); do
     local h
-    h=$(git -C "$ROOT/$r" log --all --format='%ad %H' --date=short 2>/dev/null |
+    h=$(git -C "$ROOT/$r" log --branches --remotes --format='%ad %H' --date=short 2>/dev/null |
           awk -v s="$since" -v u="$until" '$1 >= s && $1 < u {print $2}' | sort -u)
     [ -z "$h" ] && continue
     printf '\n######## %s (%s)\n' "$r" "$(printf '%s\n' "$h" | wc -l | tr -d ' ')"
