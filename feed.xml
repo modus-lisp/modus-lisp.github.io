@@ -5,21 +5,21 @@
   <link href="https://modus-lisp.github.io/feed.xml" rel="self"/>
   <link href="https://modus-lisp.github.io/"/>
   <id>https://modus-lisp.github.io/</id>
-  <updated>2026-09-19T22:39:23-04:00</updated>
+  <updated>2026-09-20T03:07:15+00:00</updated>
   <author><name>ynniv</name></author>
   <entry>
     <title>№28 — The honest figure</title>
     <link href="https://modus-lisp.github.io/issues/2026-09-19/"/>
     <id>https://modus-lisp.github.io/issues/2026-09-19/</id>
-    <updated>2026-09-19T22:39:23-04:00</updated>
-    <summary>Reel&#x27;s decoder runs on a bare-metal Pi Zero 2 W with the display driven from the ARM; Linux is netbooted onto the same board to put SBCL and libvpx on identical silicon; a 150× claim is retracted to 5×; and two days of compiler work take Modus from 37 to 16 million instructions a frame. 157 commits.</summary>
+    <updated>2026-09-20T03:07:15+00:00</updated>
+    <summary>Reel&#x27;s decoder runs on a bare-metal Pi Zero 2 W with the display driven from the ARM; Linux is netbooted onto the same board to put SBCL and libvpx on identical silicon; a 150× claim is retracted to 5×; and two days of compiler work take Modus from 37 to 16 million instructions a frame; and a Modus that runs in a browser tab. 177 commits.</summary>
     <link rel="alternate" type="text/markdown" href="https://modus-lisp.github.io/issues/2026-09-19/index.md"/>
   </entry>
   <entry>
     <title>№27 — A DVD plays, bit-exact</title>
     <link href="https://modus-lisp.github.io/issues/2026-09-12/"/>
     <id>https://modus-lisp.github.io/issues/2026-09-12/</id>
-    <updated>2026-09-12T21:06:27-04:00</updated>
+    <updated>2026-09-20T03:07:15+00:00</updated>
     <summary>Two new repositories take the media stack from one video codec to eight in a week, every one bit-exact against ffmpeg or a conformance suite; the decoder written on Sunday drives Modus&#x27;s compiler from 3 to 60 fps on a Pi 5 by Thursday; and the browser client stops needing node. 296 commits.</summary>
     <link rel="alternate" type="text/markdown" href="https://modus-lisp.github.io/issues/2026-09-12/index.md"/>
   </entry>

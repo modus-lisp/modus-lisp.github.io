@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>The honest figure — This Week in Modus №28</title>
-<meta name="description" content="This Week in Modus, 12–18 September 2026: reel's VP8 decoder runs on a bare-metal Pi Zero 2 W with the display driven from the ARM, Linux is netbooted onto the same board to measure SBCL and libvpx on identical silicon, a 150× claim is retracted to 5×, and two days of compiler work take Modus from 37 to 16 million instructions a frame.">
+<meta name="description" content="This Week in Modus, 12–18 September 2026: a Modus that runs in a browser tab; reel's VP8 decoder runs on a bare-metal Pi Zero 2 W with the display driven from the ARM, Linux is netbooted onto the same board to measure SBCL and libvpx on identical silicon, a 150× claim is retracted to 5×, and two days of compiler work take Modus from 37 to 16 million instructions a frame.">
 <meta property="og:title" content="The honest figure — This Week in Modus №28">
 <meta property="og:description" content="12–18 September 2026: same silicon, three decoders — libvpx 1.39 ms/frame, SBCL 18.4, Modus 49.2 — and the whole gap is instruction count. Then two days later Modus retires fewer instructions per frame than SBCL.">
 <meta property="og:type" content="article">
@@ -29,22 +29,23 @@
       <span>&middot;</span>
       <span>12&ndash;18 September 2026</span>
       <span>&middot;</span>
-      <span><b>157 commits</b> &middot; 9 of 46 repos</span>
+      <span><b>177 commits</b> &middot; 10 of 46 repos</span>
     </div>
     <h1>The honest<br><span class="lo">figure</span></h1>
     <hr class="rule-fire">
-    <p class="standfirst">Seventy per cent of this week is one repository, and most of that is one
+    <p class="standfirst">Most of this week is one repository, and most of that is one
     document: a runbook kept while getting last week&rsquo;s video decoder onto a bare-metal
     Pi&nbsp;Zero&nbsp;2&nbsp;W, with the display driven straight from the ARM. It records a board
     running at half its clock because nobody had ever raised it, a display fault that took sixteen
     probes to find and did not exist, and a &ldquo;150&times; slower than SBCL&rdquo; that was
     file I/O in the timer. Then Linux is netbooted onto the same board so that SBCL and libvpx can
     be measured on identical silicon &mdash; and the gap turns out to be instruction count, all of
-    it. Two days later the instruction count is below SBCL&rsquo;s.</p>
+    it. Two days later the instruction count is below SBCL&rsquo;s. And, unannounced and
+    unlinked, a Modus that runs in a browser tab.</p>
 
     <div class="tally">
-      <div><span class="n">157</span><span class="l">Commits</span></div>
-      <div><span class="n">9</span><span class="l">Repositories</span></div>
+      <div><span class="n">177</span><span class="l">Commits</span></div>
+      <div><span class="n">10</span><span class="l">Repositories</span></div>
       <div><span class="n">2.7&times;</span><span class="l">SBCL, same A53</span></div>
       <div><span class="n">7&rarr;27</span><span class="l">fps on the Zero</span></div>
       <div><span class="n">37&rarr;16M</span><span class="l">Instructions a frame</span></div>
@@ -80,6 +81,28 @@
 
     <p>That night reel&rsquo;s VP8 decoder draws its first frames onto that plane, from a native
     core built under QEMU and netbooted to the board. Seven frames a second.</p>
+
+    <div class="plates two">
+      <figure class="plate">
+        <img src="../../assets/img/rig-2026-09-19.jpg" width="1049" height="1400"
+             alt="A desk with a Dell monitor showing a decoded video frame — a blocky circle over vertical colour bars with a rainbow gradient band across the middle. Below it a Raspberry Pi 5 in a fan case glows blue beside a bare Pi Zero 2 W with jumper wires attached, two USB hubs, a yellow Ethernet cable, and a webcam on a stand pointed at the screen.">
+        <figcaption><b>The rig.</b> The Zero with its serial tap on the jumper wires, the
+        Pi&nbsp;5 beside it for the hosted comparisons, two hubs, and the webcam on its stand
+        pointed at the panel &mdash; so that what the board draws can be read back without anyone
+        typing the test output. On screen, a frame of the decoder&rsquo;s own test clip, scaled
+        to the panel by the HVS.
+        <span class="prov">photograph by the author, week of 19 September 2026</span></figcaption>
+      </figure>
+      <figure class="plate">
+        <img src="../../assets/img/rig-2026-09-09.jpg" width="1920" height="1080"
+             alt="A webcam frame of a monitor showing seven vertical colour bars over a grey ramp, with the word MODUS in a blocky pixel font beneath.">
+        <figcaption><b>The webcam&rsquo;s view.</b> Colour bars, a grey ramp and the word MODUS
+        in a pixel font, drawn by bare-metal Lisp on the Zero and read back through the same
+        camera &mdash; ten days earlier, on the firmware framebuffer path this week replaced.
+        <em>&ldquo;claude using a webcam to look at its drawing on a monitor.&rdquo;</em>
+        <span class="prov">nostr &mdash; 11a6956c, 2026-09-09 04:51Z</span></figcaption>
+      </figure>
+    </div>
   </section>
 
   <section>
@@ -253,6 +276,46 @@ L1D miss / access             1.48%         0.44%        0.25%</pre>
 
   <section>
     <div class="sec-head">
+      <span class="sec-eyebrow"><em>modus-lisp.github.io/repl</em> &nbsp;/&nbsp; 19 commits &nbsp;/&nbsp; 12 and 16 September</span>
+      <h2>A Modus in a browser tab</h2>
+    </div>
+
+    <p>This dispatch has never counted the repository it lives in, on the grounds that a dispatch
+    does not report on itself. That rule was written for crier&rsquo;s own files, and last week it
+    hid something that is not crier at all. On 11 September a directory called
+    <code>repl/</code> arrived here, unlinked from anything, and this week it became a thing:
+    <a href="https://modus-lisp.github.io/repl/">a Modus REPL that runs in the browser</a>. The
+    whole Common Lisp system compiled to MVM bytecode, executed by a JavaScript interpreter in a
+    Web Worker. Static files. No server. It is the <code>web-interp</code> branch of modus,
+    deployed.</p>
+
+    <p>Then, on Wednesday, eighteen commits in one day give it something to show. A samples browser:
+    read the source, then run it. A DOM calculator and a WebGL game. Tab completion and a live
+    symbol explorer. Quicklisp, working offline from bundled tarballs, so
+    <code>ql:quickload</code> works in a tab with no network. A mobile layout with touch
+    controls. And a rotating cube through a <code>cl-opengl</code> immediate-mode bridge to WebGL,
+    whose four commits are a small performance story of their own:</p>
+
+    <div class="console">
+      <span class="cap">repl &mdash; the OpenGL cube, Wednesday 16 September</span>
+<pre>~7.5x    display lists, and cheaper float formatting
+44 &rarr; 15 ms/frame    double-float matrices
+         a native float bridge: raw IEEE-754 doubles across the boundary
+&rarr; ~4.5 ms/frame    one matrix multiply per frame</pre>
+    </div>
+
+    <p>Then Boids, with instanced draws. The introspection RPC is stripped back to a verified
+    kernel module along the way, and a Fixpoint sample &mdash; a minimal SHA-verified loader
+    &mdash; is added and then removed the same day.</p>
+
+    <p>It is worth placing next to the rest of the issue. The same compiler that is being taught
+    to fit a 32&nbsp;KB instruction cache on a Cortex-A53 is also, this week, running under a
+    JavaScript interpreter in Safari, drawing a cube. Nine architectures was
+    <a href="../2026-02-28/">&#8470;&nbsp;2</a>; the tenth target is a browser.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
       <span class="sec-eyebrow">the rest &nbsp;/&nbsp; <em>shuttle</em>, <em>operandi</em>, <em>kiln</em>, <em>weft</em>, <em>loom</em></span>
       <h2>Also this week</h2>
     </div>
@@ -269,7 +332,11 @@ L1D miss / access             1.48%         0.44%        0.25%</pre>
     operandi-gui replaces five minutes of <em>&ldquo;&hellip;thinking&hellip;&rdquo;</em> with what the
     turn is doing.</p>
 
-    <p><b>kiln</b>: a thread that dies no longer takes the desktop with it, and the lock file is
+    <p><b>modus</b>, apart from the runbook: <code>--compile-aarch64</code> output is now
+    host-independent &mdash; merged on Friday &mdash; which extends to the ARM target the property
+    the three-host fixpoint established for x64 in
+    <a href="../2026-09-12/">&#8470;&nbsp;27</a>: whichever Lisp built Modus, what Modus compiles
+    is byte-identical. <b>kiln</b>: a thread that dies no longer takes the desktop with it, and the lock file is
     refreshed from the organisation&rsquo;s live refs rather than from whatever was cloned. Which is
     a small commit and the exact discipline this dispatch had to learn for itself three weeks
     running. <b>weft</b> gives scripts <code>screen</code>, <code>window.name</code> and
@@ -301,7 +368,13 @@ L1D miss / access             1.48%         0.44%        0.25%</pre>
   <footer>
     <p><strong>Method.</strong> Commits by <em>author</em> date, 12 to 18 September 2026, across
     the 46 repositories of the modus-lisp organisation, counting each repository&rsquo;s default
-    branch as the union of the local branch and <code>origin/</code>. Nine local clones were
+    branch as the union of the local branch and <code>origin/</code>. This issue was first
+    published at 157 commits across 9 repositories; it now reads 177 across 10, because the rule
+    that excluded the site&rsquo;s own repository has been narrowed to exclude only crier&rsquo;s
+    own files, and <code>repl/</code> is not crier. The same rule would put
+    <a href="../2026-09-12/">&#8470;&nbsp;27</a> at 311 rather than 296 &mdash; one commit for the
+    REPL&rsquo;s arrival, and fourteen modus commits pushed after that issue was written. Its
+    figures stand as published; this note is the correction. Nine local clones were
     behind origin this morning, modus by 126 commits; the union rule means the counts above are
     right regardless, and <code>bin/week</code> now says which clones are stale. Produced with
     <code>bin/week 2026-09-19 --log</code>. The runbook quoted throughout is
@@ -313,6 +386,11 @@ L1D miss / access             1.48%         0.44%        0.25%</pre>
     reports the newest run per repository, which for a repository with several workflows is not
     the worst one &mdash; kiln shows as failing on <code>tests</code> while <code>image</code> and
     <code>macos</code> pass. It should report per workflow; it does not yet.</p>
+    <p><strong>Outside the log.</strong> The author&rsquo;s nostr notes for the week were read
+    as in <a href="../2025-03-15/">&#8470;&nbsp;1</a>; they are thin on the project this time
+    &mdash; a reply pointing at this site (<em>&ldquo;no os is the best os&rdquo;</em>) and one
+    debugging transcript. The webcam plate above is from the previous week. The photograph of the
+    rig was supplied by the author.</p>
     <p><a href="../">&larr; All issues</a> &middot; <a href="../../">crier</a></p>
   </footer>
 

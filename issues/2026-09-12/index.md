@@ -42,6 +42,10 @@ The refrain in the commit subjects is *bit-exact*, and it is doing real work. Ea
 
 Put together, on Tuesday: *an MPEG program stream with MPEG-2 video and AC-3 audio plays with sound*. That is a DVD. The container, the picture and the sound were all written in the same seven days, and a DVD has been silent in this workspace for exactly as long as the workspace has existed.
 
+![A phone screen showing the glass desktop through the browser: a Media window playing a WebM test vector with a timecode overlay reading 00:00:01.067 over colour bars, a track list of eight WebM files, mic and box level meters, and a row of Ctrl, Alt, Shift and Command keys.](https://modus-lisp.github.io/assets/img/webm-2026-09-07.png)
+
+***WebM on a phone, through the desktop.** cassette demuxing a test vector, reel decoding it, glass’s Media window drawing it, glass-webrtc carrying the desktop to a phone’s browser — every layer of that in the workspace, and the two on top written this week. *“once you have vp8, webm isn’t that hard.”* nostr — b847bab4, 2026-09-07 00:17Z*
+
 ### The arrays were never fixnums
 
 Halfway through, every decoder in reel got between 1.3 and 2.2 times faster with no algorithmic change and every sample unchanged. The commit that found it is worth reading for anyone who writes numeric Lisp:
@@ -78,7 +82,7 @@ Sixty frames a second on 10 September, keyframe 37 ms, inter frames 15 ms, the s
 
 ### Three hosts, and a heap that survives
 
-Two other threads land on `main`. Modus now bootstraps under Clozure CL and under ABCL — Armed Bear, on the JVM — as well as SBCL, and a script runs the self-hosting fixpoint across all three. The compiler that produces the bare-metal image is no longer defined by one host’s idea of Common Lisp.
+Two other threads land on `main`. Modus now bootstraps under Clozure CL and under ABCL — Armed Bear, on the JVM — as well as SBCL, and a script runs the self-hosting fixpoint across all three. The three host-built images differ by about 0.3%, which is the hosts’ own codegen showing through; but what each of those images then *compiles* is produced by Modus’s in-image compiler, and the script requires that output to be byte-identical across all three — *“the host washes out once Modus is compiling.”* Three independent Lisps agreeing to the byte on the same toolchain is the diverse double-compilation that Thompson’s *Reflections on Trusting Trust* asks for, and the compiler that produces the bare-metal image is no longer defined by one host’s idea of Common Lisp.
 
 And *save-and-die*: a heap snapshot and restore, validated first under QEMU and then on a real Pi Zero 2 W, with alexandria restored from a saved core on the board. The follow-on is a turnkey SSH-REPL image for the Zero locked to a user’s Ed25519 key, and restored cores now come up with the JIT on by default. Last week’s [quickload over cabinet](https://modus-lisp.github.io/issues/2026-09-05/) put a library *onto* the machine; this week the machine can be put down and picked up again with the library still in it.
 

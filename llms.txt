@@ -1,12 +1,12 @@
 # crier — This Week in Modus
 
-> A weekly dispatch on modus-lisp: a personal computer written from scratch in Common Lisp. Weekly, one issue per week that had commits, numbered from the project's first working week in March 2025. 28 issues covering 4,567 commits.
+> A weekly dispatch on modus-lisp: a personal computer written from scratch in Common Lisp. Weekly, one issue per week that had commits, numbered from the project's first working week in March 2025. 28 issues covering 4,587 commits.
 
 Every claim in an issue comes out of the git commit log of the modus-lisp repositories; where an issue uses anything else it says so in its own method footnote. Counts are counted, not estimated. Each issue below links to a Markdown mirror of the full text.
 
 ## Issues
 
-- [№28 — The honest figure](https://modus-lisp.github.io/issues/2026-09-19/index.md): Reel's decoder runs on a bare-metal Pi Zero 2 W with the display driven from the ARM; Linux is netbooted onto the same board to put SBCL and libvpx on identical silicon; a 150× claim is retracted to 5×; and two days of compiler work take Modus from 37 to 16 million instructions a frame. 157 commits. (12–18 September 2026)
+- [№28 — The honest figure](https://modus-lisp.github.io/issues/2026-09-19/index.md): Reel's decoder runs on a bare-metal Pi Zero 2 W with the display driven from the ARM; Linux is netbooted onto the same board to put SBCL and libvpx on identical silicon; a 150× claim is retracted to 5×; and two days of compiler work take Modus from 37 to 16 million instructions a frame; and a Modus that runs in a browser tab. 177 commits. (12–18 September 2026)
 - [№27 — A DVD plays, bit-exact](https://modus-lisp.github.io/issues/2026-09-12/index.md): Two new repositories take the media stack from one video codec to eight in a week, every one bit-exact against ffmpeg or a conformance suite; the decoder written on Sunday drives Modus's compiler from 3 to 60 fps on a Pi 5 by Thursday; and the browser client stops needing node. 296 commits. (5–11 September 2026)
 - [№26 — Lightning, in 34 hours](https://modus-lisp.github.io/issues/2026-09-05/index.md): An empty repository becomes a Lightning node that Core Lightning punishes for cheating, in thirty-four hours. Thirty repositories get their first CI gate, and Modus runs a real quickload with cabinet as its only filesystem. 304 commits. (29 August – 4 September 2026)
 - [№25 — The Pi Zero answers the doorbell](https://modus-lisp.github.io/issues/2026-08-29/index.md): A real OpenSSH client logs in to bare-metal Modus on Pi Zero 2 W silicon, then downloads a library and runs it — and the desktop above it learns its own name and its own resolution. 97 commits. (22–28 August 2026)

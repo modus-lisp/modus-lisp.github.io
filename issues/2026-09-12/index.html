@@ -102,6 +102,16 @@ reed      AC-3, FLAC, Vorbis, MPEG audio Layer II, streaming AAC</pre>
     written in the same seven days, and a DVD has been silent in this workspace for exactly as long
     as the workspace has existed.</p>
 
+    <figure class="plate">
+      <img src="../../assets/img/webm-2026-09-07.png" width="1179" height="1816"
+           alt="A phone screen showing the glass desktop through the browser: a Media window playing a WebM test vector with a timecode overlay reading 00:00:01.067 over colour bars, a track list of eight WebM files, mic and box level meters, and a row of Ctrl, Alt, Shift and Command keys.">
+      <figcaption><b>WebM on a phone, through the desktop.</b> cassette demuxing a test vector,
+      reel decoding it, glass&rsquo;s Media window drawing it, glass-webrtc carrying the desktop
+      to a phone&rsquo;s browser &mdash; every layer of that in the workspace, and the two on top
+      written this week. <em>&ldquo;once you have vp8, webm isn&rsquo;t that hard.&rdquo;</em>
+      <span class="prov">nostr &mdash; b847bab4, 2026-09-07 00:17Z</span></figcaption>
+    </figure>
+
     <h3>The arrays were never fixnums</h3>
 
     <p>Halfway through, every decoder in reel got between 1.3 and 2.2 times faster with no
@@ -183,8 +193,14 @@ reed      AC-3, FLAC, Vorbis, MPEG audio Layer II, streaming AAC</pre>
 
     <p>Two other threads land on <code>main</code>. Modus now bootstraps under Clozure CL and
     under ABCL &mdash; Armed Bear, on the JVM &mdash; as well as SBCL, and a script runs the
-    self-hosting fixpoint across all three. The compiler that produces the bare-metal image is
-    no longer defined by one host&rsquo;s idea of Common Lisp.</p>
+    self-hosting fixpoint across all three. The three host-built images differ by about 0.3%,
+    which is the hosts&rsquo; own codegen showing through; but what each of those images then
+    <em>compiles</em> is produced by Modus&rsquo;s in-image compiler, and the script requires
+    that output to be byte-identical across all three &mdash; <em>&ldquo;the host washes out once
+    Modus is compiling.&rdquo;</em> Three independent Lisps agreeing to the byte on the same
+    toolchain is the diverse double-compilation that Thompson&rsquo;s <em>Reflections on Trusting
+    Trust</em> asks for, and the compiler that produces the bare-metal image is no longer
+    defined by one host&rsquo;s idea of Common Lisp.</p>
 
     <p>And <em>save-and-die</em>: a heap snapshot and restore, validated first under QEMU and then
     on a real Pi&nbsp;Zero&nbsp;2&nbsp;W, with alexandria restored from a saved core on the board.

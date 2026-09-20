@@ -8,8 +8,10 @@
 #   bin/week --list              every week of the project, numbered
 #
 # An issue dated Saturday S covers the seven days [S-7, S).  The workspace is
-# the parent of this repo unless MODUS_WORKSPACE says otherwise.  The site's own
-# repo is never counted: a dispatch does not report on itself.
+# the parent of this repo unless MODUS_WORKSPACE says otherwise.  In the site's
+# own repo, the dispatch's files are never counted — a dispatch does not report
+# on itself — but anything else that lives there is (repl/, the browser REPL,
+# arrived in September 2026 and went unreported for a week under the old rule).
 #
 # Line counts exclude generated acceptance-gate artefacts and committed scratch
 # dumps, which in a bad week
@@ -21,11 +23,17 @@ ROOT="${MODUS_WORKSPACE:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
 SELF=modus-lisp.github.io
 NOISE='shards-jit|shards-off|real-ansi-gen|gate-net[.]out|[[:blank:]]scratch/'
 
+# crier's own files, excluded from the count in $SELF.  Everything else in that
+# repository is somebody's work and is counted like any other repo's.
+CRIER_PATHS=(issues notes index.html assets bin README.md LICENSE .nojekyll .github
+             feed.xml sitemap.xml robots.txt llms.txt index.json)
+# The pathspec to append to a git log for repo $1: nothing, unless it is $SELF.
+spec() { [ "$1" = "$SELF" ] || return 0; printf -- '-- . '; for p in "${CRIER_PATHS[@]}"; do printf "':(exclude)%s' " "$p"; done; }
+
 die()   { printf 'week: %s\n' "$*" >&2; exit 1; }
 usage() { awk 'NR>1 && /^#/ {sub(/^# ?/, ""); print; next} NR>1 {exit}' "${BASH_SOURCE[0]}"; exit "${1:-0}"; }
 
-repos() { for d in "$ROOT"/*/; do r=$(basename "$d"); [ -e "$d/.git" ] || continue
-            [ "$r" = "$SELF" ] && continue; echo "$r"; done; }
+repos() { for d in "$ROOT"/*/; do r=$(basename "$d"); [ -e "$d/.git" ] || continue; echo "$r"; done; }
 
 # The refs a week is counted on: the repository's default branch, as the union
 # of the local branch and its origin/ counterpart.  Not HEAD — a repo sitting
@@ -51,13 +59,13 @@ mainrefs() {
 # Commits whose AUTHOR date falls in [since, until).  git's own --since/--until
 # read the committer date, which a rebase or a history rewrite resets to the day
 # of the rewrite — so a week's work would land in whatever week it was replayed.
-in_week() { git -C "$ROOT/$1" log $(mainrefs "$1") ${4:+"$4"} --format='%ad %H' --date=short |
+in_week() { eval git -C "$ROOT/$1" log $(mainrefs "$1") ${4:+"$4"} --format="'%ad %H'" --date=short $(spec "$1") |
               awk -v s="$2" -v u="$3" '$1 >= s && $1 < u {print $2}' | sort -u; }
 
 # ---------------------------------------------------------------- --list
 
 list_weeks() {
-  { for r in $(repos); do git -C "$ROOT/$r" log --format='%ad' --date=short; done; } |
+  { for r in $(repos); do eval git -C "$ROOT/$r" log --format="'%ad'" --date=short $(spec "$r"); done; } |
   python3 -c '
 import sys, datetime, collections
 c = collections.Counter()
@@ -93,7 +101,7 @@ print(d-datetime.timedelta(days=7))") || exit 1
     total=$((total + n)); moved=$((moved + 1))
     work=$(in_week "$r" "$since" "$until" --no-merges)
     if [ -n "$work" ]; then
-      git -C "$ROOT/$r" log --no-walk --numstat --format='' $work | grep -vE "$NOISE" |
+      eval git -C "$ROOT/$r" log --no-walk --numstat --format="''" $work $(spec "$r") | grep -vE "$NOISE" |
         awk -F'\t' -v r="$r" -v n="$n" '$1 ~ /^[0-9]+$/ {a+=$1; d+=$2; f[$3]=1}
           END {c=0; for (x in f) c++; printf "%-18s %7s %7d %9d %9d\n", r, n, c, a, d}'
     else
@@ -142,7 +150,7 @@ offhead() {
   for r in $(repos); do
     local head all off
     head=$(in_week "$r" "$since" "$until" "" | sort -u)
-    all=$(git -C "$ROOT/$r" log --branches --remotes --format='%ad %H' --date=short 2>/dev/null |
+    all=$(eval git -C "$ROOT/$r" log --branches --remotes --format="'%ad %H'" --date=short $(spec "$r") 2>/dev/null |
             awk -v s="$since" -v u="$until" '$1 >= s && $1 < u {print $2}' | sort -u)
     off=$(comm -13 <(printf '%s\n' "$head") <(printf '%s\n' "$all") | grep -c . )
     [ "${off:-0}" -gt 0 ] || continue
@@ -150,7 +158,7 @@ offhead() {
     printf '  %-16s %3d commit(s) not on %s: ' "$r" "$off" "$(mainref "$r")"
     for b in $(git -C "$ROOT/$r" for-each-ref --format='%(refname:short)' refs/remotes refs/heads); do
       local n
-      n=$(git -C "$ROOT/$r" log "$b" --format='%ad %H' --date=short 2>/dev/null |
+      n=$(eval git -C "$ROOT/$r" log "$b" --format="'%ad %H'" --date=short $(spec "$r") 2>/dev/null |
             awk -v s="$since" -v u="$until" '$1 >= s && $1 < u {print $2}' | sort -u |
             comm -13 <(printf '%s\n' "$head") - | grep -c .)
       [ "${n:-0}" -gt 0 ] && printf '%s(%d) ' "$b" "$n"
@@ -195,7 +203,7 @@ print(datetime.date.fromisoformat('$until')-datetime.timedelta(days=7))")
   printf 'ISSUE %s   covering %s .. %s — ALL REFS, not just the checkout\n' "$until" "$since" "$until"
   for r in $(repos); do
     local h
-    h=$(git -C "$ROOT/$r" log --branches --remotes --format='%ad %H' --date=short 2>/dev/null |
+    h=$(eval git -C "$ROOT/$r" log --branches --remotes --format="'%ad %H'" --date=short $(spec "$r") 2>/dev/null |
           awk -v s="$since" -v u="$until" '$1 >= s && $1 < u {print $2}' | sort -u)
     [ -z "$h" ] && continue
     printf '\n######## %s (%s)\n' "$r" "$(printf '%s\n' "$h" | wc -l | tr -d ' ')"

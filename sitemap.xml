@@ -2,12 +2,12 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://modus-lisp.github.io/</loc>
-    <lastmod>2026-09-19T22:39:23-04:00</lastmod>
+    <lastmod>2026-09-20T03:07:15+00:00</lastmod>
     <priority>1.0</priority>
   </url>
   <url>
     <loc>https://modus-lisp.github.io/issues/</loc>
-    <lastmod>2026-09-19T22:39:23-04:00</lastmod>
+    <lastmod>2026-09-20T03:07:15+00:00</lastmod>
     <priority>0.8</priority>
   </url>
   <url>
@@ -142,12 +142,12 @@
   </url>
   <url>
     <loc>https://modus-lisp.github.io/issues/2026-09-12/</loc>
-    <lastmod>2026-09-12T21:06:27-04:00</lastmod>
+    <lastmod>2026-09-20T03:07:15+00:00</lastmod>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://modus-lisp.github.io/issues/2026-09-19/</loc>
-    <lastmod>2026-09-19T22:39:23-04:00</lastmod>
+    <lastmod>2026-09-20T03:07:15+00:00</lastmod>
     <priority>0.6</priority>
   </url>
   <url>

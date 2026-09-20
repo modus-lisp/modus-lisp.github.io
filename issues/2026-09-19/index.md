@@ -1,14 +1,14 @@
 # The honest figure
 
-**This Week in Modus №28** · 12–18 September 2026 · 157 commits · 9 repos
+**This Week in Modus №28** · 12–18 September 2026 · 177 commits · 10 repos
 
 <https://modus-lisp.github.io/issues/2026-09-19/>
 
-Seventy per cent of this week is one repository, and most of that is one document: a runbook kept while getting last week’s video decoder onto a bare-metal Pi Zero 2 W, with the display driven straight from the ARM. It records a board running at half its clock because nobody had ever raised it, a display fault that took sixteen probes to find and did not exist, and a “150× slower than SBCL” that was file I/O in the timer. Then Linux is netbooted onto the same board so that SBCL and libvpx can be measured on identical silicon — and the gap turns out to be instruction count, all of it. Two days later the instruction count is below SBCL’s.
+Most of this week is one repository, and most of that is one document: a runbook kept while getting last week’s video decoder onto a bare-metal Pi Zero 2 W, with the display driven straight from the ARM. It records a board running at half its clock because nobody had ever raised it, a display fault that took sixteen probes to find and did not exist, and a “150× slower than SBCL” that was file I/O in the timer. Then Linux is netbooted onto the same board so that SBCL and libvpx can be measured on identical silicon — and the gap turns out to be instruction count, all of it. Two days later the instruction count is below SBCL’s. And, unannounced and unlinked, a Modus that runs in a browser tab.
 
 | Commits | Repositories | SBCL, same A53 | fps on the Zero | Instructions a frame |
 |---|---|---|---|---|
-| 157 | 9 | 2.7× | 7→27 | 37→16M |
+| 177 | 10 | 2.7× | 7→27 | 37→16M |
 
 ---
 
@@ -23,6 +23,14 @@ The commit subjects are a fair record of what that took. *VERDICT — ARM-side F
 By evening it is a real display path. A hardware double buffer whose flip retargets the live plane pointer in one or two microseconds; non-cacheable back buffers that fill a full screen in 9.75 ms, which is the DRAM ceiling; a *hardware-scaled* YUV plane, so a 640×360 decode is scaled to the panel by the HVS rather than by anything Lisp does; and 60 Hz measured — 600 frames in 10.005 seconds, 0.84 ms of CPU per frame. A stubborn 4:1 write narrowing turns out to be the Device memory mapping, which is the sort of thing you only learn by owning the page tables.
 
 That night reel’s VP8 decoder draws its first frames onto that plane, from a native core built under QEMU and netbooted to the board. Seven frames a second.
+
+![A desk with a Dell monitor showing a decoded video frame — a blocky circle over vertical colour bars with a rainbow gradient band across the middle. Below it a Raspberry Pi 5 in a fan case glows blue beside a bare Pi Zero 2 W with jumper wires attached, two USB hubs, a yellow Ethernet cable, and a webcam on a stand pointed at the screen.](https://modus-lisp.github.io/assets/img/rig-2026-09-19.jpg)
+
+***The rig.** The Zero with its serial tap on the jumper wires, the Pi 5 beside it for the hosted comparisons, two hubs, and the webcam on its stand pointed at the panel — so that what the board draws can be read back without anyone typing the test output. On screen, a frame of the decoder’s own test clip, scaled to the panel by the HVS. photograph by the author, week of 19 September 2026*
+
+![A webcam frame of a monitor showing seven vertical colour bars over a grey ramp, with the word MODUS in a blocky pixel font beneath.](https://modus-lisp.github.io/assets/img/rig-2026-09-09.jpg)
+
+***The webcam’s view.** Colour bars, a grey ramp and the word MODUS in a pixel font, drawn by bare-metal Lisp on the Zero and read back through the same camera — ten days earlier, on the firmware framebuffer path this week replaced. *“claude using a webcam to look at its drawing on a monitor.”* nostr — 11a6956c, 2026-09-09 04:51Z*
 
 ---
 
@@ -118,6 +126,29 @@ And one lesson that runs against the grain of everything a C programmer would tr
 
 ---
 
+*modus-lisp.github.io/repl / 19 commits / 12 and 16 September*
+
+## A Modus in a browser tab
+
+This dispatch has never counted the repository it lives in, on the grounds that a dispatch does not report on itself. That rule was written for crier’s own files, and last week it hid something that is not crier at all. On 11 September a directory called `repl/` arrived here, unlinked from anything, and this week it became a thing: [a Modus REPL that runs in the browser](https://modus-lisp.github.io/repl/). The whole Common Lisp system compiled to MVM bytecode, executed by a JavaScript interpreter in a Web Worker. Static files. No server. It is the `web-interp` branch of modus, deployed.
+
+Then, on Wednesday, eighteen commits in one day give it something to show. A samples browser: read the source, then run it. A DOM calculator and a WebGL game. Tab completion and a live symbol explorer. Quicklisp, working offline from bundled tarballs, so `ql:quickload` works in a tab with no network. A mobile layout with touch controls. And a rotating cube through a `cl-opengl` immediate-mode bridge to WebGL, whose four commits are a small performance story of their own:
+
+*repl — the OpenGL cube, Wednesday 16 September*
+
+```
+~7.5x    display lists, and cheaper float formatting
+44 → 15 ms/frame    double-float matrices
+         a native float bridge: raw IEEE-754 doubles across the boundary
+→ ~4.5 ms/frame    one matrix multiply per frame
+```
+
+Then Boids, with instanced draws. The introspection RPC is stripped back to a verified kernel module along the way, and a Fixpoint sample — a minimal SHA-verified loader — is added and then removed the same day.
+
+It is worth placing next to the rest of the issue. The same compiler that is being taught to fit a 32 KB instruction cache on a Cortex-A53 is also, this week, running under a JavaScript interpreter in Safari, drawing a cube. Nine architectures was [№ 2](https://modus-lisp.github.io/issues/2026-02-28/); the tenth target is a browser.
+
+---
+
 *the rest / shuttle, operandi, kiln, weft, loom*
 
 ## Also this week
@@ -126,7 +157,7 @@ And one lesson that runs against the grain of everything a C programmer would tr
 
 **operandi**, the agent loop, lets its host get a word into a turn already running, stops on *stuck* rather than on *long* and says so in the history, compacts with a margin rather than at the line, and on exit prints the command that resumes the session. operandi-gui replaces five minutes of *“…thinking…”* with what the turn is doing.
 
-**kiln**: a thread that dies no longer takes the desktop with it, and the lock file is refreshed from the organisation’s live refs rather than from whatever was cloned. Which is a small commit and the exact discipline this dispatch had to learn for itself three weeks running. **weft** gives scripts `screen`, `window.name` and `element.dataset`, and an uncaught error now says which script it came from. **loom** lays a page out at the viewport the page asks for, and asks the network as a phone.
+**modus**, apart from the runbook: `--compile-aarch64` output is now host-independent — merged on Friday — which extends to the ARM target the property the three-host fixpoint established for x64 in [№ 27](https://modus-lisp.github.io/issues/2026-09-12/): whichever Lisp built Modus, what Modus compiles is byte-identical. **kiln**: a thread that dies no longer takes the desktop with it, and the lock file is refreshed from the organisation’s live refs rather than from whatever was cloned. Which is a small commit and the exact discipline this dispatch had to learn for itself three weeks running. **weft** gives scripts `screen`, `window.name` and `element.dataset`, and an uncaught error now says which script it came from. **loom** lays a page out at the viewport the page asks for, and asks the network as a phone.
 
 ---
 
@@ -140,8 +171,10 @@ Last week three gates went red because VP8 moved into reel and the workflows tha
 
 ---
 
-**Method.** Commits by *author* date, 12 to 18 September 2026, across the 46 repositories of the modus-lisp organisation, counting each repository’s default branch as the union of the local branch and `origin/`. Nine local clones were behind origin this morning, modus by 126 commits; the union rule means the counts above are right regardless, and `bin/week` now says which clones are stale. Produced with `bin/week 2026-09-19 --log`. The runbook quoted throughout is `docs/reel-on-zero/BOARD-RUNBOOK.md` at `origin/main`; all figures in the tables are its own.
+**Method.** Commits by *author* date, 12 to 18 September 2026, across the 46 repositories of the modus-lisp organisation, counting each repository’s default branch as the union of the local branch and `origin/`. This issue was first published at 157 commits across 9 repositories; it now reads 177 across 10, because the rule that excluded the site’s own repository has been narrowed to exclude only crier’s own files, and `repl/` is not crier. The same rule would put [№ 27](https://modus-lisp.github.io/issues/2026-09-12/) at 311 rather than 296 — one commit for the REPL’s arrival, and fourteen modus commits pushed after that issue was written. Its figures stand as published; this note is the correction. Nine local clones were behind origin this morning, modus by 126 commits; the union rule means the counts above are right regardless, and `bin/week` now says which clones are stale. Produced with `bin/week 2026-09-19 --log`. The runbook quoted throughout is `docs/reel-on-zero/BOARD-RUNBOOK.md` at `origin/main`; all figures in the tables are its own.
 
 **Two small tool fixes.** `bin/week`’s off-branch scan used `git log --all`, which includes `refs/stash`; two stashes were reported as unmerged work. It now walks `--branches --remotes`. And `bin/ci` reports the newest run per repository, which for a repository with several workflows is not the worst one — kiln shows as failing on `tests` while `image` and `macos` pass. It should report per workflow; it does not yet.
+
+**Outside the log.** The author’s nostr notes for the week were read as in [№ 1](https://modus-lisp.github.io/issues/2025-03-15/); they are thin on the project this time — a reply pointing at this site (*“no os is the best os”*) and one debugging transcript. The webcam plate above is from the previous week. The photograph of the rig was supplied by the author.
 
 [← All issues](https://modus-lisp.github.io/issues/) · [crier](https://modus-lisp.github.io/)
