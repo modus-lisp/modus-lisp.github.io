@@ -576,25 +576,30 @@ def walk_html():
 
 
 WRITTEN = []
+DRY = False   # --check: report what would change, touch nothing
 
 
 def write(relpath, content):
     path = os.path.join(ROOT, relpath)
-    os.makedirs(os.path.dirname(path), exist_ok=True)
     old = None
     if os.path.exists(path):
         with open(path, encoding="utf-8") as fh:
             old = fh.read()
     if old == content:
         return False
+    WRITTEN.append(relpath)
+    if DRY:
+        return True
+    os.makedirs(os.path.dirname(path), exist_ok=True)
     with open(path, "w", encoding="utf-8") as fh:
         fh.write(content)
-    WRITTEN.append(relpath)
     return True
 
 
 def main():
     check = "--check" in sys.argv
+    global DRY
+    DRY = check
 
     issues = issues_from_archive()
     if not issues:
