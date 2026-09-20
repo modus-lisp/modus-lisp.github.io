@@ -90,7 +90,17 @@ def kicker_facts(page):
 
 
 def git_lastmod(relpath):
+    """When the file was last committed — or, if it has uncommitted changes,
+    now.  Without the second clause a freshly written issue takes its date
+    from the previous commit (or has none), and the feed and sitemap come out
+    stale on the very run that is meant to publish them; --check then fails
+    on the commit after."""
     try:
+        dirty = subprocess.run(
+            ["git", "-C", ROOT, "status", "--porcelain", "--", relpath],
+            capture_output=True, text=True, check=False).stdout.strip()
+        if dirty:
+            return datetime.now(timezone.utc).isoformat(timespec="seconds")
         out = subprocess.run(
             ["git", "-C", ROOT, "log", "-1", "--format=%cI", "--", relpath],
             capture_output=True, text=True, check=False).stdout.strip()
