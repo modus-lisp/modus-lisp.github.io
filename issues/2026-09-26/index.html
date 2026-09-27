@@ -37,8 +37,9 @@
     fifty-two-system Common Lisp program through exactly two dependencies. The first went this
     week, taking twenty-four systems with it. The second is the database, so SQLite was written: pager, b-trees, query
     planner, window functions, full-text search, R-trees, in two days, checked against version
-    3.40 down to which of two equal rows a <code>UNION</code> keeps. Elsewhere, five architectures
-    turned out to be passing a test that could not fail.</p>
+    3.40 down to which of two equal rows a <code>UNION</code> keeps. Elsewhere Modus learned to
+    boot as an encrypted guest whose launch is measured &mdash; and five architectures turned out
+    to be passing a test that could not fail.</p>
 
     <div class="tally">
       <div><span class="n">300</span><span class="l">Commits</span></div>
@@ -256,6 +257,73 @@ modus-sh --compile-uefi    35,951,104 bytes   md5 <span class="ret">76ec6cfb...<
 
   <section>
     <div class="sec-head">
+      <span class="sec-eyebrow"><em>modus</em> &nbsp;/&nbsp; boot-uefi-snp.lisp &nbsp;/&nbsp; 24 September</span>
+      <h2>What the hash would be for</h2>
+    </div>
+
+    <p>Byte-identical builds answer one question &mdash; is this image what the source says it is?
+    &mdash; and leave the harder one open: is the machine in front of you <em>running</em> that
+    image? AMD&rsquo;s SEV-SNP is one answer. A guest is launched into encrypted memory, the
+    firmware measures what was loaded before the guest ran, and the processor will sign that
+    measurement for a remote party. This week Modus learned to boot as such a guest, and the
+    design document opens by naming the target:</p>
+
+    <div class="callout">
+      <p>The goal is to attest a <b>DDC&rsquo;d hash</b>: the launch measurement must pin an
+      artifact that Modus&rsquo;s own self-hosted compiler reproduces byte-for-byte from
+      independent hosts.</p>
+      <span class="src">modus &mdash; docs/snp-guest.md</span>
+    </div>
+
+    <p>Those are the week&rsquo;s two halves joined. Diverse double compilation says a
+    thirty-six-megabyte image is the honest output of its source, checkable by anyone with a
+    different Lisp. An attestation report says the processor booted <em>that</em> image and not
+    another. Neither is worth much alone; together they are a chain from source to silicon with no
+    link that asks to be trusted.</p>
+
+    <p>What actually landed is the guest side of it: C-bit page tables, a shared page carved out
+    of the 2&nbsp;MB region that already holds the E1000 rings, PVALIDATE-rescind and Page State
+    Change to make it shared, the GHCB registered, and a hand-assembled <code>#VC</code> handler
+    at vector 29 for port I/O, CPUID, RDMSR/WRMSR and RDTSC. The code generator is untouched
+    &mdash; <code>IN</code> and <code>OUT</code> stay inline and the handler makes them work.
+    It is gated behind a build flag, and with the flag off the image is byte-identical to the
+    tree before it: md5 <code>56f4213f</code> on both sides, measured.</p>
+
+    <p>And then the part that makes this worth reporting rather than announcing:</p>
+
+    <div class="callout">
+      <p><b>Nothing has executed a VMGEXIT.</b> The <code>:snp</code> arm has never run. The host
+      here is a bare EPYC 7C13 &mdash; Milan, SNP-capable silicon &mdash; with a 6.8 kernel (SNP
+      host support landed in 6.11) and QEMU 7.2 (guest launch needs 9.1+), and no AmdSev OVMF
+      build is installed.</p>
+      <span class="src">modus &mdash; docs/snp-guest.md, &ldquo;What is NOT established&rdquo;</span>
+    </div>
+
+    <p>What was exercised is a second arm that runs the same handler, IDT and boot order on an
+    ordinary machine, raising <code>INT 29</code> in front of real port instructions so the
+    handler is forced to service them from the GHCB fields. It requires a serial witness &mdash;
+    five specific entries &mdash; followed by the REPL prompt, and it passes. That is a test of
+    the handler, not of SNP, and the document says which is which. It also lists what remains
+    before a report exists: a host with the right kernel and firmware, a UEFI build of the SSH
+    image rather than the toy Lisp, and the secrets page located so that a report can be requested
+    with the SSH host key&rsquo;s hash bound into <code>report_data</code>.</p>
+
+    <p>One constraint from the document is worth repeating because it decides the shape of
+    everything after it. An SNP launch digest covers only pre-launch memory &mdash; the firmware,
+    and what QEMU passes as <code>-kernel</code>. An EFI application loaded from a disk image, which
+    is how Modus boots under OVMF today, <em>is not in the measurement at all</em>. Attesting the
+    thing you care about is not a matter of hashing it; it is a matter of delivering it down a
+    path the hardware was already watching.</p>
+
+    <p>A pre-existing defect turned up on the way, and it is the fourth of its kind in this issue.
+    The UEFI REPL echoes its input and never prints a result, so
+    <code>run-uefi-repl.sh '(+ 1 2)'</code> exits zero with no output &mdash; <em>a silent false
+    pass</em>. The SNP witness therefore keys on the boot banner and the prompt rather than on an
+    evaluation, because the evaluation could not have failed.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
       <span class="sec-eyebrow"><em>cl-deposits</em> &nbsp;/&nbsp; 24 commits &nbsp;/&nbsp; 26&ndash;27 September</span>
       <h2>Attacking your own protocol</h2>
     </div>
@@ -293,6 +361,11 @@ modus-sh --compile-uefi    35,951,104 bytes   md5 <span class="ret">76ec6cfb...<
     its own size, <code>IntersectionObserver</code> and <code>ResizeObserver</code>. And the Acid3
     gate is made <em>able to fail</em> &mdash; the same lesson as the architecture ladder,
     arrived at in a different repository in the same week.</p>
+
+    <p><b>dist</b>, the self-hosted Quicklisp distribution, goes from nine projects to
+    <b>forty-four</b> &mdash; every public repository in the organisation that has an
+    <code>.asd</code>, 125 systems, each verified to install and quickload into a clean Quicklisp
+    with no local source on the machine. In July it carried nine.</p>
 
     <p><b>operandi</b>, besides shedding C: a worker tier that puts the orchestrator and the swarm
     on different models, typed verdicts so an investigation returns claims rather than essays, a

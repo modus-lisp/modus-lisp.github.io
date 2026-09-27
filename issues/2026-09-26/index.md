@@ -4,7 +4,7 @@
 
 <https://modus-lisp.github.io/issues/2026-09-26/>
 
-Somebody audited what the agent actually loads, and found C entering a fifty-two-system Common Lisp program through exactly two dependencies. The first went this week, taking twenty-four systems with it. The second is the database, so SQLite was written: pager, b-trees, query planner, window functions, full-text search, R-trees, in two days, checked against version 3.40 down to which of two equal rows a `UNION` keeps. Elsewhere, five architectures turned out to be passing a test that could not fail.
+Somebody audited what the agent actually loads, and found C entering a fifty-two-system Common Lisp program through exactly two dependencies. The first went this week, taking twenty-four systems with it. The second is the database, so SQLite was written: pager, b-trees, query planner, window functions, full-text search, R-trees, in two days, checked against version 3.40 down to which of two equal rows a `UNION` keeps. Elsewhere Modus learned to boot as an encrypted guest whose launch is measured — and five architectures turned out to be passing a test that could not fail.
 
 | Commits | Repositories | New this week | Systems loaded | Architectures, checked |
 |---|---|---|---|---|
@@ -126,6 +126,34 @@ Alongside it the Fixpoint of Theseus passes again — Gen0 to Gen3, with SHA(Gen
 
 ---
 
+*modus / boot-uefi-snp.lisp / 24 September*
+
+## What the hash would be for
+
+Byte-identical builds answer one question — is this image what the source says it is? — and leave the harder one open: is the machine in front of you *running* that image? AMD’s SEV-SNP is one answer. A guest is launched into encrypted memory, the firmware measures what was loaded before the guest ran, and the processor will sign that measurement for a remote party. This week Modus learned to boot as such a guest, and the design document opens by naming the target:
+
+> The goal is to attest a **DDC’d hash**: the launch measurement must pin an artifact that Modus’s own self-hosted compiler reproduces byte-for-byte from independent hosts.
+
+> — modus — docs/snp-guest.md
+
+Those are the week’s two halves joined. Diverse double compilation says a thirty-six-megabyte image is the honest output of its source, checkable by anyone with a different Lisp. An attestation report says the processor booted *that* image and not another. Neither is worth much alone; together they are a chain from source to silicon with no link that asks to be trusted.
+
+What actually landed is the guest side of it: C-bit page tables, a shared page carved out of the 2 MB region that already holds the E1000 rings, PVALIDATE-rescind and Page State Change to make it shared, the GHCB registered, and a hand-assembled `#VC` handler at vector 29 for port I/O, CPUID, RDMSR/WRMSR and RDTSC. The code generator is untouched — `IN` and `OUT` stay inline and the handler makes them work. It is gated behind a build flag, and with the flag off the image is byte-identical to the tree before it: md5 `56f4213f` on both sides, measured.
+
+And then the part that makes this worth reporting rather than announcing:
+
+> **Nothing has executed a VMGEXIT.** The `:snp` arm has never run. The host here is a bare EPYC 7C13 — Milan, SNP-capable silicon — with a 6.8 kernel (SNP host support landed in 6.11) and QEMU 7.2 (guest launch needs 9.1+), and no AmdSev OVMF build is installed.
+
+> — modus — docs/snp-guest.md, “What is NOT established”
+
+What was exercised is a second arm that runs the same handler, IDT and boot order on an ordinary machine, raising `INT 29` in front of real port instructions so the handler is forced to service them from the GHCB fields. It requires a serial witness — five specific entries — followed by the REPL prompt, and it passes. That is a test of the handler, not of SNP, and the document says which is which. It also lists what remains before a report exists: a host with the right kernel and firmware, a UEFI build of the SSH image rather than the toy Lisp, and the secrets page located so that a report can be requested with the SSH host key’s hash bound into `report_data`.
+
+One constraint from the document is worth repeating because it decides the shape of everything after it. An SNP launch digest covers only pre-launch memory — the firmware, and what QEMU passes as `-kernel`. An EFI application loaded from a disk image, which is how Modus boots under OVMF today, *is not in the measurement at all*. Attesting the thing you care about is not a matter of hashing it; it is a matter of delivering it down a path the hardware was already watching.
+
+A pre-existing defect turned up on the way, and it is the fourth of its kind in this issue. The UEFI REPL echoes its input and never prints a result, so `run-uefi-repl.sh '(+ 1 2)'` exits zero with no output — *a silent false pass*. The SNP witness therefore keys on the boot banner and the prompt rather than on an evaluation, because the evaluation could not have failed.
+
+---
+
 *cl-deposits / 24 commits / 26–27 September*
 
 ## Attacking your own protocol
@@ -141,6 +169,8 @@ What it did this weekend is unusual enough to report on its own: it wrote down n
 ## Also this week
 
 **weft**, the layout engine, gives scripts the measurement surface a real page expects: `getBoundingClientRect` read from the layout tree, the `offset*` and `client*` metrics, `offsetParent`, a scrolling area, a window that knows its own size, `IntersectionObserver` and `ResizeObserver`. And the Acid3 gate is made *able to fail* — the same lesson as the architecture ladder, arrived at in a different repository in the same week.
+
+**dist**, the self-hosted Quicklisp distribution, goes from nine projects to **forty-four** — every public repository in the organisation that has an `.asd`, 125 systems, each verified to install and quickload into a clean Quicklisp with no local source on the machine. In July it carried nine.
 
 **operandi**, besides shedding C: a worker tier that puts the orchestrator and the swarm on different models, typed verdicts so an investigation returns claims rather than essays, a findings ledger so a settled claim outlives the run that settled it, and a question phase where the harness decides whether to delegate. Also the small mercies — images pasted from the clipboard, multi-line history that survives a restart, and a backgrounded grandchild that no longer wedges the agent forever.
 
