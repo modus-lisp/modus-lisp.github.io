@@ -4,7 +4,7 @@
   "home": "https://modus-lisp.github.io/",
   "feed": "https://modus-lisp.github.io/feed.xml",
   "generated_from": "the site's own HTML, by bin/mirror",
-  "count": 28,
+  "count": 29,
   "issues": [
     {
       "number": 1,
@@ -313,6 +313,17 @@
       "repos": 10,
       "url": "https://modus-lisp.github.io/issues/2026-09-19/",
       "markdown": "https://modus-lisp.github.io/issues/2026-09-19/index.md"
+    },
+    {
+      "number": 29,
+      "date": "2026-09-26",
+      "span": "19\u201327 September 2026",
+      "title": "The last two roots",
+      "summary": "An audit finds C entering the agent through exactly two dependencies. Dropping the first takes twenty-four systems with it; the second is the database, so a complete SQLite is written in two days \u2014 differential-tested against 3.40, and able to share a live file with it. Meanwhile five architectures stop passing a test that could not fail. 300 commits.",
+      "commits": 300,
+      "repos": 15,
+      "url": "https://modus-lisp.github.io/issues/2026-09-26/",
+      "markdown": "https://modus-lisp.github.io/issues/2026-09-26/index.md"
     }
   ]
 }

@@ -5,6 +5,7 @@
 #   bin/week 2026-08-22          the issue dated that Saturday: 15–21 Aug
 #   bin/week 2026-08-22 --log    ... and every commit subject, grouped by repo
 #   bin/week 2026-08-22 --branches   the same week read across every ref
+#   bin/week 2026-09-26 --until 2026-09-28   the issue, covering a longer span
 #   bin/week --list              every week of the project, numbered
 #
 # An issue dated Saturday S covers the seven days [S-7, S).  The workspace is
@@ -81,14 +82,22 @@ for i, w in enumerate(sorted(c), 1):
 # ---------------------------------------------------------------- a week
 
 week() {
-  local until="$1" log="$2" since
+  local sat="$1" log="$2" since until
   since=$(python3 -c "
 import datetime,sys
-d=datetime.date.fromisoformat('$until')
+d=datetime.date.fromisoformat('$sat')
 if d.weekday()!=5: sys.exit('week: %s is a %s, not a Saturday' % (d, d.strftime('%A')))
 print(d-datetime.timedelta(days=7))") || exit 1
+  until="$sat"
+  # A week is seven days unless an issue says otherwise.  --since/--until move
+  # the span without moving the issue's date: a fortnight of work reported late
+  # is still one issue, and the next one must then start where this one stopped.
+  [ -n "$SINCE_OVERRIDE" ] && since="$SINCE_OVERRIDE"
+  [ -n "$UNTIL_OVERRIDE" ] && until="$UNTIL_OVERRIDE"
 
-  printf 'ISSUE %s   covering %s .. %s (exclusive), by author date\n\n' "$until" "$since" "$until"
+  printf 'ISSUE %s   covering %s .. %s (exclusive), by author date' "$sat" "$since" "$until"
+  { [ -n "$SINCE_OVERRIDE" ] || [ -n "$UNTIL_OVERRIDE" ]; } && printf '   [SPAN OVERRIDDEN]'
+  printf '\n\n'
   printf '%-18s %7s %7s %9s %9s\n' REPO COMMITS FILES ADDED DELETED
   printf -- '---------------------------------------------------------\n'
 
@@ -210,6 +219,17 @@ print(datetime.date.fromisoformat('$until')-datetime.timedelta(days=7))")
     git -C "$ROOT/$r" log --no-walk --format='  %ad %h %d %s' --date=short $h
   done
 }
+
+SINCE_OVERRIDE=""; UNTIL_OVERRIDE=""
+ARGS=()
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --since) SINCE_OVERRIDE="$2"; shift 2 ;;
+    --until) UNTIL_OVERRIDE="$2"; shift 2 ;;
+    *)       ARGS+=("$1"); shift ;;
+  esac
+done
+set -- "${ARGS[@]:-}"
 
 case "${1:-}" in
   ''|-h|--help) usage 0 ;;

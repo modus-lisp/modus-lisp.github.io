@@ -33,7 +33,7 @@
       <span>&middot;</span>
       <span>from the bare metal up</span>
       <span>&middot;</span>
-      <span><b>46 repositories</b></span>
+      <span><b>50 repositories</b></span>
     </div>
     <h1>Modus<span class="lo">&#8209;Lisp</span></h1>
     <hr class="rule-fire">
@@ -56,6 +56,13 @@
     them. Every week of the project has an issue.</p>
     <h3 class="month">Latest</h3>
     <ol class="issues">
+      <li>
+        <a href="issues/2026-09-26/">
+          <span class="no">&#8470;&nbsp;29<br>26 Sep 26</span>
+          <span class="it">The last two roots</span>
+          <span class="dek">An audit finds C entering the agent through exactly two dependencies. Dropping the first takes twenty-four systems with it; the second is the database, so a complete SQLite is written in two days — differential-tested against 3.40, and able to share a live file with it. Meanwhile five architectures stop passing a test that could not fail. 300 commits.</span>
+        </a>
+      </li>
       <li>
         <a href="issues/2026-09-19/">
           <span class="no">&#8470;&nbsp;28<br>19 Sep 26</span>
@@ -82,13 +89,6 @@
           <span class="no">&#8470;&nbsp;25<br>29 Aug 26</span>
           <span class="it">The Pi Zero answers the doorbell</span>
           <span class="dek">A real OpenSSH client logs in to bare-metal Modus on Pi Zero 2 W silicon, then downloads a library and runs it &mdash; and the desktop above it learns its own name and its own resolution. 97 commits.</span>
-        </a>
-      </li>
-      <li>
-        <a href="issues/2026-08-22/">
-          <span class="no">&#8470;&nbsp;24<br>22 Aug 26</span>
-          <span class="it">The stack learns to leave home</span>
-          <span class="dek">kiln and glass-sdl appear, the CL stack runs a REPL on real Pi Zero silicon, one HTTP client replaces four, and half a dozen repos stop assuming whose home directory they are in. 136 commits.</span>
         </a>
       </li>
     </ol>
@@ -207,7 +207,7 @@
 
   <section id="workspace">
     <div class="sec-head">
-      <span class="sec-eyebrow">46 repositories, one machine</span>
+      <span class="sec-eyebrow">50 repositories, one machine</span>
       <h2>The workspace</h2>
     </div>
     <p>Each piece is a library in its own right, clean-room and in portable Common Lisp, and each
@@ -328,6 +328,10 @@
       <div class="family">
         <h4>Storage &amp; formats</h4>
         <dl>
+          <dt><a href="https://github.com/modus-lisp/sqlite-pure">sqlite-pure</a></dt>
+          <dd>SQLite from scratch &mdash; reads and writes the file format, and shares a live database with the C one.</dd>
+          <dt><a href="https://github.com/modus-lisp/quill">quill</a></dt>
+          <dd>A terminal line editor: Emacs keys, history, completion. No FFI, no dependencies.</dd>
           <dt><a href="https://github.com/modus-lisp/pagetree">pagetree</a></dt>
           <dd>A copy-on-write B+tree key/value store &mdash; crash-safe, no mmap. The
           substrate under both the Bitcoin node's UTXO set and the filesystem below.</dd>
@@ -364,6 +368,8 @@
           protocol and proven against its real client rather than a mock.</dd>
           <dt><a href="https://github.com/modus-lisp/cl-consensus">cl-consensus</a></dt>
           <dd>A clean-room Bitcoin consensus engine and full node.</dd>
+          <dt><a href="https://github.com/modus-lisp/cl-deposits">cl-deposits</a></dt>
+          <dd>The Bitcoin Deposits protocol, clean-room &mdash; quorum-cosigned ledgers over Nostr, reserves validated by cl-consensus.</dd>
           <dt><a href="https://github.com/modus-lisp/cl-payments">cl-payments</a></dt>
           <dd>Lightning from scratch &mdash; verified against Core Lightning and LND on a private signet.</dd>
         </dl>

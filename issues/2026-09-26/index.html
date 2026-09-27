@@ -1,0 +1,343 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The last two roots — This Week in Modus №29</title>
+<meta name="description" content="This Week in Modus, 19–27 September 2026: an audit finds C entering the agent through exactly two dependencies, so both are replaced — one of them by a from-scratch SQLite written in two days that shares a database file with the real one. Meanwhile eight architectures stop passing a test that could not fail.">
+<meta property="og:title" content="The last two roots — This Week in Modus №29">
+<meta property="og:description" content="19–27 September 2026: CFFI entered operandi through exactly two roots. Removing them took a pure-CL HTTP client, a line editor, and a complete SQLite — differential-tested against 3.40, written over a weekend.">
+<meta property="og:type" content="article">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..700&family=Newsreader:opsz,wght@6..72,300..600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../../assets/crier.css">
+  <link rel="alternate" type="application/atom+xml" title="This Week in Modus" href="https://modus-lisp.github.io/feed.xml">
+  <link rel="alternate" type="text/markdown" href="index.md">
+</head>
+<body>
+<div class="page">
+
+  <div class="sitebar">
+    <a class="brand" href="../../">crier</a>
+    <nav><a href="../">Issues</a><a href="https://github.com/modus-lisp">GitHub</a></nav>
+  </div>
+
+  <header class="mast">
+    <div class="kicker">
+      <span>This Week in Modus &mdash; &#8470;&nbsp;29</span>
+      <span>&middot;</span>
+      <span>19&ndash;27 September 2026</span>
+      <span>&middot;</span>
+      <span><b>300 commits</b> &middot; 15 of 50 repos</span>
+    </div>
+    <h1>The last<br>two <span class="lo">roots</span></h1>
+    <hr class="rule-fire">
+    <p class="standfirst">Somebody audited what the agent actually loads, and found C entering a
+    fifty-two-system Common Lisp program through exactly two dependencies. The first went this
+    week, taking twenty-four systems with it. The second is the database, so SQLite was written: pager, b-trees, query
+    planner, window functions, full-text search, R-trees, in two days, checked against version
+    3.40 down to which of two equal rows a <code>UNION</code> keeps. Elsewhere, five architectures
+    turned out to be passing a test that could not fail.</p>
+
+    <div class="tally">
+      <div><span class="n">300</span><span class="l">Commits</span></div>
+      <div><span class="n">15</span><span class="l">Repositories</span></div>
+      <div><span class="n">3</span><span class="l">New this week</span></div>
+      <div><span class="n">52&rarr;28</span><span class="l">Systems loaded</span></div>
+      <div><span class="n">8</span><span class="l">Architectures, checked</span></div>
+    </div>
+  </header>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>operandi</em>, <em>quill</em>, <em>sqlite-pure</em> &nbsp;/&nbsp; 64 commits</span>
+      <h2>An audit, and what it cost</h2>
+    </div>
+
+    <p>operandi is this workspace&rsquo;s agent loop &mdash; the thing that reads files, runs
+    commands, calls a model and iterates. It is ordinary Common Lisp, and like any ordinary
+    Common Lisp program it reaches for Quicklisp when it wants HTTP or a database. That is fine
+    everywhere except the one place this project is aimed at, where there is no C library to bind
+    to and no dynamic linker to bind it with.</p>
+
+    <p>So somebody read the load closure. The finding is stated exactly:</p>
+
+    <div class="callout">
+      <p>Toward running operandi on an implementation with no FFI. Auditing the load closure found
+      CFFI entering through exactly two roots, and dexador was the big one: cl+ssl (OpenSSL),
+      iolib, and static-vectors, pulling in over thirty of the fifty-two systems operandi loaded
+      &mdash; for a client that makes JSON POSTs and reads one server-sent-event stream.</p>
+      <span class="src">operandi &mdash; 9e6180c, <em>http: drop dexador for seal</em></span>
+    </div>
+
+    <p>Thirty of fifty-two systems, and an OpenSSL binding, to POST some JSON. They are replaced
+    by <span class="mono">seal</span>, the workspace&rsquo;s own TLS and HTTP client, on
+    <span class="mono">natrium</span>&rsquo;s crypto &mdash; pure Lisp end to end. The commit is
+    careful about the contract it has to keep: a non-2xx must still signal with the body intact,
+    because a provider&rsquo;s refusal is only legible from the body, and losing it turns every
+    refusal into <em>&ldquo;[empty response from model]&rdquo;</em>. That is the sort of detail
+    that decides whether a replacement is real.</p>
+
+    <p>A third C path went the same day, by a different route. The prompt&rsquo;s line editor,
+    <span class="mono">linedit</span>, pulled in osicat &mdash; a C groveller &mdash; and needed a
+    245-line extension for multi-line input besides. It is replaced by <a href="https://github.com/modus-lisp/quill"><b>quill</b></a>, which did not
+    exist on Friday: Emacs keys, multi-line input, persistent history with reverse search,
+    bracketed paste, completion, paren matching. No FFI and no dependencies; the only
+    per-implementation file is <code>port.lisp</code>, for raw mode and timed reads. It gets the
+    terminal&rsquo;s width from a cursor-position report rather than an <code>ioctl</code>,
+    because an <code>ioctl</code> is a syscall and a syscall is a thing a bare-metal Lisp may not
+    have. Fifty-seven checks over the pure layers, thirteen more under a real pty, and the history
+    file format is unchanged so an existing <code>~/.operandi/history</code> carries over.</p>
+
+    <p>What the audit leaves, stated as a number in the commit that did the work:</p>
+
+    <div class="console">
+      <span class="cap">operandi &mdash; 9e6180c</span>
+<pre>Closure: 52 systems -> 28.  CFFI now enters <span class="ret">ONLY through sqlite</span>.</pre>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>sqlite-pure</em> &nbsp;/&nbsp; 40 commits &nbsp;/&nbsp; 26&ndash;27 September</span>
+      <h2>And then the database</h2>
+    </div>
+
+    <p>One root left, and it is the awkward one. cl-sqlite binds libsqlite3, and the agent has
+    kept its audit log in SQLite since it was written. There is no pure-Lisp SQLite to swap
+    in.</p>
+
+    <p>There is now. <a href="https://github.com/modus-lisp/sqlite-pure"><b>sqlite-pure</b></a>
+    was created on Saturday. By Sunday evening it had forty commits, and this is what they
+    contain:</p>
+
+    <div class="console">
+      <span class="cap">sqlite-pure &mdash; two days</span>
+<pre>Saturday   pager, b-trees, records, SQL parser and executor; joins, aggregates,
+           compound selects, CTEs, views, constraints, indexes
+           triggers, date/time, JSON1, window functions with RANGE/GROUPS frames
+           SAVEPOINT, POSIX locking, TEMP tables, ATTACH/DETACH, foreign keys
+           RIGHT and FULL OUTER JOIN, UPDATE...FROM, VACUUM, generated columns
+           STRICT tables, math functions, auto-vacuum, <span class="ret">WAL writes</span>
+Sunday     R-tree virtual tables, EXPLAIN QUERY PLAN, FTS3, FTS4, <span class="ret">FTS5</span>
+           four tokenizers, bm25/highlight/snippet, dbstat, Geopoly</pre>
+    </div>
+
+    <p>The claim that matters is not the feature list, though. It is this, from the README:</p>
+
+    <div class="callout">
+      <p>A database written here opens in the <code>sqlite3</code> shell and passes its
+      <code>PRAGMA integrity_check</code>; a database written by SQLite opens here; and the two
+      can share one file at the same time, using SQLite&rsquo;s own locking protocol.</p>
+      <span class="src">sqlite-pure &mdash; README.md</span>
+    </div>
+
+    <p>Sharing a live WAL database with a real SQLite connection means implementing the
+    <code>-shm</code> wal-index protocol, which is not a file format so much as an agreement about
+    shared memory. And the differential suite goes further than format compatibility into
+    behaviour nobody documents: type affinity, collation, error messages in SQLite&rsquo;s own
+    wording, <em>which of two equal rows a <code>UNION</code> keeps</em>, and which index the
+    planner picks &mdash; because that decides the order <code>group_concat</code> sees.</p>
+
+    <p>The float work is the best of it. SQLite&rsquo;s decimal-to-double parser and its
+    <code>printf</code> run in x87 long double and are not correctly rounded. sqlite-pure
+    reproduces that, bit for bit, wrongness included &mdash; and then measures the residue:
+    about one literal in six thousand lands one unit in the last place away. A compatible
+    implementation is one that is wrong in the same places, and this one knows how often it
+    isn&rsquo;t.</p>
+
+    <p>Four repositories now exist because a C dependency had to go: seal for TLS, natrium for
+    the ciphers under it, quill for the prompt, sqlite-pure for the log. That is the shape of this
+    whole workspace in miniature &mdash; fifty repositories, most of them a thing somebody else
+    would have linked.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>modus</em> &nbsp;/&nbsp; 23 September</span>
+      <h2>A test that could not fail</h2>
+    </div>
+
+    <p>Modus has claimed nine architectures since <a href="../2026-02-28/">&#8470;&nbsp;2</a>.
+    This week somebody checked, and the README was corrected in a commit whose subject is the
+    most useful four words in it: <em>wrong in BOTH directions</em>.</p>
+
+    <div class="callout">
+      <p>The tiers I wrote understated four architectures and overstated three, and the fixpoint
+      section named a chain that does not exist. &hellip; Overstated: &ldquo;Supported&rdquo;
+      claimed x86-64, AArch64 and i386 &ldquo;accept SSH&rdquo;. SSH is unproven on EVERY target
+      &mdash; the gate marks all six ssh cells CANNOT PROVE.</p>
+      <span class="src">modus &mdash; 80422a6b</span>
+    </div>
+
+    <p>The understatement and the overstatement had the same cause, and it is the one worth
+    remembering:</p>
+
+    <div class="callout">
+      <p>Five of the nine emitted a binary that nothing ever observed. &ldquo;Runs in QEMU&rdquo;
+      was measured by the image being produced, not by anything it did &mdash; so the back ends
+      had accumulated real codegen bugs behind a check that could not fail.</p>
+      <span class="src">modus &mdash; 5b1fbe6c</span>
+    </div>
+
+    <p>The replacement harness is deliberately crude: the payload writes its answer to a fixed
+    physical address and spins, and QEMU&rsquo;s monitor reads the memory back. No serial driver,
+    no interrupt controller, nothing per-architecture that could itself be the bug. Eight
+    architectures then pass a ten-rung ladder &mdash; call, add, multiply, branch, argument,
+    recursion, factorial, cons, loop &mdash; <em>with the answer checked</em>: x86-64, AArch64,
+    i386, ARM32, RISC-V&nbsp;64, PPC64, PPC32, 68k.</p>
+
+    <p>What had been hiding behind the check that could not fail: no entry jump emitted at all for
+    RISC-V, PPC or 68k, so the boot stub fell through into whichever function came first; three
+    translators returning no function map, so the linker <em>guessed</em> each function&rsquo;s
+    offset and the entry jump landed mid-prologue; RISC-V&rsquo;s 64-bit constant loader using
+    <code>t0</code> as scratch while its caller passed <code>t0</code> as the destination; 68k
+    using D0 and D1 as both scratch and argument registers. Real bugs, all of them, in code that
+    had been reported as working for seven months.</p>
+
+    <p>The same discipline shows up twice more in the week. A library ladder &mdash; twenty-two
+    real Common Lisp libraries, run on x64 and i386 from one tree &mdash; found six shared
+    runtime bugs, the best of them that a keyword-headed form was being treated as a macro call,
+    so <code>(:metaclass x)</code> ran a user macro named <code>METACLASS</code>; cl-annot
+    defines exactly that, and the expansion recursed until the stack died. And the ladder&rsquo;s
+    own positive control turned out to be broken in the way controls fail:</p>
+
+    <div class="callout">
+      <p>A BUILD FAILURE SATISFIED THE POSITIVE CONTROL, and that is the exact failure mode the
+      control exists to prevent, wearing the control&rsquo;s own clothes.</p>
+      <span class="src">modus &mdash; c3477698</span>
+    </div>
+
+    <p>A broken <code>chmod</code> in three build scripts had made every target fail to build, and
+    the gate printed <em>&ldquo;positive control failed as required &mdash; the gate can
+    fail&rdquo;</em> and then reported fourteen failures. The control now demands a wrong
+    <em>answer</em>, not a non-zero exit.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>modus</em> &nbsp;/&nbsp; 24&ndash;27 September</span>
+      <h2>The same image, from three compilers</h2>
+    </div>
+
+    <p><a href="../2026-09-12/">&#8470;&nbsp;27</a> reported that three host Lisps produce
+    byte-identical output once Modus is doing the compiling. This week that argument gets its
+    strongest form yet: <code>modus-sh --compile-uefi</code> builds the bare-metal UEFI Common
+    Lisp image from inside Modus, and it is compared against the same image built by SBCL.</p>
+
+    <div class="console">
+      <span class="cap">modus &mdash; 6d311fc9, test/run-uefi-ddc.sh</span>
+<pre>SBCL static build          35,951,104 bytes   md5 76ec6cfb...
+modus-sh --compile-uefi    35,951,104 bytes   md5 <span class="ret">76ec6cfb...</span>
+                           reproducible run to run; boots under OVMF and evaluates
+                           holds across SBCL, CCL and ABCL hosts</pre>
+    </div>
+
+    <p>Diverse double compilation is Thompson&rsquo;s answer to a compiler that lies about its own
+    source, and it only works if the two compilers are genuinely independent. A trusted host and
+    the self-hosted target agreeing to the byte on a thirty-six-megabyte bootable image is about
+    as concrete as that argument gets.</p>
+
+    <p>Getting there found two bugs that had nothing to do with the comparison and everything to
+    do with correctness. The better one: <code>compile-quote</code> stored vector-literal elements
+    with an instruction whose slot index is an eight-bit immediate, so element 256 landed on slot
+    zero &mdash; and <em>any <code>#(...)</code> literal longer than 255 elements was wrong in
+    every image Modus had ever built</em>. It was invisible because the one such literal in the
+    boot path, a 347-byte stub blob, had been baked into <code>modus-sh</code> itself and was
+    being emitted wrong consistently. Two compilers agreeing is how you notice that both were
+    quietly wrong in the same way.</p>
+
+    <p>Alongside it the Fixpoint of Theseus passes again &mdash; Gen0 to Gen3, with
+    SHA(Gen1) equal to SHA(Gen3) &mdash; and the ANSI runner grows to contain every test the
+    corpus defines, 1,905 more than before, which moved the denominator everything else is
+    measured against.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>cl-deposits</em> &nbsp;/&nbsp; 24 commits &nbsp;/&nbsp; 26&ndash;27 September</span>
+      <h2>Attacking your own protocol</h2>
+    </div>
+
+    <p>cl-deposits is a clean-room implementation of the Bitcoin Deposits protocol &mdash;
+    operator-run ledgers published as quorum-cosigned hash chains over Nostr, with Taproot
+    reserves validated by <span class="mono">cl-consensus</span>. It is the sibling of
+    <a href="../2026-09-05/">&#8470;&nbsp;26</a>&rsquo;s Lightning node, which will be its
+    Lightning rail. It has been here since the 5th; the ledger is counted from this week because
+    this week it was cloned.</p>
+
+    <p>What it did this weekend is unusual enough to report on its own: it wrote down nine claims
+    the specification makes &mdash; strict-majority cosign, equivocation, provable censorship,
+    inactivity, co-sign refusal, fraud-proof forgery, lottery fairness, transport, the Tier 0
+    limit &mdash; and then built the attack that tests each one. The first is a harness in which
+    an operator asks its quorum to cosign a credit that is not backed by reserves, with an honest
+    arm where every cosigner refuses and a colluding arm where two cosign blind.
+    The findings are numbered to seven and every one is marked <em>organic</em>, meaning the
+    soak turned it up before anyone went looking. One of them is the kind of sentence a protocol implementation should be
+    frightened of &mdash; <em>the custody lottery&rsquo;s N is decided after it is committed
+    to</em> &mdash; and it is followed two commits later by the mitigation and a recovery sweep.
+    Deciding a lottery&rsquo;s parameter after committing to the lottery is not a bug in the
+    code; it is a bug in the design, found by the code.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow">the rest &nbsp;/&nbsp; <em>weft</em>, <em>operandi</em>, <em>loom</em>, <em>reel</em></span>
+      <h2>Also this week</h2>
+    </div>
+
+    <p><b>weft</b>, the layout engine, gives scripts the measurement surface a real page expects:
+    <code>getBoundingClientRect</code> read from the layout tree, the <code>offset*</code> and
+    <code>client*</code> metrics, <code>offsetParent</code>, a scrolling area, a window that knows
+    its own size, <code>IntersectionObserver</code> and <code>ResizeObserver</code>. And the Acid3
+    gate is made <em>able to fail</em> &mdash; the same lesson as the architecture ladder,
+    arrived at in a different repository in the same week.</p>
+
+    <p><b>operandi</b>, besides shedding C: a worker tier that puts the orchestrator and the swarm
+    on different models, typed verdicts so an investigation returns claims rather than essays, a
+    findings ledger so a settled claim outlives the run that settled it, and a question phase
+    where the harness decides whether to delegate. Also the small mercies &mdash; images pasted
+    from the clipboard, multi-line history that survives a restart, and a backgrounded grandchild
+    that no longer wedges the agent forever.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow">the gates &nbsp;/&nbsp; 27 September</span>
+      <h2>Still one line</h2>
+    </div>
+
+    <p>Three weeks ago VP8 moved into reel and three workflows went red because their
+    sibling-checkout lists were not told. Nobody has told them yet. webp-pure, webrtc-media and
+    warren have now been red for nineteen days on <code>Component :REEL not found</code>, and loom
+    and weft fail the same way. <b>51 repositories, 35 green, 8 failing, 8 with no CI.</b></p>
+
+    <p>Of the failures, five are that one line, one is operandi&rsquo;s gate reverted a month ago,
+    one is kiln&rsquo;s fast test tripping a reader error, and the newest is cl-deposits &mdash;
+    nineteen minutes old at the time of writing, which is at least a gate doing its job. Of the
+    eight with nothing watching them, two arrived yesterday: sqlite-pure, whose differential suite
+    against SQLite 3.40 is the best-tested thing in this issue and runs nowhere automatically, and
+    quill, which has seventy checks and the same problem.</p>
+  </section>
+
+  <footer>
+    <p><strong>Method.</strong> Commits by <em>author</em> date, 19 to 27 September 2026, across
+    the 50 repositories cloned from the modus-lisp organisation, counting each repository&rsquo;s default
+    branch as the union of the local branch and <code>origin/</code>. Produced with
+    <code>bin/week 2026-09-26 --until 2026-09-28 --log</code>.</p>
+    <p><strong>A nine-day week.</strong> This issue covers nine days rather than seven, at the
+    author&rsquo;s request, because three repositories were created on the 26th and holding them
+    for a fortnight would have made two issues wrong instead of one. <code>bin/week</code> now
+    takes <code>--since</code> and <code>--until</code> so that a span can be moved without moving
+    the issue&rsquo;s date, and prints <code>[SPAN OVERRIDDEN]</code> when it has been. The next
+    issue starts on 28 September: <code>bin/week 2026-10-03 --since 2026-09-28</code>.</p>
+    <p><strong>Line counts.</strong> sqlite-pure&rsquo;s 35,869 added lines include its
+    differential test corpus and character tables extracted from SQLite; cl-deposits&rsquo; figure
+    covers only the 24 commits inside this window, not the 39 that preceded it.</p>
+    <p><a href="../">&larr; All issues</a> &middot; <a href="../../">crier</a></p>
+  </footer>
+
+</div>
+</body>
+</html>
