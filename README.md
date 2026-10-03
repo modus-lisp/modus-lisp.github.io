@@ -30,13 +30,11 @@ Every page is written by hand, and a page is a file you can open with `file://` 
 the same reason everything else in this org is written the way it is. There is no build step
 between an issue and the web.
 
-Link previews get a card each: `bin/mirror` renders `assets/og/<slug>.png` from the
-issue's own masthead — same tokens, same line breaks — so a card cannot drift from the
-page it previews. The card's HTML is tracked like any other generated file and the PNG
-is re-rendered only when that HTML changes, because a headless browser is not
-byte-deterministic and `--check` would otherwise report churn for ever. Needs Chromium
-and Pillow; without them the cards are skipped and no `og:image` is emitted, which is
-better than one that 404s.
+Link previews share one card. A preview already renders `og:title` and
+`og:description` as text beside the image, so the image must not repeat them —
+`assets/og/card.png` is a hand-made asset and `bin/mirror` only points every page at
+it, alongside `og:url` and the Twitter pair. `card-square.png` sits beside it for the
+places that crop to a square.
 
 There is one generator, and it runs the other way. `bin/mirror` reads the finished HTML and
 emits the machine-readable mirror of it: a Markdown copy of every issue, an Atom feed, an

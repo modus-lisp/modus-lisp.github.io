@@ -571,138 +571,24 @@ def walk_html():
 
 # ----------------------------------------------------------------- og cards
 
-# A link preview with no image is a grey box with some text in it.  These are
-# the issue's own masthead, rendered at 1200x630 from the same tokens the page
-# uses, so a card cannot drift from the page it previews.
-#
-# The HTML is written to assets/og/<slug>.html and tracked like any other
-# generated file; the PNG is re-rendered only when that HTML changes, because
-# a headless browser is not byte-deterministic and --check would otherwise
-# report churn for ever.
+# A link preview renders og:title and og:description as text beside the image,
+# so the image must not repeat them: it is one card for the whole site, not a
+# headline per issue.  assets/og/card.png is a hand-made asset, not generated —
+# all this does is point every page at it.
 
-CHROME_CANDIDATES = (
-    "/Applications/Chromium.app/Contents/MacOS/Chromium",
-    "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
-    "/usr/bin/chromium", "/usr/bin/google-chrome",
-)
+CARD = "assets/og/card.png"
 
-CARD_CSS = """html,body{margin:0;padding:0;background:#0E1214}
-  .card{position:relative;box-sizing:border-box;width:1200px;height:630px;padding:64px 72px;
-        background:#0E1214;color:#E6EBE9;overflow:hidden;
-        font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace}
-  .kick{font-size:21px;letter-spacing:.04em;color:#889693;text-transform:uppercase}
-  .kick b{color:#E28B57;font-weight:500}
-  h1{font-family:"Archivo",Arial,sans-serif;font-variation-settings:"wdth" 125,"wght" 700;
-     text-transform:uppercase;letter-spacing:-.028em;line-height:.94;margin:34px 0 0;
-     font-size:100px;color:#E6EBE9}
-  h1 .lo{color:#6FBFC9}
-  .rule{position:absolute;left:72px;right:72px;bottom:118px;height:4px;background:#E28B57}
-  .foot{position:absolute;left:72px;right:72px;bottom:62px;display:flex;
-        justify-content:space-between;align-items:baseline;font-size:22px;color:#889693}
-  .foot .n{color:#E6EBE9}"""
-
-FONTS = ("https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..700"
-         "&family=IBM+Plex+Mono:wght@400;500&display=swap")
-
-
-def chrome():
-    for c in CHROME_CANDIDATES:
-        if os.path.exists(c):
-            return c
-    return None
-
-
-def card_html(kicker, h1, foot_left):
-    return (f'<meta charset="utf-8">\n<link rel="stylesheet" href="{FONTS}">\n'
-            f"<style>\n{CARD_CSS}\n</style>\n"
-            f'<div class="card">\n'
-            f'  <div class="kick">{kicker}</div>\n'
-            f"  <h1>{h1}</h1>\n"
-            f'  <div class="rule"></div>\n'
-            f'  <div class="foot"><span>{foot_left}</span>'
-            f"<span>modus-lisp.github.io</span></div>\n</div>\n")
-
-
-def render_card(src_html_path, out_png_path):
-    """Render a card to PNG.  Chromium clips a screenshot short of a 630px
-    window, so render tall and crop."""
-    ch = chrome()
-    if not ch:
-        return False
-    try:
-        from PIL import Image
-    except Exception:
-        return False
-    tmp = out_png_path + ".tall.png"
-    r = subprocess.run([ch, "--headless", "--disable-gpu", "--hide-scrollbars",
-                        "--force-device-scale-factor=1", "--virtual-time-budget=8000",
-                        "--window-size=1200,900", f"--screenshot={tmp}",
-                        "file://" + os.path.abspath(src_html_path)],
-                       capture_output=True)
-    if not os.path.exists(tmp):
-        return False
-    try:
-        Image.open(tmp).convert("RGB").crop((0, 0, 1200, 630)).save(out_png_path, optimize=True)
-    finally:
-        os.remove(tmp)
-    return True
-
-
-H1_RE = re.compile(r"<h1>(.*?)</h1>", re.S)
-
-
-def build_cards(issues, notes):
-    """Write each card's HTML, render the PNG when that HTML has changed."""
-    made = []
-
-    def one(slug, kicker, h1, foot, page_rel):
-        html_rel = f"assets/og/{slug}.html"
-        png_rel = f"assets/og/{slug}.png"
-        png_abs = os.path.join(ROOT, png_rel)
-        changed = write(html_rel, card_html(kicker, h1, foot))
-        if DRY:
-            return png_rel if os.path.exists(png_abs) else None
-        if changed or not os.path.exists(png_abs):
-            if render_card(os.path.join(ROOT, html_rel), png_abs):
-                made.append(png_rel)
-        return png_rel if os.path.exists(png_abs) else None
-
-    out = {}
-    for i in issues:
-        page = read("issues", i["slug"], "index.html")
-        m = H1_RE.search(page)
-        if not m:
-            continue
-        kick = (f"This Week in Modus &mdash; <b>&#8470;&nbsp;{i['number']}</b>"
-                f" &nbsp;&middot;&nbsp; {i['span'] or i['slug']}")
-        foot = " &middot; ".join(x for x in [
-            f"<span class=\"n\">{plural(i['commits'], 'commit')}</span>" if i["commits"] else None,
-            f"{i['repos']} repositories" if i["repos"] else None] if x)
-        got = one(i["slug"], kick, m.group(1), foot or "", f"issues/{i['slug']}/")
-        if got:
-            out[f"issues/{i['slug']}/index.html"] = got
-
-    total = sum(i["commits"] or 0 for i in issues)
-    got = one("index",
-              "crier &nbsp;&middot;&nbsp; the modus-lisp dispatch",
-              'modus-<span class="lo">lisp</span>',
-              f"{len(issues)} issues &middot; {total:,} commits", "")
-    if got:
-        out["index.html"] = got
-        out["issues/index.html"] = got
-    if made:
-        print(f"rendered {len(made)} card(s)")
-    return out
-
-
-OG_RE = re.compile(r'\n?\s*<meta property="og:image"[^>]*>|\n?\s*<meta name="twitter:[^"]*"[^>]*>'
+OG_RE = re.compile(r'\n?\s*<meta property="og:image"[^>]*>'
+                   r'|\n?\s*<meta name="twitter:[^"]*"[^>]*>'
                    r'|\n?\s*<meta property="og:url"[^>]*>')
 
 
-def inject_cards(cards):
-    """og:image / og:url / twitter:card, rewritten from scratch each run."""
+def inject_cards():
+    """og:url, og:image and the twitter pair, rewritten from scratch each run."""
+    if not os.path.exists(os.path.join(ROOT, CARD)):
+        return
     n = 0
-    for rel, png in cards.items():
+    for rel in walk_html():
         path = os.path.join(ROOT, rel)
         if not os.path.exists(path):
             continue
@@ -711,11 +597,12 @@ def inject_cards(cards):
             continue
         orig = s
         s = OG_RE.sub("", s)
-        url = BASE + "/" + (os.path.dirname(rel) + "/" if os.path.dirname(rel) else "")
+        d = os.path.dirname(rel)
+        url = BASE + "/" + (d + "/" if d else "")
         tags = (f'  <meta property="og:url" content="{url}">\n'
-                f'  <meta property="og:image" content="{BASE}/{png}">\n'
+                f'  <meta property="og:image" content="{BASE}/{CARD}">\n'
                 f'  <meta name="twitter:card" content="summary_large_image">\n'
-                f'  <meta name="twitter:image" content="{BASE}/{png}">\n')
+                f'  <meta name="twitter:image" content="{BASE}/{CARD}">\n')
         s = s.replace("</head>", tags + "</head>", 1)
         if s != orig:
             write(rel, s)
@@ -768,8 +655,7 @@ def main():
         if touched:
             print(f"head links added to {len(touched)} page(s)")
 
-    cards = build_cards(issues, notes)
-    inject_cards(cards)
+    inject_cards()
 
     for i in issues:
         write(f"issues/{i['slug']}/index.md", markdown_for(i))
