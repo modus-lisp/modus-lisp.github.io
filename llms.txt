@@ -1,11 +1,12 @@
 # crier — This Week in Modus
 
-> A weekly dispatch on modus-lisp: a personal computer written from scratch in Common Lisp. Weekly, one issue per week that had commits, numbered from the project's first working week in March 2025. 29 issues covering 4,887 commits.
+> A weekly dispatch on modus-lisp: a personal computer written from scratch in Common Lisp. Weekly, one issue per week that had commits, numbered from the project's first working week in March 2025. 30 issues covering 5,119 commits.
 
 Every claim in an issue comes out of the git commit log of the modus-lisp repositories; where an issue uses anything else it says so in its own method footnote. Counts are counted, not estimated. Each issue below links to a Markdown mirror of the full text.
 
 ## Issues
 
+- [№30 — Modus, on a phone](https://modus-lisp.github.io/issues/2026-10-03/index.md): The bare-metal Lisp runs natively on an iPhone — eleven of eleven runtime tests on the device — and draws on a watch. Three long branches land at once, carrying an actor runtime the agent moves onto immediately. A Nostr relay is written in a day to replace a Python script. And a build recipe says plainly that its core is attested by hash, not reproducible. 232 commits. (28 September – 2 October 2026)
 - [№29 — The last two roots](https://modus-lisp.github.io/issues/2026-09-26/index.md): An audit finds C entering the agent through exactly two dependencies. Dropping the first takes twenty-four systems with it; the second is the database, so a complete SQLite is written in two days — differential-tested against 3.40, and able to share a live file with it. Meanwhile five architectures stop passing a test that could not fail. 300 commits. (19–27 September 2026)
 - [№28 — The honest figure](https://modus-lisp.github.io/issues/2026-09-19/index.md): Reel's decoder runs on a bare-metal Pi Zero 2 W with the display driven from the ARM; Linux is netbooted onto the same board to put SBCL and libvpx on identical silicon; a 150× claim is retracted to 5×; and two days of compiler work take Modus from 37 to 16 million instructions a frame; and a Modus that runs in a browser tab. 177 commits. (12–18 September 2026)
 - [№27 — A DVD plays, bit-exact](https://modus-lisp.github.io/issues/2026-09-12/index.md): Two new repositories take the media stack from one video codec to eight in a week, every one bit-exact against ffmpeg or a conformance suite; the decoder written on Sunday drives Modus's compiler from 3 to 60 fps on a Pi 5 by Thursday; and the browser client stops needing node. 296 commits. (5–11 September 2026)

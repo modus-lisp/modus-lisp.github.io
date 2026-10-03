@@ -4,7 +4,7 @@
   "home": "https://modus-lisp.github.io/",
   "feed": "https://modus-lisp.github.io/feed.xml",
   "generated_from": "the site's own HTML, by bin/mirror",
-  "count": 29,
+  "count": 30,
   "issues": [
     {
       "number": 1,
@@ -324,6 +324,17 @@
       "repos": 15,
       "url": "https://modus-lisp.github.io/issues/2026-09-26/",
       "markdown": "https://modus-lisp.github.io/issues/2026-09-26/index.md"
+    },
+    {
+      "number": 30,
+      "date": "2026-10-03",
+      "span": "28 September \u2013 2 October 2026",
+      "title": "Modus, on a phone",
+      "summary": "The bare-metal Lisp runs natively on an iPhone \u2014 eleven of eleven runtime tests on the device \u2014 and draws on a watch. Three long branches land at once, carrying an actor runtime the agent moves onto immediately. A Nostr relay is written in a day to replace a Python script. And a build recipe says plainly that its core is attested by hash, not reproducible. 232 commits.",
+      "commits": 232,
+      "repos": 12,
+      "url": "https://modus-lisp.github.io/issues/2026-10-03/",
+      "markdown": "https://modus-lisp.github.io/issues/2026-10-03/index.md"
     }
   ]
 }

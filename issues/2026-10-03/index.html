@@ -1,0 +1,319 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Modus, on a phone — This Week in Modus №30</title>
+<meta name="description" content="This Week in Modus, 28 September–2 October 2026: the bare-metal Lisp runs natively on an iPhone and draws on a watch, three long branches land at once, a Nostr relay is written in a day to replace a Python script, and attestation stops being implicit — including the part that says what a hash is not.">
+<meta property="og:title" content="Modus, on a phone — This Week in Modus №30">
+<meta property="og:description" content="28 September–2 October 2026: eleven of eleven runtime tests pass on an iPhone 15 Pro. The agent moves onto Modus's own actor runtime. And a build recipe says plainly that its core is attested by hash, not reproducible.">
+<meta property="og:type" content="article">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..700&family=Newsreader:opsz,wght@6..72,300..600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../../assets/crier.css">
+  <link rel="alternate" type="application/atom+xml" title="This Week in Modus" href="https://modus-lisp.github.io/feed.xml">
+  <link rel="alternate" type="text/markdown" href="index.md">
+</head>
+<body>
+<div class="page">
+
+  <div class="sitebar">
+    <a class="brand" href="../../">crier</a>
+    <nav><a href="../">Issues</a><a href="https://github.com/modus-lisp">GitHub</a></nav>
+  </div>
+
+  <header class="mast">
+    <div class="kicker">
+      <span>This Week in Modus &mdash; &#8470;&nbsp;30</span>
+      <span>&middot;</span>
+      <span>28 September &ndash; 2 October 2026</span>
+      <span>&middot;</span>
+      <span><b>232 commits</b> &middot; 12 of 51 repos</span>
+    </div>
+    <h1>Modus,<br>on a <span class="lo">phone</span></h1>
+    <hr class="rule-fire">
+    <p class="standfirst">An operating system that boots nine architectures on bare metal spent
+    this week learning to be an app. It runs natively on an iPhone, passes all eleven of its
+    runtime tests on the device, and draws on a watch. Three long-lived branches land at once,
+    carrying with them an actor runtime that the agent immediately moves onto. A Nostr relay gets
+    written in a day because the test network was still using a Python script. And attestation,
+    implicit in this project for twenty-nine issues, becomes explicit in three places &mdash;
+    including the one that says what a hash is <em>not</em>.</p>
+
+    <div class="tally">
+      <div><span class="n">232</span><span class="l">Commits</span></div>
+      <div><span class="n">12</span><span class="l">Repositories</span></div>
+      <div><span class="n">11/11</span><span class="l">Tests, on an iPhone</span></div>
+      <div><span class="n">113</span><span class="l">Red-team commits</span></div>
+      <div><span class="n">37</span><span class="l">Green, of 52</span></div>
+    </div>
+  </header>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>modus</em> &nbsp;/&nbsp; macos-hosting &nbsp;/&nbsp; 28&ndash;30 September</span>
+      <h2>Eleven of eleven, on the device</h2>
+    </div>
+
+    <p>Modus is a Lisp that owns its machine &mdash; page tables, interrupt vectors, the display
+    controller. iOS is the opposite proposition: a signed app in a sandbox, where the kernel
+    decides what you may map and a watchdog decides how long you may take. It now runs there.</p>
+
+    <div class="callout">
+      <p>Ran natively on an iPhone&nbsp;15&nbsp;Pro (iOS&nbsp;26.6.2) with a free Personal Team:
+      signed code, in place, PC-relative, data layout reserved &mdash; the kernel accepted segments
+      spanning ~4&nbsp;GB to ~15&nbsp;GB without the extended-VA entitlement. All 11 tests pass on
+      the device.</p>
+      <span class="src">modus &mdash; 7d681818</span>
+    </div>
+
+    <p>Those eleven are not a smoke test. They are the runtime&rsquo;s own hard cases: hosted
+    threads, thread-local collection, handler depth, stop-the-world, arena evacuation, slot reuse,
+    the intern race, dynamic binding, closure escape. The same list that guards the bare-metal
+    ports, run inside an App Store sandbox on a stock phone with a free developer account.</p>
+
+    <p>Three obstacles are worth naming because each is a fact about iOS rather than about Lisp.
+    An app must finish launching within twenty seconds or FrontBoard kills it &mdash;
+    <code>0x8BADF00D</code>, <em>process-launch watchdog transgression</em> &mdash; and the first
+    device runs lost every test that took longer; the shim now runs
+    <code>UIApplicationMain</code> on the main thread, with a delegate built through the
+    Objective-C runtime, and puts the image on a thread of its own. Linux gives the first thread a
+    TID equal to the PID and the runtime had believed it. And the phone wanted to auto-lock
+    mid-test.</p>
+
+    <p>Two days later the same image &mdash; JIT off, PC-relative, run in place &mdash; comes up on
+    the watchOS Simulator and draws. watchOS publishes no UIKit, so the main thread runs a SwiftUI
+    app instead, exporting the same four entry points the phone uses: info, fill, present, next
+    event. The image does not know which it is on.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>modus</em>, <em>operandi</em> &nbsp;/&nbsp; three merges &nbsp;/&nbsp; 30 September &ndash; 1 October</span>
+      <h2>The agent moves in</h2>
+    </div>
+
+    <p>Three branches that had been running in parallel &mdash; <span class="mono">multi-arch</span>,
+    <span class="mono">macos-hosting</span>, <span class="mono">operandi-on-modus</span> &mdash;
+    land on <code>main</code> over two days, in merges whose subjects read like a reconciliation
+    rather than a fast-forward: <em>the hosted actor runtime, selective receive, per-computation
+    specials &mdash; reconciled onto macos-hosting&rsquo;s lock-free interning</em>.</p>
+
+    <p>The largest piece is an actor runtime that actually exists for programs to use, where
+    before there was a scheduler core and a pile of hand-wired self-tests:</p>
+
+    <div class="callout">
+      <p>net/actors.lisp was a scheduler core and every hosted use of it a selftest wired by hand;
+      there was no runtime a program could use. This adds one. &hellip; AN ACTOR HAS ITS OWN
+      WINDOW. Handler frames, bindings, the MV buffer, the stop-the-world words and the shared-store
+      guard&rsquo;s region words.</p>
+      <span class="src">modus &mdash; c37308c9</span>
+    </div>
+
+    <p>M:N actors on native threads, each with its own garbage-collected region carved out of
+    region zero, messages passed by copy, blocking receive that hands the thread back, and
+    selective receive. Which is the Erlang shape, and the point of it shows up immediately
+    downstream: <span class="mono">operandi</span>&rsquo;s agent protocol switches from
+    shared-memory threads to actors in a single commit, and <span class="mono">natrium</span> makes
+    its default random generator per-computation so that threads and actors share no state.</p>
+
+    <p>The follow-ups are where the real cost of concurrency shows. A thread&rsquo;s result becomes
+    a message, and an error ends the thread rather than the process. A leaked runtime lock stops
+    the process instead of hanging it. A stuck collection stops <em>loudly</em> instead of
+    deadlocking. A store that would share a worker&rsquo;s object is refused outright. Actor stacks
+    get two megabytes and a guard page, so an overflow no longer lands in a neighbour. Each of
+    those is a decision to fail visibly rather than mysteriously, which is the only way a
+    concurrent runtime stays debuggable.</p>
+
+    <p>And the thread from <a href="../2026-09-26/">&#8470;&nbsp;29</a> closes. Last week&rsquo;s
+    audit left exactly one route for C into the agent: cl-sqlite. This week sqlite-pure grows a
+    drop-in &mdash; the same <code>SQLITE</code> package, a 194-case transcript that must print
+    identically, and cl-sqlite&rsquo;s own suite passing, its concurrent-insert test included
+    &mdash; and Modus&rsquo;s ASDF aliases <code>sqlite</code> to it when it can be found. The
+    dependency name in operandi&rsquo;s system definition never changes. The C underneath it
+    does.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>kiln</em>, <em>cl-deposits</em> &nbsp;/&nbsp; 1&ndash;2 October</span>
+      <h2>Attested by hash, not reproducible</h2>
+    </div>
+
+    <p><a href="../2026-09-26/">&#8470;&nbsp;29</a> reported Modus learning to boot as an encrypted
+    guest whose launch is measured, and noted that nothing had yet executed a VMGEXIT. This week
+    the idea arrives in two more repositories, and in both of them the interesting content is the
+    hedging.</p>
+
+    <p>kiln gains <code>kiln image</code>, a recipe that produces two measurable files on this
+    machine: the bare x86-64 UEFI image that an SNP launch would measure, and a heap snapshot taken
+    after <code>ql:quickload</code> of every requested system, pulled out of guest RAM over QEMU&rsquo;s
+    monitor and <em>proven by booting the same image with the core back in RAM and answering a
+    probe</em>. A manifest records every hash and pin. Where a pin is missing, the recipe says so
+    and archives HEAD rather than claiming the pin it does not have.</p>
+
+    <p>Then the next commit, which is the one worth the section title:</p>
+
+    <div class="callout">
+      <p>Two runs of the same recipe on the same image gave cores of 149,572,592 and 149,641,312
+      bytes, so the README says what the manifest&rsquo;s core hash is and is not.</p>
+      <span class="src">kiln &mdash; 6599a1d, <em>the core is attested by hash, not reproducible</em></span>
+    </div>
+
+    <p>Sixty-eight thousand bytes apart, twice from one recipe. A heap snapshot is not a build
+    artefact; it is a photograph of a running machine, and photographs differ. So the manifest
+    hash identifies <em>this</em> core and attests nothing about anyone else&rsquo;s. The image
+    beside it, built by a compiler, is a different kind of object and gets the stronger claim. A
+    project that wanted to look good would have shipped one number and let the reader assume.</p>
+
+    <p>cl-deposits takes the same idea the other way, into economics. Its trust model asks what
+    hardware attestation is actually worth when operators can be compromised, and answers with a
+    simulation rather than an assertion:</p>
+
+    <div class="console">
+      <span class="cap">cl-deposits &mdash; analysis/attest2_sim.out, max safe p over 60 trials</span>
+<pre>world                             broken       R=0.5  R=0.7  R=0.8  R=0.9
+nobody attested                   &mdash;             0.27   0.24   0.18   0.12
+80% attested, random seats        1 platform    0.90   0.63   0.57   0.30
+80% attested, random seats        1 vendor      0.48   0.42   0.33   0.18
+7 attested, &le;1/platform, &le;3/vendor  none      <span class="ret">0.99   0.99   0.99   0.99</span></pre>
+    </div>
+
+    <p>The author put the same thought more plainly on nostr the same day &mdash; <em>&ldquo;I&rsquo;ve
+    been thinking about TEEs wrong. They&rsquo;re not perfect, but what if you only need a majority
+    of them to be?&rdquo;</em> &mdash; and the commit&rsquo;s own summary is the thesis:
+    <em>attestation as a trust root that degrades to economics</em>. A fully attested quorum with per-platform and per-vendor seat caps survives
+    a vendor break plus two platform breaks at any coalition size &mdash; and when it stops
+    surviving, it falls back to the collateral arithmetic rather than to nothing. Attestation that
+    is assumed unbreakable is a single point of failure; attestation priced as one input among
+    several is a defence.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>cl-deposits</em>, <em>beacon</em> &nbsp;/&nbsp; 113 commits</span>
+      <h2>Attacking it properly</h2>
+    </div>
+
+    <p>cl-deposits accounts for nearly half the week, and almost all of it is adversarial. Last
+    issue it had written down nine claims its specification makes and built the attack for the
+    first. This week it builds the rest and runs them against a persistent regtest network: vault
+    theft, censorship holds, withheld reveals, rollback depth, dereliction, veto-pledge fraud on
+    mixed quorums, collusion with fresh keys, relay fault injection.</p>
+
+    <p>What makes it convincing is that the scenarios are hostile to their own harness. Nodes must
+    arm themselves rather than being armed; scenarios form their own ledgers and deposits rather
+    than borrowing the soak&rsquo;s; they pick clean actors and report key taint; a dispute is run
+    all the way to on-chain confiscation and the test waits for the chain. The findings file is
+    kept alongside, and it records a Rust confiscation hang in the reference implementation &mdash;
+    the thing being tested against &mdash; as readily as its own bugs.</p>
+
+    <p>The design findings are the ones to read. <em>Confiscation: replacement collateral is an
+    eligibility cut, not a veto.</em> <em>A shared eligibility vector: one survivor takes custody;
+    none survive means re-arm.</em> <em>Members refuse to cosign for a deposed operator.</em> Each
+    is a rule discovered by playing the protocol adversarially rather than by reading it.</p>
+
+    <p>And the week&rsquo;s new repository exists because of a line in that test network.
+    <a href="https://github.com/modus-lisp/beacon"><b>beacon</b></a> is a Nostr relay in pure
+    Common Lisp &mdash; append-only event log, in-memory unboxed indexes, sharded fanout, an fsync
+    policy, no step proportional to store size, benchmarks in the README &mdash; written on
+    1 October in six commits. The commit that uses it says why it was written:
+    <em>Devnet relay: beacon (pure CL) replaces relay.py</em>. That is the fourth repository in two
+    issues created to delete a dependency, after seal, quill and sqlite-pure.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow">the rest &nbsp;/&nbsp; <em>sqlite-pure</em>, <em>seal</em>, <em>glass</em>, <em>spool</em>, <em>chord</em></span>
+      <h2>Also this week</h2>
+    </div>
+
+    <p><b>sqlite-pure</b>, besides the drop-in, spends the week in the query planner: subquery
+    flattening, WHERE-term push-down, HAVING-to-WHERE, an OR optimisation with IN rewriting and
+    multi-index OR, a LIKE optimisation, and <code>RIGHT</code>/<code>FULL JOIN</code> regressions
+    fixed to match SQLite&rsquo;s own plans &mdash; which matters because the plan decides the row
+    order a query sees.</p>
+
+    <p><b>seal</b> makes verification faster off SBCL &mdash; linear base64, a cached trust store,
+    Montgomery ECDSA &mdash; and then per-computation caches so the actor runtime can use it
+    safely. <b>glass</b> gets a Music window with a station list, and fixes the recognizer hearing
+    the music it is playing; <b>spool</b> learns Icecast and Shoutcast streams; <b>chord</b> loads
+    and runs Kokoro voices, and the voice and speed become run-time choices. The desktop acquired
+    a radio this week, which is not the most consequential thing in this issue and is probably the
+    most pleasant.</p>
+
+    <p>And the Pi work from the last three issues kept going underneath all of it: clips now reach
+    the board over HTTP, with the loader refusing a truncated body rather than handing the decoder
+    a short buffer; a green-screen regression turned out to be lossy display-list stores through
+    the non-cacheable window; and the boot path paints a test pattern the moment the display plane
+    comes up. On 28 September it was filmed:</p>
+
+    <div class="plates two">
+      <figure class="plate">
+        <img src="../../assets/img/vp8-zero-2026-09-28.jpg" width="1280" height="720"
+             alt="A monitor photographed in a dark room, showing a decoded video frame: six vertical colour bars in red, green, yellow, blue, magenta and cyan, crossed by diagonal stepped bands, with a timecode overlay reading 00:00:01.300 and a frame number 39.">
+        <figcaption><b>The decoder, running.</b> A VP8 test clip decoding on a bare-metal
+        Pi&nbsp;Zero&nbsp;2&nbsp;W and scaled to the panel by the HVS &mdash; timecode and frame
+        number burned into the clip, so the picture proves its own progress.
+        <em>&ldquo;bare metal common lisp, software decoding vp8 on an rpi zero 2w.&rdquo;</em>
+        <span class="prov">nostr &mdash; 296d02f7, 2026-09-28 11:48Z, frame from a 15-second clip</span></figcaption>
+      </figure>
+      <figure class="plate">
+        <img src="../../assets/img/ti-explorer-2026-10-01.jpg" width="1024" height="808"
+             alt="A monochrome screen showing the Texas Instruments Explorer boot banner with the TI logo, copyright lines dated 1985 to 1990, a warning that no SITE object named BOOT was found, and a prompt reading: Reading at top level in Simple Lisp Listener 1.">
+        <figcaption><b>Not this project&rsquo;s code.</b> A Texas Instruments Explorer coming up to
+        a Lisp Listener, copyright 1985&ndash;1990, posted the day the iPhone work merged. The
+        archive has measured itself against these machines since
+        <a href="../2025-03-15/">&#8470;&nbsp;1</a>; this is one of them, booting, in the same week
+        a Lisp machine ran on a phone. <em>&ldquo;guess who&rsquo;s back / back again / lisp is
+        back / tell a friend.&rdquo;</em>
+        <span class="prov">nostr &mdash; 9a6ca0f1, 2026-10-01 16:33Z, frame from a five-minute
+        recording; whether hardware or emulation is not established here</span></figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow">the gates &nbsp;/&nbsp; 3 October</span>
+      <h2>Four weeks of one line</h2>
+    </div>
+
+    <p>The <code>Component :REEL not found</code> break is now twenty-five days old. webp-pure and
+    webrtc-media have been red since 8 September, warren since the 9th, and loom and weft fail the
+    same way because they depend on webp-pure. Five of six red badges are still that one unfixed
+    sibling-checkout list; the sixth is operandi&rsquo;s gate, reverted thirty-three days ago.</p>
+
+    <p><b>52 repositories, 37 green, 6 failing, 9 with no CI.</b> cl-deposits went green this week
+    and now installs beacon and secp256k1-fast for its regtest smoke, which is the gate doing
+    exactly what gates are for. beacon, quill and sqlite-pure &mdash; three repositories created in
+    two weeks, two of them now load-bearing for a test network &mdash; have nothing watching
+    them.</p>
+  </section>
+
+  <footer>
+    <p><strong>Method.</strong> Commits by <em>author</em> date, 28 September to 2 October 2026,
+    across the 51 repositories cloned from the modus-lisp organisation, counting each
+    repository&rsquo;s default branch as the union of the local branch and <code>origin/</code>.
+    Produced with <code>bin/week 2026-10-03 --since 2026-09-28 --log</code>; the
+    <code>--since</code> picks up where <a href="../2026-09-26/">&#8470;&nbsp;29</a>&rsquo;s
+    nine-day span stopped, as that issue said it would.</p>
+    <p><strong>Not counted.</strong> Thirty-two commits sit on branches that had not merged when
+    this was written &mdash; modus&rsquo;s <code>macos-hosting</code> continuation, kiln&rsquo;s
+    <code>ios</code>, warp&rsquo;s <code>modus-threads</code>, glass&rsquo;s <code>desk</code> and
+    <code>fast-paint</code>, cassette&rsquo;s <code>vorbis-local</code>, sqlite-pure&rsquo;s
+    <code>wal-begin-read-retry</code>. Four of those repositories are checked out on the branch
+    rather than on their default, which is why the ledger reads the default branch explicitly
+    rather than whatever happens to be in the working tree.</p>
+    <p><strong>Outside the log.</strong> The author&rsquo;s nostr notes for the window were read
+    as in <a href="../2025-03-15/">&#8470;&nbsp;1</a>: twenty-six notes, two of them carrying the
+    video the plates above are taken from, and one &mdash; the TEE remark quoted in
+    &ldquo;Attested by hash&rdquo; &mdash; posted the same day as the commit it anticipates. The
+    plates are single frames; neither video is reproduced here.</p>
+    <p><a href="../">&larr; All issues</a> &middot; <a href="../../">crier</a></p>
+  </footer>
+
+</div>
+</body>
+</html>
