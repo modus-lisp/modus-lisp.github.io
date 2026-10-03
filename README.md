@@ -24,11 +24,19 @@ explained.
 | `bin/mirror` | Regenerates the machine-readable half of the site from the site itself. `--check` fails if it is stale. |
 | `assets/crier.css` | The whole design system. Tokens, then chrome, then prose. There is no second stylesheet. |
 | `.nojekyll` | Tells Pages to serve the files as written rather than running Jekyll over them. |
-| `issues/*/index.md`, `feed.xml`, `llms.txt`, `index.json`, `sitemap.xml`, `robots.txt` | **Derived.** Written by `bin/mirror`; never edit them by hand. |
+| `issues/*/index.md`, `feed.xml`, `llms.txt`, `index.json`, `sitemap.xml`, `robots.txt`, `assets/og/` | **Derived.** Written by `bin/mirror`; never edit them by hand. |
 
 Every page is written by hand, and a page is a file you can open with `file://` — which is
 the same reason everything else in this org is written the way it is. There is no build step
 between an issue and the web.
+
+Link previews get a card each: `bin/mirror` renders `assets/og/<slug>.png` from the
+issue's own masthead — same tokens, same line breaks — so a card cannot drift from the
+page it previews. The card's HTML is tracked like any other generated file and the PNG
+is re-rendered only when that HTML changes, because a headless browser is not
+byte-deterministic and `--check` would otherwise report churn for ever. Needs Chromium
+and Pillow; without them the cards are skipped and no `og:image` is emitted, which is
+better than one that 404s.
 
 There is one generator, and it runs the other way. `bin/mirror` reads the finished HTML and
 emits the machine-readable mirror of it: a Markdown copy of every issue, an Atom feed, an
