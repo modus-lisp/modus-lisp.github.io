@@ -569,46 +569,68 @@ def walk_html():
                     yield os.path.relpath(os.path.join(base, f), ROOT)
 
 
-# ----------------------------------------------------------------- og cards
+# -------------------------------------------------------------- preview meta
 
 # A link preview renders og:title and og:description as text beside the image,
-# so the image must not repeat them: it is one card for the whole site, not a
-# headline per issue.  assets/og/card.png is a hand-made asset, not generated —
-# all this does is point every page at it.
+# so the image must not repeat them: one card for the whole site, hand-made,
+# not a headline per issue.  What IS per issue goes in tags — the publication
+# name, the date it covers, and the two numbers that describe the week, which
+# X and several readers render as labelled fields under the card.
 
 CARD = "assets/og/card.png"
+SITE_NAME = "crier — This Week in Modus"
 
-OG_RE = re.compile(r'\n?\s*<meta property="og:image"[^>]*>'
-                   r'|\n?\s*<meta name="twitter:[^"]*"[^>]*>'
-                   r'|\n?\s*<meta property="og:url"[^>]*>')
+# Must match every tag meta_for emits, or they accumulate one copy per run.
+META_RE = re.compile(
+    r'\n?[ \t]*<meta property="og:(?:image|url|site_name|locale)(?::[a-z]+)?"[^>]*>'
+    r'|\n?[ \t]*<meta property="article:[^"]*"[^>]*>'
+    r'|\n?[ \t]*<meta name="twitter:[^"]*"[^>]*>')
 
 
-def inject_cards():
-    """og:url, og:image and the twitter pair, rewritten from scratch each run."""
+def meta_for(rel, issues_by_page):
+    d = os.path.dirname(rel)
+    url = BASE + "/" + (d + "/" if d else "")
+    out = [f'<meta property="og:url" content="{url}">',
+           f'<meta property="og:site_name" content="{esc(SITE_NAME)}">',
+           '<meta property="og:locale" content="en_GB">',
+           f'<meta property="og:image" content="{BASE}/{CARD}">',
+           '<meta property="og:image:width" content="1200">',
+           '<meta property="og:image:height" content="630">',
+           '<meta name="twitter:card" content="summary_large_image">',
+           f'<meta name="twitter:image" content="{BASE}/{CARD}">']
+    i = issues_by_page.get(rel)
+    if i:
+        out.append(f'<meta property="article:published_time" content="{i["slug"]}T00:00:00Z">')
+        out.append('<meta property="article:section" content="This Week in Modus">')
+        if i.get("commits"):
+            out += ['<meta name="twitter:label1" content="Commits">',
+                    f'<meta name="twitter:data1" content="{i["commits"]:,}">']
+        if i.get("repos"):
+            out += ['<meta name="twitter:label2" content="Repositories">',
+                    f'<meta name="twitter:data2" content="{i["repos"]}">']
+    return "".join("  " + t + "\n" for t in out)
+
+
+def inject_meta(issues):
+    """Preview metadata, rewritten from scratch each run."""
     if not os.path.exists(os.path.join(ROOT, CARD)):
         return
+    by_page = {f"issues/{i['slug']}/index.html": i for i in issues}
     n = 0
     for rel in walk_html():
-        path = os.path.join(ROOT, rel)
-        if not os.path.exists(path):
+        if not os.path.exists(os.path.join(ROOT, rel)):
             continue
         s = read(rel)
         if "</head>" not in s:
             continue
         orig = s
-        s = OG_RE.sub("", s)
-        d = os.path.dirname(rel)
-        url = BASE + "/" + (d + "/" if d else "")
-        tags = (f'  <meta property="og:url" content="{url}">\n'
-                f'  <meta property="og:image" content="{BASE}/{CARD}">\n'
-                f'  <meta name="twitter:card" content="summary_large_image">\n'
-                f'  <meta name="twitter:image" content="{BASE}/{CARD}">\n')
-        s = s.replace("</head>", tags + "</head>", 1)
+        s = META_RE.sub("", s)
+        s = s.replace("</head>", meta_for(rel, by_page) + "</head>", 1)
         if s != orig:
             write(rel, s)
             n += 1
     if n:
-        print(f"preview tags on {n} page(s)")
+        print(f"preview metadata on {n} page(s)")
 
 
 # ------------------------------------------------------------------- driver
@@ -655,7 +677,7 @@ def main():
         if touched:
             print(f"head links added to {len(touched)} page(s)")
 
-    inject_cards()
+    inject_meta(issues)
 
     for i in issues:
         write(f"issues/{i['slug']}/index.md", markdown_for(i))

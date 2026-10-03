@@ -32,9 +32,12 @@ between an issue and the web.
 
 Link previews share one card. A preview already renders `og:title` and
 `og:description` as text beside the image, so the image must not repeat them —
-`assets/og/card.png` is a hand-made asset and `bin/mirror` only points every page at
-it, alongside `og:url` and the Twitter pair. `card-square.png` sits beside it for the
-places that crop to a square.
+`assets/og/card.png` is a hand-made asset, the same on every page, with
+`card-square.png` beside it for the places that crop to a square. What *is* per issue
+goes in tags, which `bin/mirror` writes: `article:published_time`, `article:section`,
+and the `twitter:label`/`data` pairs that render as **Commits** and **Repositories**
+under the card. The strip-and-rewrite regex has to match every tag the generator
+emits, or they accumulate a copy per run; it did once.
 
 There is one generator, and it runs the other way. `bin/mirror` reads the finished HTML and
 emits the machine-readable mirror of it: a Markdown copy of every issue, an Atom feed, an
