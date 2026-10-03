@@ -90,23 +90,19 @@ def kicker_facts(page):
 
 
 def git_lastmod(relpath):
-    """When the file was last committed — or, if it has uncommitted changes,
-    now.  Without the second clause a freshly written issue takes its date
-    from the previous commit (or has none), and the feed and sitemap come out
-    stale on the very run that is meant to publish them; --check then fails
-    on the commit after."""
-    try:
-        dirty = subprocess.run(
-            ["git", "-C", ROOT, "status", "--porcelain", "--", relpath],
-            capture_output=True, text=True, check=False).stdout.strip()
-        if dirty:
-            return datetime.now(timezone.utc).isoformat(timespec="seconds")
-        out = subprocess.run(
-            ["git", "-C", ROOT, "log", "-1", "--format=%cI", "--", relpath],
-            capture_output=True, text=True, check=False).stdout.strip()
-        return out or None
-    except Exception:
-        return None
+    """Deliberately NOT the file's commit date.
+
+    feed.xml and sitemap.xml are generated and then committed alongside the
+    pages they describe, so a lastmod taken from git is circular: generation
+    reads the previous commit, the commit changes it, and the next --check
+    reports both files stale for ever.  An issue's natural modification date
+    is the Saturday it is dated, which is in its path, needs no git, and is
+    the same on every machine.  Anything else falls back to the newest issue.
+    """
+    m = re.search(r"(\d{4}-\d{2}-\d{2})", relpath)
+    if m:
+        return m.group(1) + "T00:00:00Z"
+    return None
 
 
 # ------------------------------------------------------------- to markdown
@@ -402,13 +398,14 @@ def build_sitemap(issues, extra):
         rows.append(f"    <priority>{priority}</priority>")
         rows.append("  </url>")
 
-    url(f"{BASE}/", git_lastmod("index.html"), "1.0")
-    url(f"{BASE}/issues/", git_lastmod("issues/index.html"), "0.8")
+    newest = (issues[-1]["slug"] + "T00:00:00Z") if issues else None
+    url(f"{BASE}/", newest, "1.0")
+    url(f"{BASE}/issues/", newest, "0.8")
     for i in issues:
         rel = f"issues/{i['slug']}/index.html"
         url(f"{BASE}/issues/{i['slug']}/", git_lastmod(rel), "0.6")
     for path in extra:
-        url(f"{BASE}/{path}", git_lastmod(f"{path}index.html"), "0.5")
+        url(f"{BASE}/{path}", newest, "0.5")
     return ('<?xml version="1.0" encoding="UTF-8"?>\n'
             '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
             + "\n".join(rows) + "\n</urlset>\n")
