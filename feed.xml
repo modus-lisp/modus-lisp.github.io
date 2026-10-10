@@ -5,8 +5,16 @@
   <link href="https://modus-lisp.github.io/feed.xml" rel="self"/>
   <link href="https://modus-lisp.github.io/"/>
   <id>https://modus-lisp.github.io/</id>
-  <updated>2026-10-03T00:00:00Z</updated>
+  <updated>2026-10-10T00:00:00Z</updated>
   <author><name>ynniv</name></author>
+  <entry>
+    <title>№31 — The chain verifies</title>
+    <link href="https://modus-lisp.github.io/issues/2026-10-10/"/>
+    <id>https://modus-lisp.github.io/issues/2026-10-10/</id>
+    <updated>2026-10-10T00:00:00Z</updated>
+    <summary>A processor signed a report about a real machine, and Modus checked AMD&#x27;s whole certificate chain itself — flip one bit of the measurement and it refuses. A control experiment then establishes what EC2 cannot attest at all. Four new repositories in seven days, two of them interoperating with somebody else&#x27;s running node. 294 commits.</summary>
+    <link rel="alternate" type="text/markdown" href="https://modus-lisp.github.io/issues/2026-10-10/index.md"/>
+  </entry>
   <entry>
     <title>№30 — Modus, on a phone</title>
     <link href="https://modus-lisp.github.io/issues/2026-10-03/"/>

@@ -1,0 +1,135 @@
+#!/usr/bin/env python3
+"""notes — the author's nostr notes for a week, as a second source.
+
+The archive is built from the commit log.  Where an issue reaches outside it
+the method footnote says so, and this is the thing it reaches for: what was
+said, publicly, at the time, by the person doing the work.  It has caught a
+fortnight of work hidden inside one backdated commit (№1), a repository that
+had never been cloned, and more than one claim the log states and the notes
+explain.
+
+    bin/notes 2026-10-10              the week ending that Saturday
+    bin/notes 2026-10-10 --since 2026-10-03
+    bin/notes 2026-10-10 --media      only notes carrying an image or video
+    bin/notes 2026-10-10 --all        every note, not just the on-topic ones
+
+Writes nothing.  Relays are flaky and partial; this asks several and merges
+by event id, so a thin result means the relays were thin, not that the week
+was quiet.
+"""
+
+import argparse
+import asyncio
+import datetime
+import json
+import re
+import sys
+
+PUBKEY = "576d23dc3db2056d208849462fee358cf9f0f3310a2c63cb6c267a4b9f5848f9"  # ynniv@ynniv.com
+RELAYS = ("wss://relay.ynniv.com", "wss://nos.lol", "wss://nostr.wine",
+          "wss://relay.damus.io", "wss://relay.primal.net")
+
+# What counts as on-topic.  Deliberately wide: a false positive costs a glance,
+# a false negative costs the finding.
+TOPIC = re.compile(
+    r"\b(modus|movitz|lisp|sbcl|ccl|abcl|quicklisp|clos|ansi|bare.?metal|unikernel"
+    r"|kiln|glass|cairn|reel|cassette|scribe|weft|loom|warp|shuttle|operandi|beacon"
+    r"|quill|sqlite|seal|natrium|secp256k1|marmot|fips|deposits|payments|consensus"
+    r"|attest|sev|snp|nitro|enclave|tee|pi ?zero|raspberry|aarch64|risc-?v|uefi"
+    r"|compiler|decoder|codec|vp8|vp9|h\.?264|crier)\b", re.I)
+
+MEDIA = re.compile(r"https?://\S+\.(?:png|jpe?g|gif|webp|mp4|mov|webm)\b", re.I)
+
+
+def iso(ts):
+    return datetime.datetime.fromtimestamp(ts, datetime.timezone.utc).strftime("%Y-%m-%d %H:%MZ")
+
+
+async def drain(relay, since, until, seen, lock, out):
+    try:
+        import websockets
+    except ImportError:
+        sys.exit("notes: needs the websockets module (pip install websockets)")
+    cursor, got = until, 0
+    for page in range(30):
+        try:
+            async with websockets.connect(relay, open_timeout=15, close_timeout=5,
+                                          max_size=8 * 1024 * 1024) as ws:
+                sub = f"s{page}"
+                await ws.send(json.dumps(["REQ", sub, {
+                    "kinds": [1], "authors": [PUBKEY],
+                    "since": since, "until": cursor, "limit": 500}]))
+                oldest, n = cursor, 0
+                while True:
+                    try:
+                        raw = await asyncio.wait_for(ws.recv(), timeout=20)
+                    except asyncio.TimeoutError:
+                        break
+                    m = json.loads(raw)
+                    if m[0] == "EVENT" and m[1] == sub:
+                        ev = m[2]
+                        n += 1
+                        oldest = min(oldest, ev["created_at"])
+                        async with lock:
+                            if ev["id"] not in seen:
+                                seen.add(ev["id"])
+                                out.append(ev)
+                    elif m[0] in ("EOSE", "CLOSED"):
+                        break
+                got += n
+                if n == 0 or oldest >= cursor or oldest <= since:
+                    break
+                cursor = oldest
+        except Exception as e:
+            print(f"  ({relay}: {type(e).__name__})", file=sys.stderr)
+            break
+    print(f"  ({relay}: {got})", file=sys.stderr)
+
+
+async def fetch(since, until):
+    seen, lock, out = set(), asyncio.Lock(), []
+    await asyncio.gather(*(drain(r, since, until, seen, lock, out) for r in RELAYS),
+                         return_exceptions=True)
+    return sorted(out, key=lambda e: e["created_at"])
+
+
+def main():
+    ap = argparse.ArgumentParser(add_help=False)
+    ap.add_argument("saturday")
+    ap.add_argument("--since")
+    ap.add_argument("--media", action="store_true")
+    ap.add_argument("--all", action="store_true")
+    ap.add_argument("-h", "--help", action="help")
+    a = ap.parse_args()
+
+    sat = datetime.date.fromisoformat(a.saturday)
+    if sat.weekday() != 5:
+        sys.exit(f"notes: {sat} is a {sat:%A}, not a Saturday")
+    start = datetime.date.fromisoformat(a.since) if a.since else sat - datetime.timedelta(days=7)
+    mid = datetime.time(0, 0, tzinfo=datetime.timezone.utc)
+    since = int(datetime.datetime.combine(start, mid).timestamp())
+    until = int(datetime.datetime.combine(sat, mid).timestamp())
+
+    print(f"NOTES {start} .. {sat} (exclusive)", file=sys.stderr)
+    evs = asyncio.run(fetch(since, until))
+
+    shown = 0
+    for e in evs:
+        body = e["content"]
+        if a.media and not MEDIA.search(body):
+            continue
+        if not a.all and not a.media and not TOPIC.search(body):
+            continue
+        shown += 1
+        reply = "re" if any(t[:1] == ["e"] for t in e.get("tags", [])) else "  "
+        print(f"\n{iso(e['created_at'])}  {e['id'][:8]}  {reply}")
+        print("  " + body.strip().replace("\n", "\n  "))
+        for u in MEDIA.finditer(body):
+            print(f"  -> {u.group(0)}")
+
+    kind = "with media" if a.media else ("" if a.all else "on-topic")
+    print(f"\n{shown} of {len(evs)} notes {kind}".rstrip(), file=sys.stderr)
+
+
+if __name__ == "__main__":
+    main()

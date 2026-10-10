@@ -4,7 +4,7 @@
   "home": "https://modus-lisp.github.io/",
   "feed": "https://modus-lisp.github.io/feed.xml",
   "generated_from": "the site's own HTML, by bin/mirror",
-  "count": 30,
+  "count": 31,
   "issues": [
     {
       "number": 1,
@@ -335,6 +335,17 @@
       "repos": 12,
       "url": "https://modus-lisp.github.io/issues/2026-10-03/",
       "markdown": "https://modus-lisp.github.io/issues/2026-10-03/index.md"
+    },
+    {
+      "number": 31,
+      "date": "2026-10-10",
+      "span": "3\u20139 October 2026",
+      "title": "The chain verifies",
+      "summary": "A processor signed a report about a real machine, and Modus checked AMD's whole certificate chain itself \u2014 flip one bit of the measurement and it refuses. A control experiment then establishes what EC2 cannot attest at all. Four new repositories in seven days, two of them interoperating with somebody else's running node. 294 commits.",
+      "commits": 294,
+      "repos": 22,
+      "url": "https://modus-lisp.github.io/issues/2026-10-10/",
+      "markdown": "https://modus-lisp.github.io/issues/2026-10-10/index.md"
     }
   ]
 }

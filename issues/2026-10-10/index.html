@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The chain verifies — This Week in Modus №31</title>
+<meta name="description" content="This Week in Modus, 3–9 October 2026: a real SEV-SNP attestation report from a cloud machine, and the whole AMD certificate chain verified in Lisp — plus a record of the measurement that could not be reproduced. Four new repositories, two of which interoperate with somebody else's running node.">
+<meta property="og:title" content="The chain verifies — This Week in Modus №31">
+<meta property="og:description" content="3–9 October 2026: ARK to ASK to VCEK to report, ECDSA P-384, checked in Modus against real hardware on two clouds. Flip one bit of the measurement and it is rejected. Four new repositories in seven days.">
+<meta property="og:type" content="article">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..700&family=Newsreader:opsz,wght@6..72,300..600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../../assets/crier.css">
+  <link rel="alternate" type="application/atom+xml" title="This Week in Modus" href="https://modus-lisp.github.io/feed.xml">
+  <link rel="alternate" type="text/markdown" href="index.md">
+  <meta property="og:url" content="https://modus-lisp.github.io/issues/2026-10-10/">
+  <meta property="og:site_name" content="crier — This Week in Modus">
+  <meta property="og:locale" content="en_GB">
+  <meta property="og:image" content="https://modus-lisp.github.io/assets/og/card.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://modus-lisp.github.io/assets/og/card.png">
+  <meta property="article:published_time" content="2026-10-10T00:00:00Z">
+  <meta property="article:section" content="This Week in Modus">
+  <meta name="twitter:label1" content="Commits">
+  <meta name="twitter:data1" content="294">
+  <meta name="twitter:label2" content="Repositories">
+  <meta name="twitter:data2" content="22">
+</head>
+<body>
+<div class="page">
+
+  <div class="sitebar">
+    <a class="brand" href="../../">crier</a>
+    <nav><a href="../">Issues</a><a href="https://github.com/modus-lisp">GitHub</a></nav>
+  </div>
+
+  <header class="mast">
+    <div class="kicker">
+      <span>This Week in Modus &mdash; &#8470;&nbsp;31</span>
+      <span>&middot;</span>
+      <span>3&ndash;9 October 2026</span>
+      <span>&middot;</span>
+      <span><b>294 commits</b> &middot; 22 of 56 repos</span>
+    </div>
+    <h1>The chain<br><span class="lo">verifies</span></h1>
+    <hr class="rule-fire">
+    <p class="standfirst">Two issues ago this archive reported a bare-metal Lisp learning to boot
+    as an encrypted guest, and noted that nothing had yet executed a VMGEXIT. Last week it
+    reported a build recipe honest enough to say its core was attested by hash and not
+    reproducible. This week a processor signed a report about a real machine, and Modus checked
+    AMD&rsquo;s whole certificate chain itself &mdash; including the part where you flip one bit
+    of the measurement and it refuses. Alongside it: four new repositories in seven days, two of
+    which talk to somebody else&rsquo;s running node.</p>
+
+    <div class="tally">
+      <div><span class="n">294</span><span class="l">Commits</span></div>
+      <div><span class="n">22</span><span class="l">Repositories</span></div>
+      <div><span class="n">4</span><span class="l">New this week</span></div>
+      <div><span class="n">2</span><span class="l">Clouds attested</span></div>
+      <div><span class="n">39</span><span class="l">Green, of 56</span></div>
+    </div>
+  </header>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>modus</em> &nbsp;/&nbsp; test/snp &nbsp;/&nbsp; 7&ndash;8 October</span>
+      <h2>ARK to ASK to VCEK to report</h2>
+    </div>
+
+    <p>An AMD SEV-SNP attestation report is a block of bytes signed by a key that only the
+    processor&rsquo;s security chip holds, saying what was loaded into a virtual machine before it
+    ran. Believing one means walking a certificate chain: AMD&rsquo;s root key signs a signing
+    key, which signs a per-chip key, which signs the report. Everyone does this with AMD&rsquo;s
+    own tooling. This week Modus does it itself, in Lisp, and the commit lists what that
+    involved:</p>
+
+    <div class="callout">
+      <p>DER parsing of the certificates, SHA-384 (SHA-512 with its own IV), RSASSA-PSS (SHA-384,
+      MGF1-SHA-384, salt 48, e = 65537) for ARK, ASK and VCEK/VLEK, and ECDSA over secp384r1 for
+      the report. Profile is checked; anything else is refused.</p>
+      <span class="src">modus &mdash; dcc812c7, <em>SNP: full report verification in Lisp</em></span>
+    </div>
+
+    <p>Against real hardware, twice. A cloud VPS on an EPYC&nbsp;7713P, whose report is signed by
+    a per-chip VCEK: every link passes. An EC2 <code>c6a</code> instance, which uses the
+    per-vendor VLEK path through a different intermediate: every link passes. And then the part
+    that makes it a verifier rather than a parser &mdash; <em>flipping one bit of the measurement
+    is rejected; a wrong signer is rejected.</em> A checker that has never said no is not known to
+    work.</p>
+
+    <p>The verifier goes on to require that the report was produced at VMPL0, and to check
+    validity, chip ID, TCB and the debug policy &mdash; because a report from a guest with
+    debugging enabled attests to a machine somebody can single-step. Along the way the ECDSA is
+    rewritten in Jacobian coordinates with a joint scalar multiplication, eleven times faster,
+    which is the difference between a verification you run and one you mean to.</p>
+
+    <h3>What it does not establish</h3>
+
+    <p>The same commit names what it has not checked: certificate validity periods, and the
+    chip-id and TCB extensions inside the certificates as opposed to in the report. And a separate
+    commit exists only to record a failure:</p>
+
+    <div class="callout">
+      <p>SNP: VPS launch measurement not reproduced from the published firmware.</p>
+      <span class="src">modus &mdash; 05a7edb2, a record with no code in it</span>
+    </div>
+
+    <p>That is the gap that matters, and it is the one
+    <a href="../2026-09-26/">&#8470;&nbsp;29</a> predicted. A signed report says
+    <em>this machine booted an image whose hash is X</em>. It does not say what X is. Turning the
+    hash into a claim about software means rebuilding the measurement yourself from firmware you
+    can read &mdash; and on this provider&rsquo;s published firmware, it did not come out the
+    same. The report is verified; the thing it measures is not yet pinned. A second experiment in the same series answers a sharper
+    question, and the answer is a limit on the whole approach.</p>
+
+    <p>The question was whether a customer can get anything of their own into an EC2 launch
+    measurement &mdash; specifically, Secure Boot keys, which would let a report mean
+    <em>&ldquo;this machine booted an image signed by modus.&rdquo;</em> The experiment is a
+    proper control: two AMIs from one snapshot, differing only in their UEFI variable data, four
+    guests on identical instance types.</p>
+
+    <div class="console">
+      <span class="cap">modus &mdash; test/snp/ec2-varstore/RESULT.md, 8 October</span>
+<pre>guest       variable store      measurement
+source      none                7a89ccea&hellip;dc766
+control-1   none                7a89ccea&hellip;dc766
+control-2   none                7a89ccea&hellip;dc766
+vars        <span class="ret">our KEK + db</span>        7a89ccea&hellip;dc766</pre>
+    </div>
+
+    <p>The <code>vars</code> guest really did boot with the keys &mdash; its EFI variables hold
+    <code>modus KEK (development)</code> and <code>modus db (development)</code>, and the
+    controls&rsquo; hold none. The measurement is identical anyway. The record draws the
+    consequence without softening it: <em>&ldquo;EC2 SEV-SNP cannot vouch for anything past
+    AWS&rsquo;s firmware.&rdquo;</em> Attesting your own image there is not a matter of
+    configuring it correctly; the platform does not offer it. Which is exactly why the other half
+    of this week exists.</p>
+
+    <p>And the attestation work found a bug underneath itself. Parsing a report inside Modus
+    produced wrong SHA-256 and SHA-512 digests under <code>--eval</code> in the hosted CLI. The
+    fix runs four commits: the constants were being initialised lazily and sometimes not at all,
+    the padding was writing a truncated bit length, and the hashes now work block-wise so a
+    message is not bounded by memory. A verifier that had been written on top of a quietly broken
+    hash would have verified nothing, convincingly.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>kiln</em>, <em>modus</em> &nbsp;/&nbsp; Nitro &nbsp;/&nbsp; 6&ndash;7 October</span>
+      <h2>An enclave, built without their tools</h2>
+    </div>
+
+    <p>AWS Nitro Enclaves are the other half of the same idea: a stripped virtual machine with no
+    persistent storage, no interactive access and no external network, which measures what it
+    boots into platform configuration registers. The normal way to build one is Docker plus
+    <code>nitro-cli</code>. kiln now builds the image directly &mdash;
+    <em>&ldquo;the hosted modus as an AWS Nitro Enclave image, without Docker or
+    nitro-cli&rdquo;</em> &mdash; signs the EIF so that PCR8 is computed from the signing
+    certificate, and ships a saved heap so the enclave starts from a core rather than installing
+    at boot.</p>
+
+    <p>The measured result is in the subject line of the commit that got it running: <em>the
+    enclave boots from a saved core; SSH banner 2.7&nbsp;s after run-enclave</em>. The enclave
+    serves SSH over vsock, because an enclave has no network and vsock is the only door. Several
+    commits around it are the small indignities of somebody else&rsquo;s init: the application
+    ramdisk must put the program under <code>rootfs/</code>, <code>/cmd</code> wants one argument
+    per line, and the Nitro Security Module self-test must not take the console down with it when
+    it fails.</p>
+
+    <p>And that is the answer to the EC2 result above, named in the same record: the AWS route
+    that attests the image is Nitro &mdash; PCR0 to PCR2 over the enclave image, PCR8 over who
+    signed it. SNP attestation of a reproducible image needs a host where you supply the firmware;
+    Nitro measures what you actually shipped. Two platforms, two attestation stories, and the week
+    establishes which question each one can answer. Which the author summarised on nostr, as a
+    list:</p>
+
+    <div class="console">
+      <span class="cap">&ldquo;everywhere you want to be&rdquo; &mdash; nostr, 7 October</span>
+<pre>iOS                        aarch64
+Android                    x64
+Linux                      arm32
+pi zero 2w hardware        i386
+browser                    riscv32/64
+nitro                      ppc32/64
+sev-snp</pre>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>cl-fips</em>, <em>cl-marmot</em>, <em>json-simple</em>, <em>fs-fat</em> &nbsp;/&nbsp; 72 commits</span>
+      <h2>Four repositories, seven days</h2>
+    </div>
+
+    <p>Two of them are protocol implementations that were taken all the way to interoperating with
+    a running implementation somebody else wrote, which is the only test that counts.</p>
+
+    <p><a href="https://github.com/modus-lisp/cl-fips"><b>cl-fips</b></a> is a node for the Free
+    Internetworking Peering System &mdash; Noise IK and XK links, a spanning tree, reachability
+    announcements, transit forwarding. Thirty-six commits in two days, and the subjects are a
+    ladder of things checked against the real upstream node rather than against a mock: an echo
+    round trip, then node-initiated data, then a probe-size limit derived from the link MTU, then
+    <em>a middle node between two real upstream nodes</em>, then reaching a node two hops away
+    through a real relay. Two commits are security fixes found by playing adversary against itself
+    &mdash; closing an FSP rekey hijack, and making a forged SessionSetup unable to displace a
+    rekey. By Friday the whole daemon runs inside Modus over both TCP and UDP, and
+    there is an IPv6 shim so that <code>http://&lt;npub&gt;.fips/</code> resolves.</p>
+
+    <p><a href="https://github.com/modus-lisp/cl-marmot"><b>cl-marmot</b></a> is MLS over Nostr
+    &mdash; RFC 9420, the protocol White Noise speaks. It passes the MLS working group&rsquo;s own
+    interop vectors for cipher suite 1, then joins a group created by <code>wn</code> and messages
+    both ways, then reaches <b>22 of 22</b> on an asserted interop script against it. It reached
+    version 1.0.0 on Friday with an API freeze, and the commit before that is the one worth
+    noting: <em>README: what 1.0 does not do</em>. Transport is <code>wss://</code> through seal,
+    pure-CL TLS 1.3 with full certificate validation. It runs on Modus.</p>
+
+    <p><a href="https://github.com/modus-lisp/json-simple"><b>json-simple</b></a> is the
+    now-familiar move: a jzon-compatible parser and printer, same mapping, byte-identical output,
+    with jzon itself wired in as an oracle on every push. It exists because jzon was the last
+    third-party system in the agent&rsquo;s closure, and cl-nostr is already moving onto it. One
+    commit is a small monument to this project&rsquo;s habits &mdash; <em>float: use the
+    host&rsquo;s FLOAT and SCALE-FLOAT (modus now rounds subnormals correctly)</em> &mdash; a
+    workaround deleted because the floor underneath it was fixed.</p>
+
+    <p><a href="https://github.com/modus-lisp/fs-fat"><b>fs-fat</b></a> arrives as a single commit
+    of 4,882 lines: FAT32 and exFAT, readers and writers, in portable Common Lisp. A bare-metal
+    machine that wants to read an SD card needs this, and nothing in the workspace had it.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>modus</em>, <em>kiln</em> &nbsp;/&nbsp; 98 and 22 commits</span>
+      <h2>Also this week</h2>
+    </div>
+
+    <p><b>Android.</b> Modus runs as an Android app &mdash; a NativeActivity that runs the image
+    as a child, with the keyboard and key events built the same way the iOS shim has them, and
+    kiln&rsquo;s blit, speaker and scale calls wired through. The phone work from
+    <a href="../2026-10-03/">&#8470;&nbsp;30</a> now has a second phone.</p>
+
+    <p><b>kiln on iOS</b> grows a Notes app to type into, a caret you can move, touch-sized chrome
+    and one desk pixel per point &mdash; and a keyboard that follows the focus. There is something
+    funny about a project this concerned with page tables spending a day on whether Notes looks
+    like a phone&rsquo;s notes, and it is also exactly right: a system nobody can use is a system
+    nobody checks.</p>
+
+    <p><b>The ANSI grind</b> continues underneath all of it, and the commits are the usual mix of
+    specification and consequence: numeric comparisons signalling <code>TYPE-ERROR</code> for a
+    non-number, <code>WITH-STANDARD-IO-SYNTAX</code> binding its variables rather than assigning
+    them, <code>#n=</code> labels being per-<code>READ</code>, <code>EQUAL</code> hash tables
+    bucketing list keys by structure, and <code>FUNCALL</code> of an undefined symbol signalling
+    <code>UNDEFINED-FUNCTION</code>. A compiler change lands with the right failure mode too:
+    <em>CLI builds fail when the compiler skips a form</em>.</p>
+
+    <p><b>klog</b>, in kiln, is this week&rsquo;s neatest small thing, and its origin is on the
+    record. The agent asked for a log it could not get at; the answer, posted the same day the
+    commit landed, was <em>&ldquo;why don&rsquo;t you make a log handler that sends logs as
+    giftwrapped DMs to an npub that you bake in via kiln&rdquo;</em>. So kiln&rsquo;s event log is
+    now NIP-59 gift-wrapped direct messages to a baked-in key. A machine with no console, inside
+    an enclave, can still tell you what it is doing, over a relay, encrypted to one reader.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow">the gates &nbsp;/&nbsp; 10 October</span>
+      <h2>Thirty-three days</h2>
+    </div>
+
+    <p>webp-pure and webrtc-media have been red since 8 September on <code>Component :REEL not
+    found</code>; warren since the 9th; loom and weft since the 21st, for the same reason, because
+    they depend on webp-pure. The sibling-checkout list still has not been told that VP8 moved
+    into reel. <b>56 repositories, 39 green, 6 failing, 11 with no CI.</b></p>
+
+    <p>Eleven ungated now. Two of this week&rsquo;s four repositories brought a workflow with
+    them &mdash; cl-marmot and json-simple, the latter running jzon as an oracle on every push.
+    The other two did not. cl-fips, thirty-six commits with two security fixes and interop against
+    a live node, has nothing watching it; neither does fs-fat, whose whole job is to write a
+    filesystem correctly.</p>
+  </section>
+
+  <footer>
+    <p><strong>Method.</strong> Commits by <em>author</em> date, 3 to 9 October 2026, across the
+    56 repositories cloned from the modus-lisp organisation, counting each repository&rsquo;s
+    default branch as the union of the local branch and <code>origin/</code>. Produced with
+    <code>bin/week 2026-10-10 --log</code>. Thirty-three commits sit on branches that had not
+    merged &mdash; modus&rsquo;s <code>zero-hid</code>, <code>zero-marmot</code>,
+    <code>virtio-net</code> and <code>compile-speed</code>, kiln&rsquo;s <code>zero</code> and
+    <code>android</code> &mdash; and are not counted.</p>
+    <p><strong>Outside the log.</strong> The author&rsquo;s nostr notes were read as in
+    <a href="../2025-03-15/">&#8470;&nbsp;1</a>, with a new tool: <code>bin/notes</code>, which
+    pulls a week&rsquo;s notes from five relays and merges them by event id. It is in the
+    repository rather than in a scratch directory because this is the fourth issue to want it. The
+    &ldquo;everywhere you want to be&rdquo; list and the klog remark above are both from it, each
+    quoted with its own timestamp.</p>
+    <p><a href="../">&larr; All issues</a> &middot; <a href="../../">crier</a></p>
+  </footer>
+
+</div>
+</body>
+</html>
