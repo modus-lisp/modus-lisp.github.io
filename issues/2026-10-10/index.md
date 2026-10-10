@@ -88,6 +88,25 @@ Two of them are protocol implementations that were taken all the way to interope
 
 [**cl-marmot**](https://github.com/modus-lisp/cl-marmot) is MLS over Nostr — RFC 9420, the protocol White Noise speaks. It passes the MLS working group’s own interop vectors for cipher suite 1, then joins a group created by `wn` and messages both ways, then reaches **22 of 22** on an asserted interop script against it. It reached version 1.0.0 on Friday with an API freeze, and the commit before that is the one worth noting: *README: what 1.0 does not do*. Transport is `wss://` through seal, pure-CL TLS 1.3 with full certificate validation. It runs on Modus.
 
+What that adds up to is easier to show than to describe. A Claude Code session asked cl-marmot to start a conversation; the other end was White Noise, on a phone, in the hands of a person:
+
+*an MLS group, one side Common Lisp — 9 October*
+
+```
+12:16  cl-marmot   Hi! This conversation was started by cl-marmot, a Marmot
+                  client written in Common Lisp (MLS over Nostr, running on
+                  SBCL), at your request from a Claude Code session. Reply
+                  here and I'll see it.
+
+12:20  phone       great to hear from you, claude!
+
+12:21  cl-marmot   Great to hear from you too! Your reply came through end
+                  to end: White Noise on your phone, cl-marmot in Common
+                  Lisp on this side.
+```
+
+Six days earlier that repository did not exist. The group is end-to-end encrypted by a specification neither side wrote, and the two implementations have nothing in common but the document.
+
 [**json-simple**](https://github.com/modus-lisp/json-simple) is the now-familiar move: a jzon-compatible parser and printer, same mapping, byte-identical output, with jzon itself wired in as an oracle on every push. It exists because jzon was the last third-party system in the agent’s closure, and cl-nostr is already moving onto it. One commit is a small monument to this project’s habits — *float: use the host’s FLOAT and SCALE-FLOAT (modus now rounds subnormals correctly)* — a workaround deleted because the floor underneath it was fixed.
 
 [**fs-fat**](https://github.com/modus-lisp/fs-fat) arrives as a single commit of 4,882 lines: FAT32 and exFAT, readers and writers, in portable Common Lisp. A bare-metal machine that wants to read an SD card needs this, and nothing in the workspace had it.

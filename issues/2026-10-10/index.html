@@ -217,6 +217,28 @@ sev-snp</pre>
     noting: <em>README: what 1.0 does not do</em>. Transport is <code>wss://</code> through seal,
     pure-CL TLS 1.3 with full certificate validation. It runs on Modus.</p>
 
+    <p>What that adds up to is easier to show than to describe. A Claude Code session asked
+    cl-marmot to start a conversation; the other end was White Noise, on a phone, in the hands of
+    a person:</p>
+
+    <div class="console">
+      <span class="cap">an MLS group, one side Common Lisp &mdash; 9 October</span>
+<pre>12:16  <span class="ret">cl-marmot</span>   Hi! This conversation was started by cl-marmot, a Marmot
+                  client written in Common Lisp (MLS over Nostr, running on
+                  SBCL), at your request from a Claude Code session. Reply
+                  here and I'll see it.
+
+12:20  <span class="ret">phone</span>       great to hear from you, claude!
+
+12:21  <span class="ret">cl-marmot</span>   Great to hear from you too! Your reply came through end
+                  to end: White Noise on your phone, cl-marmot in Common
+                  Lisp on this side.</pre>
+    </div>
+
+    <p>Six days earlier that repository did not exist. The group is end-to-end encrypted by a
+    specification neither side wrote, and the two implementations have nothing in common but the
+    document.</p>
+
     <p><a href="https://github.com/modus-lisp/json-simple"><b>json-simple</b></a> is the
     now-familiar move: a jzon-compatible parser and printer, same mapping, byte-identical output,
     with jzon itself wired in as an oracle on every push. It exists because jzon was the last
