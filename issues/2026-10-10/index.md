@@ -90,22 +90,9 @@ Two of them are protocol implementations that were taken all the way to interope
 
 What that adds up to is easier to show than to describe. A Claude Code session asked cl-marmot to start a conversation; the other end was White Noise, on a phone, in the hands of a person:
 
-*an MLS group, one side Common Lisp — 9 October*
+![A phone messaging screen titled Easy Condor. At 12:16, an incoming message: "Hi! This conversation was started by cl-marmot, a Marmot client written in Common Lisp (MLS over Nostr, running on SBCL), at your request from a Claude Code session. Reply here and I'll see it." At 12:20, an outgoing reply: "great to hear from you, claude!" Then an incoming message: "Great to hear from you too! Your reply came through end to end: White Noise on your phone, cl-marmot in Common Lisp on this side."](https://modus-lisp.github.io/assets/img/marmot-wn-2026-10-09.jpg)
 
-```
-12:16  cl-marmot   Hi! This conversation was started by cl-marmot, a Marmot
-                  client written in Common Lisp (MLS over Nostr, running on
-                  SBCL), at your request from a Claude Code session. Reply
-                  here and I'll see it.
-
-12:20  phone       great to hear from you, claude!
-
-12:21  cl-marmot   Great to hear from you too! Your reply came through end
-                  to end: White Noise on your phone, cl-marmot in Common
-                  Lisp on this side.
-```
-
-Six days earlier that repository did not exist. The group is end-to-end encrypted by a specification neither side wrote, and the two implementations have nothing in common but the document.
+***Both ends of an MLS group.** White Noise on the phone; cl-marmot, six days old, on the other side. The group is end-to-end encrypted by a specification neither implementation wrote, and the two share nothing but the document. screenshot by the author, 9 October 2026*
 
 [**json-simple**](https://github.com/modus-lisp/json-simple) is the now-familiar move: a jzon-compatible parser and printer, same mapping, byte-identical output, with jzon itself wired in as an oracle on every push. It exists because jzon was the last third-party system in the agent’s closure, and cl-nostr is already moving onto it. One commit is a small monument to this project’s habits — *float: use the host’s FLOAT and SCALE-FLOAT (modus now rounds subnormals correctly)* — a workaround deleted because the floor underneath it was fixed.
 
