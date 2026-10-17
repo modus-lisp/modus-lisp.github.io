@@ -8,7 +8,7 @@ Four issues ago a bare-metal Lisp learned to boot as an encrypted guest and had 
 
 | Commits | Repositories | New this week | Red-team suite | Green, of 59 |
 |---|---|---|---|---|
-| 277 | 21 | 3 | 26/26 | 40 |
+| 277 | 21 | 3 | 26/26 | 41 |
 
 ---
 
@@ -108,7 +108,7 @@ All eleven were corrected on the 17th, the day this was published, with the list
 
 Two tools came out of it. `bin/siblings` computes each closure and reports a stale list before CI does. And `bin/ci` now reports the worst of a repository’s *current* workflows on its *default* branch — it had been reporting the newest run of anything, which counted a deleted workflow as a failure and a Pages deploy as a pass.
 
-As of publication: **59 repositories, 40 green, none failing, 18 without a workflow.** Three of those need none — the organisation profile, this site, and the Quicklisp distribution. Most of the rest are repositories created in the last five weeks.
+As of publication: **59 repositories, 41 green, none failing, 18 without a workflow.** Three of those need none — the organisation profile, this site, and the Quicklisp distribution. Most of the rest are repositories created in the last five weeks.
 
 ---
 
