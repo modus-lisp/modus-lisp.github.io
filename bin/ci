@@ -36,25 +36,44 @@ while True:
     repos += [r["name"] for r in batch if not r.get("archived")]
     page += 1
 
-rows = []
-for name in sorted(repos):
-    runs = gh(f"/repos/{ORG}/{name}/actions/runs?per_page=1")
-    wr = (runs or {}).get("workflow_runs") or []
-    if not wr:
-        rows.append((name, "none", "", "", "", ""))
-        continue
-    r = wr[0]
-    rows.append((name, r.get("conclusion") or r.get("status") or "?",
-                 age(r["created_at"]), (r.get("name") or "")[:20],
-                 r.get("head_branch") or "", r.get("html_url") or ""))
-
+# A repository's state is the WORST of its CURRENT workflows, each read at its
+# newest run ON THE DEFAULT BRANCH.  All three qualifiers were learned the hard
+# way.  Taking the newest run of any workflow reported operandi as failing for
+# forty-seven days on a workflow that had been deleted.  Taking the newest run
+# across workflows let a later green job hide an earlier red one (kiln).  And
+# not filtering by branch counted a GitHub Pages deploy -- which is not a
+# workflow file and tests nothing -- as a passing gate.
 RANK = {"failure": 0, "timed_out": 0, "cancelled": 1, "startup_failure": 0,
         "in_progress": 2, "queued": 2, "none": 3, "success": 4, "skipped": 4}
+
+rows = []
+for name in sorted(repos):
+    meta = gh(f"/repos/{ORG}/{name}") or {}
+    branch = meta.get("default_branch") or "main"
+    files = gh(f"/repos/{ORG}/{name}/contents/.github/workflows?ref={branch}")
+    files = [f["name"] for f in (files if isinstance(files, list) else [])
+             if f.get("name", "").endswith((".yml", ".yaml"))]
+    worst = None
+    for wf in files:
+        runs = gh(f"/repos/{ORG}/{name}/actions/workflows/{wf}/runs?branch={branch}&per_page=1")
+        wr = (runs or {}).get("workflow_runs") or []
+        if not wr:
+            continue
+        r = wr[0]
+        concl = r.get("conclusion") or r.get("status") or "?"
+        row = (name, concl, age(r["created_at"]), (r.get("name") or wf)[:20],
+               branch, r.get("html_url") or "")
+        if worst is None or RANK.get(concl, 2) < RANK.get(worst[1], 2):
+            worst = row
+    rows.append(worst or (name, "none", "", "", "", ""))
+
+
+
+MARK = {"success": "ok", "failure": "FAIL", "none": " --", "cancelled": "cxl"}
 rows.sort(key=lambda r: (RANK.get(r[1], 2), r[0]))
 if BAD_ONLY:
     rows = [r for r in rows if RANK.get(r[1], 2) < 4]
 
-MARK = {"success": "ok", "failure": "FAIL", "none": " --", "cancelled": "cxl"}
 print(f"{'':4} {'repo':<22} {'result':<9} {'age':>4}  {'workflow':<20} branch")
 for name, concl, a, wf, br, url in rows:
     print(f"{MARK.get(concl, '  ?'):>4} {name:<22} {concl:<9} {a:>4}  {wf:<20} {br}")

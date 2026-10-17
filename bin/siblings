@@ -1,0 +1,109 @@
+#!/usr/bin/env python3
+"""siblings — which CI sibling lists have gone stale, before CI finds out.
+
+Most repositories' gates.yml clone their modus-lisp siblings from a hand-written
+list, and that list is a transitive closure maintained by hand.  When a
+dependency moves -- VP8 into reel, JSON onto json-simple -- the list goes stale,
+and the failure reads "Component X not found", which looks like a broken build
+rather than a missing line.  webp-pure was red for thirty-nine days that way, and
+six more repositories were stale and still green only because they had not run.
+
+This computes each closure from the .asd files on every default branch and
+compares.  Same for kiln's repos.lock, which deliberately lists only repos added
+on purpose, but must still contain everything those repos require.
+
+    bin/siblings          stale lists only
+    bin/siblings -v       every repo with a list, extras included
+
+Reads the local clones under the workspace (fetch first); writes nothing.
+"""
+
+import os
+import re
+import subprocess
+import sys
+
+HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+W = os.environ.get("MODUS_WORKSPACE", os.path.dirname(HERE))
+SELF = os.path.basename(HERE)
+VERBOSE = "-v" in sys.argv
+
+
+def git(r, *a):
+    return subprocess.run(["git", "-C", os.path.join(W, r), *a],
+                          capture_output=True, text=True).stdout
+
+
+def default(r):
+    ok = git(r, "rev-parse", "-q", "--verify", "refs/remotes/origin/main").strip()
+    return "main" if ok else "master"
+
+
+repos = sorted(d for d in os.listdir(W) if os.path.exists(os.path.join(W, d, ".git")))
+asd, owner = {}, {}
+for r in repos:
+    ref = "origin/" + default(r)
+    files = [f for f in git(r, "ls-tree", "-r", "--name-only", ref).split() if f.endswith(".asd")]
+    asd[r] = "".join(git(r, "show", f"{ref}:{f}") for f in files)
+    for name in re.findall(r'defsystem\s+[#:"]*([A-Za-z0-9_.+/-]+)', asd[r]):
+        n = name.lower().strip('"').split("/")[0]
+        # A system belongs to a sibling only if it is named after that sibling.
+        # modus ships a shim called "chipz"; the real chipz is a Quicklisp
+        # library, and a repo that wants it does not want the kernel.
+        if n == r or n.startswith(r + "-") or n.endswith("-" + r):
+            owner.setdefault(n, r)
+
+DEP = re.compile(r":depends-on\s*\(([^()]*(?:\([^()]*\)[^()]*)*)\)")
+
+
+def direct(r):
+    out = set()
+    for m in DEP.finditer(asd.get(r, "")):
+        for name in re.findall(r'[#:"]*([A-Za-z0-9_.+/-]+)"?', m.group(1)):
+            o = owner.get(name.lower().split("/")[0])
+            if o and o != r:
+                out.add(o)
+    return out
+
+
+def closure(r):
+    seen, todo = set(), [r]
+    while todo:
+        for d in direct(todo.pop()):
+            if d not in seen and d != r:
+                seen.add(d)
+                todo.append(d)
+    return seen
+
+
+stale = 0
+for r in repos:
+    if r == SELF:
+        continue
+    wf = git(r, "show", f"origin/{default(r)}:.github/workflows/gates.yml")
+    m = re.search(r"for repo in ([^;]*);", wf)
+    if not m:
+        continue
+    listed, need = set(m.group(1).split()), closure(r)
+    missing, extra = need - listed, listed - need
+    if missing:
+        stale += 1
+        print(f"STALE  {r:16s} gates.yml lacks: {' '.join(sorted(missing))}")
+    elif VERBOSE:
+        tail = f"   (extra, harmless: {' '.join(sorted(extra))})" if extra else ""
+        print(f"ok     {r:16s}{tail}")
+
+if "kiln" in repos:
+    lock = git("kiln", "show", f"origin/{default('kiln')}:repos.lock")
+    locked = {l.split()[0] for l in lock.splitlines() if l.strip() and not l.startswith("#")}
+    need = set().union(*(closure(r) for r in locked if r in repos)) if locked else set()
+    missing = sorted(need - locked)
+    if missing:
+        stale += 1
+        print(f"STALE  {'kiln':16s} repos.lock lacks: {' '.join(missing)}")
+        for x in missing:
+            who = sorted(r for r in locked if r in repos and x in closure(r))
+            print(f"         {x} <- {', '.join(who[:5])}{' …' if len(who) > 5 else ''}")
+
+print(f"\n{stale} stale" if stale else "\nevery sibling list is complete")
+sys.exit(1 if stale else 0)

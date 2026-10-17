@@ -20,7 +20,9 @@ explained.
 | `issues/index.html` | The archive — every issue, grouped by month. |
 | `issues/YYYY-MM-DD/index.html` | One issue of **This Week in Modus** — what moved, across every repo, and why it was hard. The date is the Saturday that closes the week. |
 | `bin/week` | Everything an issue is made of: the ledger, and every commit subject grouped by repo. |
-| `bin/ci` | The last CI run for every repository in the org, worst first. `--bad` for only the problems. |
+| `bin/ci` | The worst current workflow of every repository in the org, on its default branch, worst first. `--bad` for only the problems. |
+| `bin/siblings` | Which CI sibling lists (and kiln's `repos.lock`) have gone stale, computed from the `.asd` files. |
+| `bin/notes` | The author's nostr notes for a week, from several relays — the second source, when an issue needs one. |
 | `bin/mirror` | Regenerates the machine-readable half of the site from the site itself. `--check` fails if it is stale. |
 | `assets/crier.css` | The whole design system. Tokens, then chrome, then prose. There is no second stylesheet. |
 | `.nojekyll` | Tells Pages to serve the files as written rather than running Jekyll over them. |
