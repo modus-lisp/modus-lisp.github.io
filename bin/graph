@@ -1,0 +1,277 @@
+#!/usr/bin/env python3
+"""graph — the dependency graph on the front page.
+
+Reads every repository's .asd files (through bin/siblings), keeps the edges a
+transitive reduction leaves, and has Eclipse ELK's layered algorithm lay them
+out -- the Java original, in tools/elk, pinned.  The result is a static SVG
+spliced into index.html between <!-- graph --> and <!-- /graph -->; the only
+script is the hover.
+
+Three things are decided here rather than by the layout:
+
+  TIERS    four rows, top to bottom, and no edge may point up one
+  DOMAINS  the colour of each repository
+  UTIL     libraries used from everywhere, whose edges would be long
+           horizontal runs through everything else; they get a column at the
+           side that lists their users instead
+
+A run of repositories with one way in and one way out, all in one tier, is
+drawn as a single row.  A repository nobody has placed in a tier or a domain
+stops the build -- new repos have to be put somewhere on purpose.
+
+    bin/graph            rewrite the figure in index.html
+    bin/graph --check    exit 1 if index.html is out of date; writes nothing
+
+Fetch first: it reads each clone's origin default branch.
+"""
+
+import html
+import importlib.machinery
+import importlib.util
+import json
+import os
+import re
+import subprocess
+import sys
+
+HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+ELK = os.path.join(HERE, "tools", "elk")
+ELK_BIN = os.path.join(ELK, "build", "install", "elk", "bin", "elk")
+CHECK = "--check" in sys.argv
+
+TIERS = {
+    "Applications": "operandi-gui warp warren loom spool glass-sdl glass-webrtc glass-mcclim beacon"
+                    " cl-marmot emissary cl-deposits cl-payments cairn skep operandi kiln dist modus",
+    "Engines & protocols": "glass chord stave mill weft folio shuttle cl-consensus cl-nostr"
+                           " webrtc-media webrtc-data cl-tor cl-frpc conch cl-fips cl-sev-snp cabinet",
+    "Formats & codecs": "pigment stencil gesso scribe webp-pure png-pure reed reel cassette"
+                        " json-simple pagetree quill sqlite-pure fs-fat zstd-pure brotli-pure",
+    "Foundations": "seal natrium secp256k1-fast cl-transport cram",
+}
+# Colours: the first seven slots of a categorical palette checked for colour-
+# blind separation on --surface (worst adjacent pair ΔE 8.4); every node also
+# carries its name, so colour is never the only cue.
+DOMAINS = {
+    "Desktop": ("#3987e5", "glass glass-sdl glass-mcclim glass-webrtc warp warren loom spool quill"),
+    "Web & documents": ("#d95926", "weft shuttle scribe gesso stencil pigment folio webp-pure png-pure"),
+    "Media & models": ("#199e70", "reed reel cassette mill chord stave webrtc-media"),
+    "Storage": ("#c98500", "cram zstd-pure brotli-pure json-simple pagetree cabinet cairn sqlite-pure fs-fat"),
+    "Nostr & agents": ("#d55181", "cl-nostr beacon cl-marmot emissary operandi operandi-gui skep"),
+    "Bitcoin": ("#008300", "cl-consensus cl-payments cl-deposits"),
+    "Network & crypto": ("#9085e9", "seal natrium secp256k1-fast conch cl-tor cl-transport cl-frpc"
+                                    " webrtc-data cl-fips cl-sev-snp"),
+    "The machine": (None, "modus kiln dist"),
+}
+UTIL = ["seal", "cram", "cl-transport", "json-simple", "secp256k1-fast", "natrium"]
+
+CH, PAD, H, GAP = 7.2, 22, 26, 22       # 12px IBM Plex Mono is 7.2px a character
+GUTTER, CW = 150, 280                   # tier labels on the left; utility column
+
+
+def load_siblings():
+    sys.dont_write_bytecode = True          # no bin/__pycache__ in the site
+    loader = importlib.machinery.SourceFileLoader("siblings", os.path.join(HERE, "bin", "siblings"))
+    spec = importlib.util.spec_from_loader("siblings", loader)
+    mod = importlib.util.module_from_spec(spec)
+    loader.exec_module(mod)
+    return mod
+
+
+def elk(graph):
+    if not os.path.exists(ELK_BIN):
+        java21 = "/opt/homebrew/opt/openjdk@21"
+        env = dict(os.environ, **({"JAVA_HOME": java21} if os.path.isdir(java21) else {}))
+        subprocess.run(["gradle", "-q", "installDist"], cwd=ELK, env=env, check=True)
+    out = subprocess.run([ELK_BIN], input=json.dumps(graph), capture_output=True, text=True)
+    if out.returncode:
+        sys.exit("graph: ELK failed\n" + out.stderr)
+    return json.loads(out.stdout)
+
+
+def main():
+    sib = load_siblings()
+    page = open(os.path.join(HERE, "index.html")).read()
+    nodes = sorted(set(re.findall(r'<dt><a href="https://github\.com/modus-lisp/([A-Za-z0-9_.-]+)">', page)))
+    tier = {r: i for i, rs in enumerate(TIERS.values()) for r in rs.split()}
+    fam = {r: d for d, (_, rs) in DOMAINS.items() for r in rs.split()}
+    colour = {d: c for d, (c, _) in DOMAINS.items()}
+    missing = [n for n in nodes if n not in tier or n not in fam]
+    if missing:
+        sys.exit(f"graph: place these in TIERS and DOMAINS first: {' '.join(missing)}")
+
+    E = {(a, b) for a in nodes for b in sib.direct(a) if b in tier}
+    up = [(a, b) for (a, b) in E if tier[a] > tier[b]]
+    if up:
+        sys.exit(f"graph: edges pointing up a tier: {up}")
+
+    def reach(a, skip):
+        seen, todo = set(), [y for (x, y) in E if x == a and (x, y) != skip]
+        while todo:
+            y = todo.pop()
+            if y not in seen:
+                seen.add(y)
+                todo += [z for (x, z) in E if x == y]
+        return seen
+    R = sorted((a, b) for (a, b) in E if b not in reach(a, (a, b)))
+
+    util = sorted(UTIL, key=lambda u: (list(DOMAINS).index(fam[u]), u))
+    users = {u: sorted(a for (a, b) in R if b == u) for u in util}
+    G = [(a, b) for (a, b) in R if a not in util and b not in util]
+
+    ins = lambda n: [a for (a, b) in G if b == n]
+    outs = lambda n: [b for (a, b) in G if a == n]
+    chains = []
+    for n in sorted({b for (_, b) in G}):
+        if len(ins(n)) != 1 or (len(outs(ins(n)[0])) == 1 and len(ins(ins(n)[0])) == 1):
+            continue                                    # not the head of a run
+        run = [n]
+        while len(outs(run[-1])) == 1 and len(ins(outs(run[-1])[0])) == 1 \
+                and tier[outs(run[-1])[0]] == tier[n]:
+            run.append(outs(run[-1])[0])
+        if len(run) >= 3:
+            chains.append(run)
+    cof = {m: i for i, run in enumerate(chains) for m in run}
+    wid = lambda n: round(len(n) * CH + PAD)
+    cw = lambda run: sum(wid(m) for m in run) + GAP * (len(run) - 1)
+    end = lambda n, side: f"C{cof[n]}.{side}" if n in cof else n
+    GE = sorted({(end(a, "out"), end(b, "in")) for (a, b) in G if not (a in cof and b in cof and cof[a] == cof[b])})
+    placed = [n for n in nodes if n not in util and n not in cof and any(n in e for e in R)]
+
+    L = elk({
+        "id": "root",
+        "layoutOptions": {
+            "elk.algorithm": "layered", "elk.direction": "DOWN", "elk.edgeRouting": "ORTHOGONAL",
+            "elk.randomSeed": "1", "elk.partitioning.activate": "true", "elk.separateConnectedComponents": "false",
+            "elk.layered.spacing.nodeNodeBetweenLayers": "46", "elk.spacing.nodeNode": "14",
+            "elk.layered.spacing.edgeNodeBetweenLayers": "14", "elk.spacing.edgeEdge": "6",
+            "elk.layered.nodePlacement.strategy": "NETWORK_SIMPLEX",
+            "elk.padding": f"[top=10,left={GUTTER},bottom=10,right=10]"},
+        "children": [{"id": n, "width": wid(n), "height": H,
+                      "layoutOptions": {"elk.partitioning.partition": str(tier[n])}} for n in placed]
+        + [{"id": f"C{i}", "width": cw(run), "height": H,
+            "ports": [{"id": f"C{i}.in", "x": wid(run[0]) / 2, "y": 0, "width": 1, "height": 1,
+                       "layoutOptions": {"elk.port.side": "NORTH"}},
+                      {"id": f"C{i}.out", "x": cw(run) - wid(run[-1]) / 2, "y": H, "width": 1, "height": 1,
+                       "layoutOptions": {"elk.port.side": "SOUTH"}}],
+            "layoutOptions": {"elk.partitioning.partition": str(tier[run[0]]),
+                              "elk.portConstraints": "FIXED_POS"}} for i, run in enumerate(chains)],
+        "edges": [{"id": f"e{i}", "sources": [a], "targets": [b]} for i, (a, b) in enumerate(GE)]})
+
+    W, Hh = L["width"], L["height"]
+    pos = {c["id"]: c for c in L["children"]}
+    links = []
+    for i, run in enumerate(chains):
+        C = pos.pop(f"C{i}")
+        x = C["x"]
+        for j, m in enumerate(run):
+            pos[m] = {"x": x, "y": C["y"], "width": wid(m)}
+            if j:
+                links.append(f'<path class="e" d="M{x - GAP:.1f},{C["y"] + H / 2:.1f}H{x:.1f}" '
+                             f'data-s="{run[j - 1]}" data-t="{m}"/>')
+            x += wid(m) + GAP
+    real = lambda p: chains[int(p[1:].split(".")[0])][-1 if p.endswith(".out") else 0] if "." in p else p
+
+    def path(e):
+        out = []
+        for s in e.get("sections", []):
+            pts = [s["startPoint"]] + s.get("bendPoints", []) + [s["endPoint"]]
+            out.append("M" + "L".join(f"{p['x']:.1f},{p['y']:.1f}" for p in pts))
+        return "".join(out)
+
+    def node(n, x, y, w, h=H, extra=""):
+        return (f'<a href="https://github.com/modus-lisp/{n}" class="n" data-id="{n}" '
+                f'transform="translate({x:.1f},{y:.1f})"><title>{n} &middot; {html.escape(fam[n])}</title>'
+                f'<rect class="box" width="{w}" height="{h}" rx="4"/>'
+                f'<rect width="4" height="{h}" rx="2" fill="{colour[fam[n]]}"/>'
+                f'<text x="14" y="{H / 2 + 4:.0f}">{n}{extra}</text>')
+
+    bands = []
+    for i, t in enumerate(list(TIERS)[:3]):
+        ys = [pos[n]["y"] for n in pos if tier[n] == i]
+        if ys:
+            y0, y1 = min(ys) - 12, max(ys) + H + 12
+            bands.append(f'<rect class="band" y="{y0:.0f}" width="{W:.0f}" height="{y1 - y0:.0f}" rx="6"/>'
+                         f'<text class="tier" x="14" y="{(y0 + y1) / 2 + 4:.0f}">{html.escape(t)}</text>')
+    edges = [f'<path class="e" d="{path(e)}" data-s="{real(e["sources"][0])}" data-t="{real(e["targets"][0])}"/>'
+             for e in L["edges"]]
+    nodes_svg = [node(n, p["x"], p["y"], p["width"]) + "</a>" for n, p in sorted(pos.items())]
+
+    cx, cy, col = W + 30, 10, []
+    for u in util:
+        lines, line = [], ""
+        for w in users[u]:
+            t = f"{line}, {w}" if line else w
+            if len(t) * 6.6 + 7 > CW - 24:
+                lines.append(line + ",")
+                line = w
+            else:
+                line = t
+        lines.append(line)
+        h = H + 10 + 16 * len(lines)
+        col.append(node(u, cx, cy, CW, h, f' <tspan class="cnt">&larr; {len(users[u])}</tspan>')
+                   + "".join(f'<text class="who" x="14" y="{H + 8 + 16 * i}">{l}</text>' for i, l in enumerate(lines))
+                   + "</a>")
+        cy += h + 12
+    hidden = [f'<path class="e hid" data-s="{a}" data-t="{b}"/>' for (a, b) in R if a in util or b in util]
+    W, Hh = cx + CW + 4, max(Hh, cy)
+
+    iso = [n for n in nodes if n not in pos and n not in util]
+    legend = "".join(f'<span><i style="background:{c}"></i>{html.escape(d)}</span>'
+                     for d, (c, _) in DOMAINS.items() if c)
+    fig = f'''<!-- graph: written by bin/graph; edit TIERS and DOMAINS there, not here -->
+    <figure class="depgraph" aria-labelledby="dg-cap">
+      <div class="dg-legend">{legend}</div>
+      <div class="dg-scroll">
+        <svg viewBox="0 0 {W:.0f} {Hh:.0f}" width="{W:.0f}" height="{Hh:.0f}" role="img"
+             aria-label="Dependency graph of {len(nodes)} repositories; the list below carries the same names.">
+{"".join(bands)}
+{"".join(edges + links + hidden)}
+{"".join(nodes_svg)}
+{"".join(col)}
+        </svg>
+      </div>
+      <figcaption id="dg-cap">What builds on what: {len(R)} edges, the {len(E)} declared in the
+      <code>.asd</code> files with the ones implied by others taken out, read from each default
+      branch. The six on the right are used from everywhere, so they list their users rather than
+      draw them; hover anything to trace it. No sibling dependencies either way: {", ".join(iso)}.
+      Laid out by Eclipse ELK&rsquo;s layered algorithm.</figcaption>
+    </figure>
+    <script>
+    (() => {{
+      const svg = document.querySelector('.depgraph svg');
+      const E = [...svg.querySelectorAll('.e')], N = [...svg.querySelectorAll('.n')];
+      const dn = {{}}, up = {{}};
+      E.forEach(e => {{ (dn[e.dataset.s] ??= []).push(e.dataset.t); (up[e.dataset.t] ??= []).push(e.dataset.s); }});
+      const walk = (id, m, s = new Set()) => ((m[id] || []).forEach(x => s.has(x) || (s.add(x), walk(x, m, s))), s);
+      const clear = () => {{ svg.classList.remove('hot'); svg.querySelectorAll('.on,.self').forEach(x => x.classList.remove('on', 'self')); }};
+      N.forEach(n => {{
+        n.addEventListener('pointerenter', () => {{
+          const id = n.dataset.id, a = walk(id, dn), b = walk(id, up);
+          svg.classList.add('hot');
+          N.forEach(m => {{ m.classList.toggle('on', m.dataset.id === id || a.has(m.dataset.id) || b.has(m.dataset.id));
+                           m.classList.toggle('self', m.dataset.id === id); }});
+          E.forEach(e => {{ const s = e.dataset.s, t = e.dataset.t;
+            e.classList.toggle('on', ((s === id || a.has(s)) && a.has(t)) || ((t === id || b.has(t)) && b.has(s))); }});
+        }});
+        n.addEventListener('pointerleave', clear);
+      }});
+    }})();
+    </script>
+    <!-- /graph -->'''
+
+    new = re.sub(r"<!-- graph:.*?<!-- /graph -->", lambda _: fig, page, count=1, flags=re.S)
+    if new == page and "<!-- graph:" in page:
+        print(f"graph: up to date ({len(nodes)} repositories, {len(R)} edges)")
+        return
+    if "<!-- graph:" not in page:
+        sys.exit("graph: index.html has no <!-- graph: ... <!-- /graph --> block to fill")
+    if CHECK:
+        print("graph: index.html is out of date")
+        sys.exit(1)
+    open(os.path.join(HERE, "index.html"), "w").write(new)
+    print(f"graph: wrote {len(nodes)} repositories, {len(R)} edges ({len(G)} drawn), "
+          f"{len(chains)} chain(s), layout {W:.0f}x{Hh:.0f}")
+
+
+if __name__ == "__main__":
+    main()

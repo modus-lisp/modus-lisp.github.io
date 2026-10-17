@@ -76,34 +76,39 @@ def closure(r):
     return seen
 
 
-stale = 0
-for r in repos:
-    if r == SELF:
-        continue
-    wf = git(r, "show", f"origin/{default(r)}:.github/workflows/gates.yml")
-    m = re.search(r"for repo in ([^;]*);", wf)
-    if not m:
-        continue
-    listed, need = set(m.group(1).split()), closure(r)
-    missing, extra = need - listed, listed - need
-    if missing:
-        stale += 1
-        print(f"STALE  {r:16s} gates.yml lacks: {' '.join(sorted(missing))}")
-    elif VERBOSE:
-        tail = f"   (extra, harmless: {' '.join(sorted(extra))})" if extra else ""
-        print(f"ok     {r:16s}{tail}")
+def main():
+    stale = 0
+    for r in repos:
+        if r == SELF:
+            continue
+        wf = git(r, "show", f"origin/{default(r)}:.github/workflows/gates.yml")
+        m = re.search(r"for repo in ([^;]*);", wf)
+        if not m:
+            continue
+        listed, need = set(m.group(1).split()), closure(r)
+        missing, extra = need - listed, listed - need
+        if missing:
+            stale += 1
+            print(f"STALE  {r:16s} gates.yml lacks: {' '.join(sorted(missing))}")
+        elif VERBOSE:
+            tail = f"   (extra, harmless: {' '.join(sorted(extra))})" if extra else ""
+            print(f"ok     {r:16s}{tail}")
 
-if "kiln" in repos:
-    lock = git("kiln", "show", f"origin/{default('kiln')}:repos.lock")
-    locked = {l.split()[0] for l in lock.splitlines() if l.strip() and not l.startswith("#")}
-    need = set().union(*(closure(r) for r in locked if r in repos)) if locked else set()
-    missing = sorted(need - locked)
-    if missing:
-        stale += 1
-        print(f"STALE  {'kiln':16s} repos.lock lacks: {' '.join(missing)}")
-        for x in missing:
-            who = sorted(r for r in locked if r in repos and x in closure(r))
-            print(f"         {x} <- {', '.join(who[:5])}{' …' if len(who) > 5 else ''}")
+    if "kiln" in repos:
+        lock = git("kiln", "show", f"origin/{default('kiln')}:repos.lock")
+        locked = {l.split()[0] for l in lock.splitlines() if l.strip() and not l.startswith("#")}
+        need = set().union(*(closure(r) for r in locked if r in repos)) if locked else set()
+        missing = sorted(need - locked)
+        if missing:
+            stale += 1
+            print(f"STALE  {'kiln':16s} repos.lock lacks: {' '.join(missing)}")
+            for x in missing:
+                who = sorted(r for r in locked if r in repos and x in closure(r))
+                print(f"         {x} <- {', '.join(who[:5])}{' …' if len(who) > 5 else ''}")
 
-print(f"\n{stale} stale" if stale else "\nevery sibling list is complete")
-sys.exit(1 if stale else 0)
+    print(f"\n{stale} stale" if stale else "\nevery sibling list is complete")
+    sys.exit(1 if stale else 0)
+
+
+if __name__ == "__main__":
+    main()

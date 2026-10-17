@@ -21,6 +21,7 @@ explained.
 | `issues/YYYY-MM-DD/index.html` | One issue of **This Week in Modus** — what moved, across every repo, and why it was hard. The date is the Saturday that closes the week. |
 | `bin/week` | Everything an issue is made of: the ledger, and every commit subject grouped by repo. |
 | `bin/ci` | The worst current workflow of every repository in the org, on its default branch, worst first. `--bad` for only the problems. |
+| `bin/graph` | The dependency graph on the front page: `.asd` edges, laid out by Eclipse ELK (Java, in `tools/elk`). New repos must be given a tier and a domain first. `--check` is dry. |
 | `bin/siblings` | Which CI sibling lists (and kiln's `repos.lock`) have gone stale, computed from the `.asd` files. |
 | `bin/notes` | The author's nostr notes for a week, from several relays — the second source, when an issue needs one. |
 | `bin/mirror` | Regenerates the machine-readable half of the site from the site itself. `--check` fails if it is stale. |

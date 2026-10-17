@@ -375,6 +375,46 @@ p.backfill {
   margin-top: 20px;
 }
 
+/* ------------------------------------------------------- dependency graph */
+
+/* Wider than the page: the graph is laid out at its own size and scrolls
+   sideways inside itself rather than shrinking its labels to nothing. */
+figure.depgraph {
+  width: min(1500px, calc(100vw - 36px));
+  margin: 30px 0 46px 50%;
+  transform: translateX(-50%);
+}
+.dg-legend {
+  display: flex; flex-wrap: wrap; gap: 6px 18px;
+  font-family: var(--mono); font-size: 12px; color: var(--ink-soft);
+  margin: 0 0 12px;
+}
+.dg-legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: -1px; }
+.dg-scroll { overflow-x: auto; overscroll-behavior-x: contain; }
+.dg-scroll svg { display: block; width: 100%; min-width: 1100px; height: auto; font-family: var(--mono); }
+.depgraph figcaption {
+  font-family: var(--mono); font-size: 12px; line-height: 1.6; color: var(--muted);
+  max-width: 100ch; margin-top: 12px;
+}
+.depgraph .band { fill: var(--surface); opacity: .55; }
+.depgraph .tier { fill: var(--muted); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; }
+.depgraph .e { fill: none; stroke: #3a4548; stroke-width: 1.25; }
+.depgraph .e.hid { display: none; }
+.depgraph .box { fill: var(--surface); stroke: var(--hair); }
+.depgraph text { fill: var(--ink-soft); font-size: 12px; }
+.depgraph .who { fill: var(--muted); font-size: 11px; }
+.depgraph .cnt { fill: var(--muted); }
+.depgraph .n:focus-visible .box { stroke: var(--fire); stroke-width: 2; }
+.depgraph svg.hot .e { stroke: #1f272a; }
+.depgraph svg.hot .n { opacity: .35; }
+.depgraph svg.hot .e.on { stroke: var(--fire); stroke-width: 1.75; }
+.depgraph svg.hot .n.on { opacity: 1; }
+.depgraph svg.hot .n.self .box { stroke: var(--fire); }
+.depgraph svg.hot .n.self text { fill: var(--ink); }
+@media (prefers-reduced-motion: no-preference) {
+  .depgraph .n, .depgraph .e { transition: opacity .12s, stroke .12s; }
+}
+
 /* -------------------------------------------------------------- repo map */
 
 .families { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 34px 40px; }
