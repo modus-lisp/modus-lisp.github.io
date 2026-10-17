@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Attested, end to end — This Week in Modus №32</title>
+<meta name="description" content="This Week in Modus, 10–16 October 2026: Modus boots under SEV-SNP through measured boot, serves key-only SSH, and returns a report whose launch measurement equals the value computed offline. The agent learns to refuse an encrypted route that is not an attested one. And the whole thing turns out to have started with wanting a language model you could check.">
+<meta property="og:title" content="Attested, end to end — This Week in Modus №32">
+<meta property="og:description" content="10–16 October 2026: the measurement matches. Four issues after a bare-metal Lisp first tried to boot as an encrypted guest, it serves SSH from one and proves what it is.">
+<meta property="og:type" content="article">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..700&family=Newsreader:opsz,wght@6..72,300..600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../../assets/crier.css">
+  <link rel="alternate" type="application/atom+xml" title="This Week in Modus" href="https://modus-lisp.github.io/feed.xml">
+  <link rel="alternate" type="text/markdown" href="index.md">
+  <meta property="og:url" content="https://modus-lisp.github.io/issues/2026-10-17/">
+  <meta property="og:site_name" content="crier — This Week in Modus">
+  <meta property="og:locale" content="en_GB">
+  <meta property="og:image" content="https://modus-lisp.github.io/assets/og/card.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://modus-lisp.github.io/assets/og/card.png">
+  <meta property="article:published_time" content="2026-10-17T00:00:00Z">
+  <meta property="article:section" content="This Week in Modus">
+  <meta name="twitter:label1" content="Commits">
+  <meta name="twitter:data1" content="277">
+  <meta name="twitter:label2" content="Repositories">
+  <meta name="twitter:data2" content="21">
+</head>
+<body>
+<div class="page">
+
+  <div class="sitebar">
+    <a class="brand" href="../../">crier</a>
+    <nav><a href="../">Issues</a><a href="https://github.com/modus-lisp">GitHub</a></nav>
+  </div>
+
+  <header class="mast">
+    <div class="kicker">
+      <span>This Week in Modus &mdash; &#8470;&nbsp;32</span>
+      <span>&middot;</span>
+      <span>10&ndash;16 October 2026</span>
+      <span>&middot;</span>
+      <span><b>277 commits</b> &middot; 21 of 58 repos</span>
+    </div>
+    <h1>Attested,<br>end to <span class="lo">end</span></h1>
+    <hr class="rule-fire">
+    <p class="standfirst">Four issues ago a bare-metal Lisp learned to boot as an encrypted guest
+    and had never executed a VMGEXIT. Three weeks later it verified AMD&rsquo;s certificate chain
+    itself, and recorded that it could not reproduce the launch measurement from the
+    provider&rsquo;s firmware. On Saturday it did. Modus now boots under SEV-SNP through measured
+    boot, serves key-only SSH, and returns a report whose measurement equals the number computed
+    offline &mdash; and the agent that uses all this learned, the same week, to refuse a route
+    that is encrypted but not attested.</p>
+
+    <div class="tally">
+      <div><span class="n">277</span><span class="l">Commits</span></div>
+      <div><span class="n">21</span><span class="l">Repositories</span></div>
+      <div><span class="n">3</span><span class="l">New this week</span></div>
+      <div><span class="n">26/26</span><span class="l">Red-team suite</span></div>
+      <div><span class="n">38</span><span class="l">Green, of 59</span></div>
+    </div>
+  </header>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>modus</em> &nbsp;/&nbsp; baf1bf2f &nbsp;/&nbsp; 10 October</span>
+      <h2>The measurement matches</h2>
+    </div>
+
+    <p>An attestation report is only worth what you can say about the thing it measures. Last
+    issue established the first half &mdash; the chain verifies, a flipped bit is rejected
+    &mdash; and recorded the half that did not work: the launch measurement could not be
+    reproduced from the published firmware, so the report proved that <em>something</em> booted
+    without proving what. This week, on a provider where you supply the firmware:</p>
+
+    <div class="callout">
+      <p>On VPSBG&rsquo;s SEV-SNP VPS (EPYC 7713P, 1 vCPU) Modus now boots through measured boot
+      (UKI via <code>-kernel</code>, kernel hashes), serves key-only SSH, and returns a PSP
+      attestation report that verifies against AMD&rsquo;s chain with a launch measurement
+      <b>equal to the offline <code>sev-snp-measure</code> value</b>.</p>
+      <span class="src">modus &mdash; baf1bf2f</span>
+    </div>
+
+    <p>That equality is the whole point. One number comes out of a processor that signed it; the
+    other is computed on a laptop from the firmware and the image. When they agree, a remote
+    party who trusts AMD&rsquo;s root key and can read the image knows what the machine is
+    running. Everything the archive has reported under this heading since
+    <a href="../2026-09-26/">&#8470;&nbsp;29</a> was a step toward those two numbers being the
+    same.</p>
+
+    <p>The commit body is a list of what it cost, and it is the most instructive part. Memory a
+    SEV-SNP guest has never written <em>reads as noise</em>, so the runtime-metadata page has to
+    be zeroed whole rather than word by word. The shared region must be rescinded with
+    <code>PVALIDATE</code> through its <em>encrypted</em> mapping before the C-bit is cleared
+    &mdash; doing the first <code>PVALIDATE</code> through a C=0 mapping killed the virtual
+    machine outright. The secrets page has to be copied out of the range the image is about to be
+    copied over. And a comparison that had always worked, <code>%core-requested-p</code>, had to
+    become <code>EQ</code> rather than <code>=</code>.</p>
+
+    <p>None of that is debuggable the usual way, because an SNP guest has no console. So the
+    build grew spin points &mdash; <code>MODUS_SNP_SPIN_AT</code>,
+    <code>MODUS_LISP_SPIN_AT</code>, <code>MODUS_SNP_VC_FATAL=spin</code> &mdash; to bisect a boot
+    by where it stops. Networking is virtio-net MMIO through the GHCB; SSH gets its keys from
+    <code>RDRAND</code>, waits that are timed rather than counted, and
+    <code>RDTSC</code> because <code>RDTSCP</code> is not on every x86-64.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>operandi</em>, <em>cl-sev-snp</em>, <em>seal</em> &nbsp;/&nbsp; 11&ndash;14 October</span>
+      <h2>Why any of this</h2>
+    </div>
+
+    <p>This archive has reported the attestation work for a month without ever saying what it was
+    <em>for</em>. The answer turned up in the author&rsquo;s own notes this week, in a reply about
+    something else entirely:</p>
+
+    <div class="callout">
+      <p>i keep meaning to try PPQdotAI. routstr and the underlying tinfoil are what sent me down
+      the SEV-SNP path 😂</p>
+      <span class="src">nostr &mdash; 407a1388, 2026-10-10 17:10Z</span>
+    </div>
+
+    <p>Tinfoil runs language models inside attested enclaves; Routstr routes to them. The whole
+    SEV-SNP campaign &mdash; the guest boot, the #VC handler, the certificate chain in Lisp, the
+    EC2 control experiment, the measured boot above &mdash; began with wanting an inference
+    provider whose claim you could check rather than accept. This week the two ends meet.</p>
+
+    <p><b>cl-sev-snp</b> is the verifier lifted out of modus into a library of its own, and it
+    immediately grows: AWS Nitro attestation documents alongside SEV-SNP reports, the Genoa root
+    key pinned by default, and &mdash; three days later &mdash; <em>fetch over seal/http instead
+    of dexador: no FFI</em>, because a verifier that pulls in OpenSSL to download a certificate
+    has an awkward story to tell.</p>
+
+    <p><b>operandi</b> gets a <code>--tinfoil</code> backend sealed to Tinfoil&rsquo;s enclave,
+    and a <code>--confidential</code> flag. The interesting commits are the ones that decide what
+    the flag may mean:</p>
+
+    <div class="console">
+      <span class="cap">operandi &mdash; what counts as confidential, 14 October</span>
+<pre>a8e43c9   confidential: judge by the hardware root, not the hop count
+19df216   confidential: <span class="ret">refuse --routstr outright; it is encrypted, not attested</span>
+087d0c0   confidential: rename the flag to --confidential-tinfoil</pre>
+    </div>
+
+    <p>A blind relay hides your traffic from the relay. An attested enclave tells you what is
+    running at the other end. They are different properties, and an agent that treated the first
+    as the second would be lying to its user in a way nobody would notice. So the flag refuses
+    the route it cannot attest, and then gets renamed to name the specific root it trusts &mdash;
+    because <em>confidential</em> on its own is a claim about nothing in particular.</p>
+
+    <p>Underneath, <b>seal</b> grows the transport that needs: HPKE (RFC 9180, base mode,
+    X25519 and AES-256-GCM) and the Encrypted HTTP Body Protocol framing over it, with key
+    configurations parsed from a provider&rsquo;s <code>/.well-known/hpke-keys</code>. Two TLS
+    fixes land beside it that read like the week&rsquo;s theme in miniature: keep reading until
+    the ServerHello record is <em>whole</em>, and keep the handshake messages coalesced with
+    it.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>emissary</em> &nbsp;/&nbsp; 5 commits &nbsp;/&nbsp; 14&ndash;15 October</span>
+      <h2>A key that answers</h2>
+    </div>
+
+    <p>The week&rsquo;s other new repository is the piece that makes an attested machine useful
+    from a distance. <a href="https://github.com/modus-lisp/emissary"><b>emissary</b></a>
+    evaluates forms sent by allowlisted Nostr keys &mdash; gift-wrapped under NIP-17 and NIP-59,
+    each in a fresh and killable Modus process &mdash; over three transports: direct messages, Marmot groups,
+    and FIPS.</p>
+
+    <p>Which is to say: remote code execution, deliberately, with the authorisation being a
+    signature rather than a password and the isolation being a process rather than a promise. The
+    Marmot transport answers only allowlisted members of groups the agent was invited to, and
+    direct messages are accepted only as kind-14 rumors. Put beside the attested SSH above, the
+    shape is clear enough &mdash; a machine that can prove what it is, reachable over a protocol
+    with no servers, taking instructions only from keys it knows.</p>
+
+    <p>It started on the 14th as something narrower &mdash; <code>modus-agent</code>, a thing
+    that ran forms for allowlisted keys &mdash; and was generalised the same day into a layer with
+    a pluggable handler, of which running Lisp is merely the default. The commit that did it
+    opens with a definition worth keeping:</p>
+
+    <div class="callout">
+      <p>An emissary is a key that acts for the principals on its allowlist: requests arrive over
+      NIP-17 DMs, Marmot groups and FIPS, each with a sender the transport authenticated, and a
+      principal&rsquo;s request goes to a pluggable HANDLER whose answer returns the way it came.
+      The default handler evaluates the request in a fresh, killable modus process.</p>
+      <span class="src">emissary &mdash; 2e8e353</span>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>modus</em> &nbsp;/&nbsp; 149 commits</span>
+      <h2>And a week of making it fast</h2>
+    </div>
+
+    <p>Most of modus&rsquo;s 149 commits are not about attestation at all. They are the
+    performance work the Pi&nbsp;Zero campaign of
+    <a href="../2026-09-19/">&#8470;&nbsp;28</a> argued for, now applied broadly: the interpreter
+    is 2.1&times; faster from constant-folded shift counts and byte-typed fetches, a
+    hot-function JIT promotes a runtime <code>DEFUN</code> to native after sixty-four calls or ten
+    milliseconds, a bridged call patches itself to its native callee, and global and special
+    variable reads go through a baked cell rather than a hash probe.</p>
+
+    <p>The arithmetic got a rebuild. Bignums move onto limb vectors with a magnitude kernel,
+    Karatsuba multiplication above forty-eight digits, a Lehmer GCD taken from the top sixty-one
+    bits, and a doubling integer square root. Double-float expression trees compile unboxed;
+    <code>EXP</code> and <code>LOG</code> get fdlibm-style argument reduction and land within one
+    or two units in the last place of libm. Bit arrays become genuinely packed, sixteen to a
+    fixnum word.</p>
+
+    <p>And 13,702 lines were deleted, nearly all of them one file:
+    <code>mvm/ansi-bridge.lisp</code>, dissolved into the <code>cl-*</code> files whose runtime it
+    held and an <code>ansi-test-aux.lisp</code> for the test helpers, with thirty-one definitions
+    dropped because a later one in the same group already shadowed them. A bridge is scaffolding;
+    taking it down is how you find out the building stands.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow">the rest &nbsp;/&nbsp; <em>cl-deposits</em>, <em>glass</em>, <em>natrium</em>, <em>png-pure</em></span>
+      <h2>Also this week</h2>
+    </div>
+
+    <p><b>cl-deposits</b> takes its red-team suite to <b>26 of 26</b>, with authorised
+    confiscation rebuilt from public state rather than from anything the node privately knows, and
+    disputes driven on their own threads with per-ledger locks. One commit is a small lesson in
+    what a passing test is worth: <em>a reference winner under OBL_WITHHOLD is INVALID (rerun),
+    not a pass</em>.</p>
+
+    <p><b>glass</b> splits the desk into a network thread and a compositor thread, and gives every
+    RFB client a thread that shares nothing &mdash; the reader messages the sender rather than
+    reaching into it. <b>natrium</b> is re-tuned for Modus specifically: SHA-512 as pairs of
+    32-bit halves to avoid bignums, Poly1305 decoding limbs from bytes rather than through a
+    128-bit integer per block, and field multiplication through a new <code>%mul-split</code>
+    intrinsic that modus advertises on <code>*features*</code>. <b>png-pure</b> arrives as a PNG
+    encoder on cram, with QR and BOLT11 demos &mdash; so an invoice can become an image without
+    leaving the workspace.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow">the gates &nbsp;/&nbsp; 17 October</span>
+      <h2>Fourteen</h2>
+    </div>
+
+    <p><b>59 repositories, 38 green, 7 failing, 14 with no CI.</b> The
+    <code>Component :REEL not found</code> break is thirty-nine days old in webp-pure and
+    webrtc-media, and still takes loom and weft down with it. kiln&rsquo;s macOS workflow joined
+    the failures three days ago.</p>
+
+    <p>Fourteen ungated is the highest this archive has recorded, and it is a consequence of the
+    pace rather than of neglect: nine repositories have been created in four weeks and most
+    arrived without a workflow. Among them now are cl-sev-snp, whose job is to decide whether to
+    believe a cryptographic attestation, and emissary, whose job is to execute code that arrives
+    over the network.</p>
+  </section>
+
+  <footer>
+    <p><strong>Method.</strong> Commits by <em>author</em> date, 10 to 16 October 2026, across the
+    58 repositories cloned from the modus-lisp organisation, counting each repository&rsquo;s
+    default branch as the union of the local branch and <code>origin/</code>. Produced with
+    <code>bin/week 2026-10-17 --log</code>. Seven commits sit on branches that had not merged
+    &mdash; modus&rsquo;s <code>operandi-on-modus</code> and <code>zero-hid</code>, kiln&rsquo;s
+    <code>zero</code> &mdash; and are not counted. The green/failing figures count the
+    organisation&rsquo;s 59 repositories, which includes the profile repository this ledger does
+    not.</p>
+    <p><strong>Outside the log.</strong> The author&rsquo;s nostr notes were read with
+    <code>bin/notes 2026-10-17</code>. The remark that opens &ldquo;Why any of this&rdquo; is from
+    them, and it is the only place in a month of commits where the motive for the SEV-SNP work is
+    stated plainly &mdash; which is exactly what a second source is for.</p>
+    <p><a href="../">&larr; All issues</a> &middot; <a href="../../">crier</a></p>
+  </footer>
+
+</div>
+</body>
+</html>

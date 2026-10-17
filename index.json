@@ -4,7 +4,7 @@
   "home": "https://modus-lisp.github.io/",
   "feed": "https://modus-lisp.github.io/feed.xml",
   "generated_from": "the site's own HTML, by bin/mirror",
-  "count": 31,
+  "count": 32,
   "issues": [
     {
       "number": 1,
@@ -346,6 +346,17 @@
       "repos": 22,
       "url": "https://modus-lisp.github.io/issues/2026-10-10/",
       "markdown": "https://modus-lisp.github.io/issues/2026-10-10/index.md"
+    },
+    {
+      "number": 32,
+      "date": "2026-10-17",
+      "span": "10\u201316 October 2026",
+      "title": "Attested, end to end",
+      "summary": "Modus boots under SEV-SNP through measured boot, serves key-only SSH, and returns a report whose launch measurement equals the value computed offline \u2014 the half that was missing last week. The agent learns to refuse a route that is encrypted but not attested. And a nostr note explains, for the first time, what the whole campaign was for. 277 commits.",
+      "commits": 277,
+      "repos": 21,
+      "url": "https://modus-lisp.github.io/issues/2026-10-17/",
+      "markdown": "https://modus-lisp.github.io/issues/2026-10-17/index.md"
     }
   ]
 }
