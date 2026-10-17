@@ -60,7 +60,7 @@
       <div><span class="n">21</span><span class="l">Repositories</span></div>
       <div><span class="n">3</span><span class="l">New this week</span></div>
       <div><span class="n">26/26</span><span class="l">Red-team suite</span></div>
-      <div><span class="n">38</span><span class="l">Green, of 59</span></div>
+      <div><span class="n">40</span><span class="l">Green, of 59</span></div>
     </div>
   </header>
 
@@ -246,19 +246,30 @@
   <section>
     <div class="sec-head">
       <span class="sec-eyebrow">the gates &nbsp;/&nbsp; 17 October</span>
-      <h2>Fourteen</h2>
+      <h2>Eleven stale lists</h2>
     </div>
 
-    <p><b>59 repositories, 38 green, 7 failing, 14 with no CI.</b> The
-    <code>Component :REEL not found</code> break is thirty-nine days old in webp-pure and
-    webrtc-media, and still takes loom and weft down with it. kiln&rsquo;s macOS workflow joined
-    the failures three days ago.</p>
+    <p>Most repositories here clone their modus-lisp dependencies in CI from a list written into
+    the workflow by hand &mdash; a transitive closure, maintained by eye. When VP8 moved into reel
+    in September and JSON onto json-simple this month, eleven of those lists were not told. Five
+    had been failing on <code>Component :REEL not found</code> for weeks; the other six were just
+    as stale and still green only because they had not run since.</p>
 
-    <p>Fourteen ungated is the highest this archive has recorded, and it is a consequence of the
-    pace rather than of neglect: nine repositories have been created in four weeks and most
-    arrived without a workflow. Among them now are cl-sev-snp, whose job is to decide whether to
-    believe a cryptographic attestation, and emissary, whose job is to execute code that arrives
-    over the network.</p>
+    <p>All eleven were corrected on the 17th, the day this was published, with the lists computed
+    from the <code>.asd</code> files across the organisation rather than by hand, and all eleven
+    went green within minutes. kiln&rsquo;s <code>repos.lock</code> gained the four repositories
+    that the ones it already pins now require. Those commits fall in next week&rsquo;s ledger, not
+    this one&rsquo;s.</p>
+
+    <p>Two tools came out of it. <code>bin/siblings</code> computes each closure and reports a
+    stale list before CI does. And <code>bin/ci</code> now reports the worst of a
+    repository&rsquo;s <em>current</em> workflows on its <em>default</em> branch &mdash; it had
+    been reporting the newest run of anything, which counted a deleted workflow as a failure and a
+    Pages deploy as a pass.</p>
+
+    <p>As of publication: <b>59 repositories, 40 green, none failing, 18 without a workflow.</b>
+    Three of those need none &mdash; the organisation profile, this site, and the Quicklisp
+    distribution. Most of the rest are repositories created in the last five weeks.</p>
   </section>
 
   <footer>

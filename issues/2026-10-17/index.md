@@ -8,7 +8,7 @@ Four issues ago a bare-metal Lisp learned to boot as an encrypted guest and had 
 
 | Commits | Repositories | New this week | Red-team suite | Green, of 59 |
 |---|---|---|---|---|
-| 277 | 21 | 3 | 26/26 | 38 |
+| 277 | 21 | 3 | 26/26 | 40 |
 
 ---
 
@@ -100,11 +100,15 @@ And 13,702 lines were deleted, nearly all of them one file: `mvm/ansi-bridge.lis
 
 *the gates / 17 October*
 
-## Fourteen
+## Eleven stale lists
 
-**59 repositories, 38 green, 7 failing, 14 with no CI.** The `Component :REEL not found` break is thirty-nine days old in webp-pure and webrtc-media, and still takes loom and weft down with it. kiln’s macOS workflow joined the failures three days ago.
+Most repositories here clone their modus-lisp dependencies in CI from a list written into the workflow by hand — a transitive closure, maintained by eye. When VP8 moved into reel in September and JSON onto json-simple this month, eleven of those lists were not told. Five had been failing on `Component :REEL not found` for weeks; the other six were just as stale and still green only because they had not run since.
 
-Fourteen ungated is the highest this archive has recorded, and it is a consequence of the pace rather than of neglect: nine repositories have been created in four weeks and most arrived without a workflow. Among them now are cl-sev-snp, whose job is to decide whether to believe a cryptographic attestation, and emissary, whose job is to execute code that arrives over the network.
+All eleven were corrected on the 17th, the day this was published, with the lists computed from the `.asd` files across the organisation rather than by hand, and all eleven went green within minutes. kiln’s `repos.lock` gained the four repositories that the ones it already pins now require. Those commits fall in next week’s ledger, not this one’s.
+
+Two tools came out of it. `bin/siblings` computes each closure and reports a stale list before CI does. And `bin/ci` now reports the worst of a repository’s *current* workflows on its *default* branch — it had been reporting the newest run of anything, which counted a deleted workflow as a failure and a Pages deploy as a pass.
+
+As of publication: **59 repositories, 40 green, none failing, 18 without a workflow.** Three of those need none — the organisation profile, this site, and the Quicklisp distribution. Most of the rest are repositories created in the last five weeks.
 
 ---
 
