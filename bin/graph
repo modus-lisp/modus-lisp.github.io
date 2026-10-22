@@ -2,8 +2,9 @@
 """graph — the dependency graph on the front page.
 
 Reads every repository's .asd files (through bin/siblings), keeps the edges a
-transitive reduction leaves, and has Eclipse ELK's layered algorithm lay them
-out -- the Java original, in tools/elk, pinned.  The result is a static SVG
+transitive reduction leaves, and has trellis -- the layered layout in Common
+Lisp after Eclipse ELK, loaded from its sibling clone by tools/trellis -- lay
+them out, keeping the best of eight seeds.  The result is a static SVG
 spliced into index.html between <!-- graph --> and <!-- /graph -->; the only
 script is the hover.
 
@@ -35,8 +36,7 @@ import subprocess
 import sys
 
 HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-ELK = os.path.join(HERE, "tools", "elk")
-ELK_BIN = os.path.join(ELK, "build", "install", "elk", "bin", "elk")
+LAYOUT = os.path.join(HERE, "tools", "trellis", "layout.lisp")
 CHECK = "--check" in sys.argv
 
 TIERS = {
@@ -77,14 +77,11 @@ def load_siblings():
     return mod
 
 
-def elk(graph):
-    if not os.path.exists(ELK_BIN):
-        java21 = "/opt/homebrew/opt/openjdk@21"
-        env = dict(os.environ, **({"JAVA_HOME": java21} if os.path.isdir(java21) else {}))
-        subprocess.run(["gradle", "-q", "installDist"], cwd=ELK, env=env, check=True)
-    out = subprocess.run([ELK_BIN], input=json.dumps(graph), capture_output=True, text=True)
-    if out.returncode:
-        sys.exit("graph: ELK failed\n" + out.stderr)
+def layout(workspace, graph):
+    out = subprocess.run(["sbcl", "--script", LAYOUT, workspace],
+                         input=json.dumps(graph), capture_output=True, text=True)
+    if out.returncode or not out.stdout.strip():
+        sys.exit("graph: trellis failed\n" + out.stderr)
     return json.loads(out.stdout)
 
 
@@ -137,7 +134,7 @@ def main():
     GE = sorted({(end(a, "out"), end(b, "in")) for (a, b) in G if not (a in cof and b in cof and cof[a] == cof[b])})
     placed = [n for n in nodes if n not in util and n not in cof and any(n in e for e in R)]
 
-    L = elk({
+    L = layout(sib.W, {
         "id": "root",
         "layoutOptions": {
             "elk.algorithm": "layered", "elk.direction": "DOWN", "elk.edgeRouting": "ORTHOGONAL",
@@ -145,6 +142,7 @@ def main():
             "elk.layered.spacing.nodeNodeBetweenLayers": "46", "elk.spacing.nodeNode": "14",
             "elk.layered.spacing.edgeNodeBetweenLayers": "14", "elk.spacing.edgeEdge": "6",
             "elk.layered.nodePlacement.strategy": "NETWORK_SIMPLEX",
+            "elk.layered.thoroughness": "30", "trellis.candidates": "8",
             "elk.padding": f"[top=10,left={GUTTER},bottom=10,right=10]"},
         "children": [{"id": n, "width": wid(n), "height": H,
                       "layoutOptions": {"elk.partitioning.partition": str(tier[n])}} for n in placed]
@@ -234,7 +232,7 @@ def main():
       <code>.asd</code> files with the ones implied by others taken out, read from each default
       branch. The six on the right are used from everywhere, so they list their users rather than
       draw them; hover anything to trace it. No sibling dependencies either way: {", ".join(iso)}.
-      Laid out by Eclipse ELK&rsquo;s layered algorithm.</figcaption>
+      Laid out by <a href="https://github.com/modus-lisp/trellis">trellis</a>, after Eclipse ELK&rsquo;s layered algorithm.</figcaption>
     </figure>
     <script>
     (() => {{
