@@ -5,8 +5,16 @@
   <link href="https://modus-lisp.github.io/feed.xml" rel="self"/>
   <link href="https://modus-lisp.github.io/"/>
   <id>https://modus-lisp.github.io/</id>
-  <updated>2026-10-17T00:00:00Z</updated>
+  <updated>2026-10-24T00:00:00Z</updated>
   <author><name>ynniv</name></author>
+  <entry>
+    <title>№33 — Every last test</title>
+    <link href="https://modus-lisp.github.io/issues/2026-10-24/"/>
+    <id>https://modus-lisp.github.io/issues/2026-10-24/</id>
+    <updated>2026-10-24T00:00:00Z</updated>
+    <summary>The x86-64 build passes every test in the unmodified upstream ANSI suite, 21,681 of 21,681, 198 days after the first test ran and five days after the last thousand were still failing. trellis ports ELK’s layered layout to Lisp; secret keys move into memory the collector never touches; witness asks who says an enclave is what it claims. 278 commits.</summary>
+    <link rel="alternate" type="text/markdown" href="https://modus-lisp.github.io/issues/2026-10-24/index.md"/>
+  </entry>
   <entry>
     <title>№32 — Attested, end to end</title>
     <link href="https://modus-lisp.github.io/issues/2026-10-17/"/>

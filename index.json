@@ -4,7 +4,7 @@
   "home": "https://modus-lisp.github.io/",
   "feed": "https://modus-lisp.github.io/feed.xml",
   "generated_from": "the site's own HTML, by bin/mirror",
-  "count": 32,
+  "count": 33,
   "issues": [
     {
       "number": 1,
@@ -357,6 +357,17 @@
       "repos": 21,
       "url": "https://modus-lisp.github.io/issues/2026-10-17/",
       "markdown": "https://modus-lisp.github.io/issues/2026-10-17/index.md"
+    },
+    {
+      "number": 33,
+      "date": "2026-10-24",
+      "span": "17\u201324 October 2026",
+      "title": "Every last test",
+      "summary": "The x86-64 build passes every test in the unmodified upstream ANSI suite, 21,681 of 21,681, 198 days after the first test ran and five days after the last thousand were still failing. trellis ports ELK\u2019s layered layout to Lisp; secret keys move into memory the collector never touches; witness asks who says an enclave is what it claims. 278 commits.",
+      "commits": 278,
+      "repos": 33,
+      "url": "https://modus-lisp.github.io/issues/2026-10-24/",
+      "markdown": "https://modus-lisp.github.io/issues/2026-10-24/index.md"
     }
   ]
 }

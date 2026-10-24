@@ -43,7 +43,7 @@ TIERS = {
     "Applications": "operandi-gui warp warren loom spool glass-sdl glass-webrtc glass-mcclim beacon"
                     " cl-marmot emissary cl-deposits cl-payments cairn skep operandi kiln dist modus",
     "Engines & protocols": "glass chord stave mill weft folio shuttle cl-consensus cl-nostr"
-                           " webrtc-media webrtc-data cl-tor cl-frpc conch cl-fips cl-sev-snp cabinet",
+                           " webrtc-media webrtc-data cl-tor cl-frpc conch cl-fips cl-sev-snp cabinet trellis wax witness",
     "Formats & codecs": "pigment stencil gesso scribe webp-pure png-pure reed reel cassette"
                         " json-simple pagetree quill sqlite-pure fs-fat zstd-pure brotli-pure",
     "Foundations": "seal natrium secp256k1-fast cl-transport cram",
@@ -53,13 +53,13 @@ TIERS = {
 # carries its name, so colour is never the only cue.
 DOMAINS = {
     "Desktop": ("#3987e5", "glass glass-sdl glass-mcclim glass-webrtc warp warren loom spool quill"),
-    "Web & documents": ("#d95926", "weft shuttle scribe gesso stencil pigment folio webp-pure png-pure"),
+    "Web & documents": ("#d95926", "weft shuttle scribe gesso stencil pigment folio webp-pure png-pure trellis"),
     "Media & models": ("#199e70", "reed reel cassette mill chord stave webrtc-media"),
     "Storage": ("#c98500", "cram zstd-pure brotli-pure json-simple pagetree cabinet cairn sqlite-pure fs-fat"),
-    "Nostr & agents": ("#d55181", "cl-nostr beacon cl-marmot emissary operandi operandi-gui skep"),
+    "Nostr & agents": ("#d55181", "cl-nostr beacon cl-marmot emissary operandi operandi-gui skep witness"),
     "Bitcoin": ("#008300", "cl-consensus cl-payments cl-deposits"),
     "Network & crypto": ("#9085e9", "seal natrium secp256k1-fast conch cl-tor cl-transport cl-frpc"
-                                    " webrtc-data cl-fips cl-sev-snp"),
+                                    " webrtc-data cl-fips cl-sev-snp wax"),
     "The machine": (None, "modus kiln dist"),
 }
 UTIL = ["seal", "cram", "cl-transport", "json-simple", "secp256k1-fast", "natrium"]
