@@ -4,7 +4,7 @@
   "home": "https://modus-lisp.github.io/",
   "feed": "https://modus-lisp.github.io/feed.xml",
   "generated_from": "the site's own HTML, by bin/mirror",
-  "count": 33,
+  "count": 34,
   "issues": [
     {
       "number": 1,
@@ -368,6 +368,17 @@
       "repos": 33,
       "url": "https://modus-lisp.github.io/issues/2026-10-24/",
       "markdown": "https://modus-lisp.github.io/issues/2026-10-24/index.md"
+    },
+    {
+      "number": 34,
+      "date": "2026-10-31",
+      "span": "25\u201330 October 2026",
+      "title": "A 284B model, from Lisp",
+      "summary": "illatio, language-model inference in Common Lisp, goes from its first commit to DeepSeek V4 Flash streamed from an SSD on a 48 GB laptop in under two days, then trains GPT-2. trellis is rewritten from the published papers. Modus moves its kernel out of CL-USER, gains a generational collector, and boots on a 486. 266 commits.",
+      "commits": 266,
+      "repos": 9,
+      "url": "https://modus-lisp.github.io/issues/2026-10-31/",
+      "markdown": "https://modus-lisp.github.io/issues/2026-10-31/index.md"
     }
   ]
 }

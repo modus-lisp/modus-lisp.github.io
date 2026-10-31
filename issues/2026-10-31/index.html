@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A 284B model, from Lisp — This Week in Modus №34</title>
+<meta name="description" content="This Week in Modus, 25–30 October 2026: illatio, language-model inference in Common Lisp, goes from its first commit to DeepSeek V4 Flash streamed from an SSD on a 48 GB laptop in under two days, then trains GPT-2. trellis is rewritten from the published papers. And Modus's kernel moves out of CL-USER, gains a generational collector, and boots on a 486.">
+<meta property="og:title" content="A 284B model, from Lisp — This Week in Modus №34">
+<meta property="og:description" content="25–30 October 2026: a pure-Lisp inference engine runs a 284B mixture of experts from an SSD on a laptop, forty-two hours after its first commit.">
+<meta property="og:type" content="article">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..700&family=Newsreader:opsz,wght@6..72,300..600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../../assets/crier.css">
+  <link rel="alternate" type="application/atom+xml" title="This Week in Modus" href="https://modus-lisp.github.io/feed.xml">
+  <link rel="alternate" type="text/markdown" href="index.md">
+  <meta property="og:url" content="https://modus-lisp.github.io/issues/2026-10-31/">
+  <meta property="og:site_name" content="crier — This Week in Modus">
+  <meta property="og:locale" content="en_GB">
+  <meta property="og:image" content="https://modus-lisp.github.io/assets/og/card.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://modus-lisp.github.io/assets/og/card.png">
+  <meta property="article:published_time" content="2026-10-31T00:00:00Z">
+  <meta property="article:section" content="This Week in Modus">
+  <meta name="twitter:label1" content="Commits">
+  <meta name="twitter:data1" content="266">
+  <meta name="twitter:label2" content="Repositories">
+  <meta name="twitter:data2" content="9">
+</head>
+<body>
+<div class="page">
+
+  <div class="sitebar">
+    <a class="brand" href="../../">crier</a>
+    <nav><a href="../">Issues</a><a href="https://github.com/modus-lisp">GitHub</a></nav>
+  </div>
+
+  <header class="mast">
+    <div class="kicker">
+      <span>This Week in Modus &mdash; &#8470;&nbsp;34</span>
+      <span>&middot;</span>
+      <span>25&ndash;30 October 2026</span>
+      <span>&middot;</span>
+      <span><b>266 commits</b> &middot; 9 of 62 repos</span>
+    </div>
+    <h1>A 284B model,<br>from <span class="lo">Lisp</span></h1>
+    <hr class="rule-fire">
+    <p class="standfirst">At 22:22 on Tuesday a new repository loaded a half-billion-parameter model
+    in Common Lisp. By Thursday afternoon the same code was running DeepSeek V4 Flash, a 284B
+    mixture of experts, from the SSD of a 48 GB laptop, about as fast as the C engine it was ported
+    from. On Friday it trained GPT-2. The layout library from last week was rewritten from the
+    papers and checked against a thousand graphs. And Modus moved its kernel out of the
+    user&rsquo;s package, gained a generational collector, and booted on a 486.</p>
+
+    <div class="tally">
+      <div><span class="n">266</span><span class="l">Commits</span></div>
+      <div><span class="n">9</span><span class="l">Repositories</span></div>
+      <div><span class="n">1</span><span class="l">New this week</span></div>
+      <div><span class="n">9.8</span><span class="l">tok/s at 284B</span></div>
+      <div><span class="n">43</span><span class="l">Green, of 63</span></div>
+    </div>
+  </header>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>illatio</em> &nbsp;/&nbsp; 78 commits &nbsp;/&nbsp; 27&ndash;30 October</span>
+      <h2>Inference, carried in</h2>
+    </div>
+
+    <p><em>Illatio</em> is Latin for &ldquo;a carrying in; an inference&rdquo;. It is a
+    language-model engine in Common Lisp: GGUF weights, quantized kernels, a byte-level BPE
+    tokenizer, sampling, chat templates, tool calls and an OpenAI-compatible server. It has no C or
+    Objective-C of its own and no BLAS. It calls a few libc functions and the Objective-C runtime
+    through SBCL&rsquo;s alien interface, and on Apple silicon it drives the GPU through Metal from
+    Lisp.</p>
+
+    <p>The log reads like a stopwatch. The first commit, at 22:22 on the 27th, is Qwen2.5-0.5B: the
+    file format, Q8_0 kernels, the tokenizer and the forward pass. At 07:17 the next morning,
+    <em>illatio runs on modus</em>, giving llama.cpp&rsquo;s tokens, slowly. Then Qwen3-4B, K-quants,
+    a 27B Qwen3.5, and at 21:43, <em>the GPU: qwen35 decode on Metal, driven from Lisp</em>. At
+    23:22, DeepSeek V4 Flash&rsquo;s forward pass on the CPU. At 00:58, <em>checked against
+    ds4&rsquo;s own numbers, at this model&rsquo;s noise floor</em>. Through the 29th every layer
+    moved to the GPU, with the routed experts streamed from disk. The author, that evening:
+    <em>common lisp running ds4f on a 48GB MBP, written 100% by claude in 48 hours, based on
+    llama.cpp and ds4</em>.</p>
+
+    <div class="ledger-wrap">
+      <table class="ledger">
+        <thead><tr><th>DeepSeek V4 Flash, 48 GB M4 Pro</th><th class="num">illatio</th><th class="num">ds4</th></tr></thead>
+        <tbody>
+          <tr><td class="what">prefill, a 6,352-token prompt</td><td class="num">105 tok/s</td><td class="num">104 tok/s</td></tr>
+          <tr><td class="what">decode, warm</td><td class="num">9.8 tok/s</td><td class="num">4.2 tok/s</td></tr>
+          <tr><td class="what">decode at 6K tokens of context</td><td class="num">7.1 tok/s</td><td class="num">&mdash;</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>Those are the README&rsquo;s numbers, from one machine. The model file is 86.7&nbsp;GB, 78
+    of it routed experts, on a machine with 48. ds4 streams them from the SSD too. The difference
+    in decode is in what illatio keeps: an expert pool sized to the GPU&rsquo;s working set, the
+    next layer&rsquo;s experts guessed and read ahead, and expert reads that bypass the page cache.
+    The README&rsquo;s afterword puts it plainly: <em>most of the work was not arithmetic but
+    logistics</em>.</p>
+
+    <p>&ldquo;Ported from&rdquo; is meant literally, and <code>THIRD-PARTY.md</code> says from what.
+    The Metal kernels&rsquo; structure, the block dequantizers and the CPU kernels&rsquo;
+    arithmetic order come from ggml and llama.cpp, and the GPU kernels are Metal shaders rather
+    than Lisp. The DeepSeek port, its tokenizer and its expert hotlist come from ds4. GPT-2
+    training comes from llm.c. All three are MIT, and so is illatio. Every model is checked against
+    its reference: llama.cpp for the Qwens, ds4&rsquo;s CPU path for DeepSeek.</p>
+
+    <p>On the 30th it learned to train: GPT-2&rsquo;s forward, backward and AdamW from
+    llm.c&rsquo;s CPU reference, then the whole step in one Metal command buffer. Then it played
+    modded-nanogpt&rsquo;s speedrun game, sized for a laptop: a 6-layer, 384-channel model on
+    FineWeb, run to a validation loss of 4.30. llm.c&rsquo;s recipe ended its run at 5.37. With
+    modded-nanogpt&rsquo;s later changes, Muon among them, the third record of the day reached
+    4.30 in <b>52.1 minutes</b>. Those times are on this laptop&rsquo;s own scale, not
+    comparable to the H100 records. The author, on the day: <em>it just took me longer to
+    decide on a library name than for claude to get rudimentary inference in common lisp</em>.
+    operandi gained <code>--illatio</code> the same week: the model runs inside the agent&rsquo;s
+    own image, with no server at all.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>trellis</em> &nbsp;/&nbsp; d4648ed &nbsp;/&nbsp; 27 October</span>
+      <h2>Rewritten from the papers</h2>
+    </div>
+
+    <p>Last issue described trellis as what it then was: a port of Eclipse ELK&rsquo;s layered
+    engine. ELK is EPL-licensed and the workspace is MIT, so on the 27th trellis was replaced
+    outright. The repository now begins with one commit: <em>a complete graph layout library,
+    implementing the published algorithms directly from their papers and checked against ELK
+    0.13</em>. The ported history is gone from <code>main</code>.</p>
+
+    <p>The commit body reads like a bibliography. It uses Eades, Lin &amp; Smyth for breaking
+    cycles and Gansner et al.&rsquo;s network simplex for layering. Crossing reduction follows
+    Schulze, Sp&ouml;nemann &amp; von Hanxleden, with crossings counted by Barth, J&uuml;nger &amp;
+    Mutzel&rsquo;s accumulator tree. Nodes are placed by Brandes &amp; K&ouml;pf, with the
+    corrections Brandes, Walter &amp; Zink published in 2020, and edges routed orthogonally after
+    Weber. Beside the layered algorithm sit tree, radial, force, stress, packing and the rest:
+    fourteen algorithms in about five thousand lines.</p>
+
+    <p>The reference suite works the way json-simple&rsquo;s does against jzon. It holds a thousand
+    random graphs, each laid out by ELK itself, and both engines face the same four checks: finite
+    coordinates, no overlapping siblings, every edge routed to its endpoints, children inside their
+    parents. trellis passes all four on <b>985</b> of the thousand; ELK on 515, with 96 errors and
+    8 timeouts. The fifteen trellis misses are mostly <code>fixed</code> layouts whose given
+    positions overlap. Where ELK&rsquo;s own layout passed, layered graphs come out with fewer
+    crossings and no edges through nodes.</p>
+
+    <p>One honest gap shows on this site&rsquo;s front page. trellis does not yet implement
+    network-simplex <em>node placement</em>, the compact alternative to Brandes &amp; K&ouml;pf
+    from the same Gansner paper. The dependency graph is correct, but about a third wider than it
+    was.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>modus</em> &nbsp;/&nbsp; 134 commits</span>
+      <h2>The kernel leaves CL-USER</h2>
+    </div>
+
+    <p>Until this week every kernel function sat in the runtime&rsquo;s table under its bare
+    name, so a user&rsquo;s definition could quietly replace it. The commit that changed this
+    measured it: <em>a CL-USER (defun %format-impl &hellip;) &hellip; replaced the kernel&rsquo;s
+    function for the kernel&rsquo;s own callers too: measured, that one DEFUN broke FORMAT and
+    killed the script</em>. Internals now live in <code>MODUS-INT</code>, SBCL&rsquo;s
+    <code>SB-INT</code> in spirit. The public surface is <code>MODUS</code>, and the networking,
+    SSH, crypto, runtime and board code each have a package of their own. Redefining a kernel
+    function is still possible, but you have to name <code>MODUS-INT::</code> to do it.</p>
+
+    <p>The collector became generational, first on the Pi&nbsp;Zero board image in emulation,
+    then on hosted aarch64 and x86-64. The design doc keeps its own measurement honest. Tenuring
+    42.7&nbsp;MB during a remote-desktop drag cut the mean pause from 242 to 129&nbsp;ms and the
+    time spent paused from 4.9% to 1.0%. The frame rate did not move, <em>so GC was not what
+    limits a drag</em>. A card table and write barrier followed, so minor collections scan only
+    dirty cards.</p>
+
+    <p>The ports went down-market. The i386 image builds with soft float and runs on a 486, where
+    QEMU&rsquo;s 486 model traps every SSE2 instruction. It matched SBCL on 3,000 of 3,000 tests,
+    its float battery came out identical to the hard-float image&rsquo;s, and a scan counted no
+    x87 or SSE instruction executed. An x87 mode covers the 486DX through the
+    Pentium III. The full CL image boots on 68k, with a soft-float build for the FPU-less
+    68LC040. Running last week&rsquo;s ANSI suite on i386, arm32 and RISC-V found real bugs:
+    arm32 and RISC-V asked for the working directory with x86-64&rsquo;s syscall number, so the
+    suite could not find its own files. The self-hosting diverse double-compile is a byte-identical
+    fixpoint again, and now part of the merge gate.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow">the rest &nbsp;/&nbsp; <em>cl-deposits</em>, <em>operandi</em>, <em>cl-sev-snp</em>, <em>scribe</em></span>
+      <h2>Also this week</h2>
+    </div>
+
+    <p><b>cl-deposits</b>&rsquo; 31 commits are mostly rules. A ledger now carries a named
+    ruleset (DEP-18), October&rsquo;s convicting rules apply only to ledgers whose ruleset enforces
+    them, and balance commitments are emitted and verified. Its red team runs the new rulesets
+    against a live devnet with stochastic deploys. Two new documents, <code>CHAOS.md</code> and
+    <code>ADVERSARIAL.md</code>, are backlogs of faults and attacks not yet tried.</p>
+
+    <p><b>operandi</b> ported its macOS sandbox launcher to Lisp, with a rules language per user
+    and per project. Its <code>Glob</code> tool now matches in Lisp, because the bash version
+    always found nothing on macOS. <b>cl-sev-snp</b> reads Tinfoil&rsquo;s version-3 attestation
+    documents. <b>scribe</b> stopped drawing each glyph at a different fraction of a pixel, which
+    straightened every label in trellis&rsquo;s examples.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow">the gates &nbsp;/&nbsp; 31 October</span>
+      <h2>A pin that moved alone</h2>
+    </div>
+
+    <p>One repository was failing: kiln&rsquo;s image build, red since the 25th. A lock update on
+    the 24th moved glass to a commit that calls <code>SCRIBE:WITH-THREAD-STATE</code>, and left
+    scribe pinned at a commit from 12 August that predates it. kiln&rsquo;s lock now pins
+    scribe&rsquo;s current master, and the image builds again. <code>bin/siblings</code> checks that
+    every dependency is pinned, but not that the pins agree, so it could not have caught this.</p>
+
+    <p>As of publication: <b>63 repositories, 43 green, none failing, 20 without a workflow.</b>
+    illatio and the rewritten trellis have none yet.</p>
+  </section>
+
+  <footer>
+    <p><strong>Method.</strong> Commits by <em>author</em> date, 25 to 30 October 2026, across the
+    62 repositories cloned from the modus-lisp organisation, counting each repository&rsquo;s
+    default branch as the union of the local branch and <code>origin/</code>. Produced with
+    <code>bin/week 2026-10-31 --since 2026-10-25 --log</code>; the span starts on the 25th because
+    &#8470;&nbsp;33 ran through the 24th. Ten modus commits authored on 6 October were merged on
+    the 30th. They fall in &#8470;&nbsp;31&rsquo;s span, which was published while they sat on a
+    branch, so no ledger has counted them. trellis&rsquo;s 35 commits in &#8470;&nbsp;33 were the
+    port; that history was replaced and those commits no longer exist on <code>main</code>. 43
+    unmerged commits on <code>illatio/cuda</code>, <code>modus/rmb-on-main</code> and
+    <code>modus-lisp-fixes</code>, <code>cl-deposits/soak-v6</code> and
+    <code>kiln/modus-lisp-fixes</code> are not counted, nor
+    is kiln&rsquo;s lock fix, dated today. The performance and conformance figures are the
+    repositories&rsquo; own, from their READMEs and commit bodies. The green and failing figures
+    count the organisation&rsquo;s 63 repositories, which includes the profile repository this
+    ledger does not.</p>
+    <p><strong>Outside the log.</strong> The author&rsquo;s nostr notes were read with
+    <code>bin/notes 2026-10-31 --since 2026-10-25</code>. Both quotations about illatio&rsquo;s
+    speed are from them.</p>
+    <p><a href="../">&larr; All issues</a> &middot; <a href="../../">crier</a></p>
+  </footer>
+
+</div>
+</body>
+</html>

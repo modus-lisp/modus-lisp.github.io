@@ -1,5 +1,5 @@
-;;;; The layout engine for bin/graph: trellis, the Common Lisp layered layout
-;;;; after Eclipse ELK, loaded from its sibling clone in the workspace.  Reads ELK
+;;;; The layout engine for bin/graph: trellis, graph layout in Common Lisp from the
+;;;; published algorithms, loaded from its sibling clone in the workspace.  Reads ELK
 ;;;; JSON on stdin, writes the laid-out graph as ELK JSON on stdout.
 ;;;;
 ;;;;   sbcl --script tools/trellis/layout.lisp WORKSPACE < graph.json
@@ -12,7 +12,7 @@
       (*error-output* (make-broadcast-stream)))
   (asdf:load-system :trellis))
 (write-string
- (funcall (find-symbol "LAYOUT-JSON" "TRELLIS")
+ (funcall (find-symbol "LAYOUT-ELK-JSON" "TRELLIS")
           (with-output-to-string (out)
             (loop for line = (read-line *standard-input* nil)
                   while line do (write-line line out)))))

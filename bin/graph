@@ -2,9 +2,9 @@
 """graph — the dependency graph on the front page.
 
 Reads every repository's .asd files (through bin/siblings), keeps the edges a
-transitive reduction leaves, and has trellis -- the layered layout in Common
-Lisp after Eclipse ELK, loaded from its sibling clone by tools/trellis -- lay
-them out, keeping the best of eight seeds.  The result is a static SVG
+transitive reduction leaves, and has trellis -- graph layout in Common Lisp,
+from the published algorithms, loaded from its sibling clone by tools/trellis --
+lay them out, keeping the best of eight seeds.  The result is a static SVG
 spliced into index.html between <!-- graph --> and <!-- /graph -->; the only
 script is the hover.
 
@@ -43,7 +43,7 @@ TIERS = {
     "Applications": "operandi-gui warp warren loom spool glass-sdl glass-webrtc glass-mcclim beacon"
                     " cl-marmot emissary cl-deposits cl-payments cairn skep operandi kiln dist modus",
     "Engines & protocols": "glass chord stave mill weft folio shuttle cl-consensus cl-nostr"
-                           " webrtc-media webrtc-data cl-tor cl-frpc conch cl-fips cl-sev-snp cabinet trellis wax witness",
+                           " webrtc-media webrtc-data cl-tor cl-frpc conch cl-fips cl-sev-snp cabinet trellis wax witness illatio",
     "Formats & codecs": "pigment stencil gesso scribe webp-pure png-pure reed reel cassette"
                         " json-simple pagetree quill sqlite-pure fs-fat zstd-pure brotli-pure",
     "Foundations": "seal natrium secp256k1-fast cl-transport cram",
@@ -54,7 +54,7 @@ TIERS = {
 DOMAINS = {
     "Desktop": ("#3987e5", "glass glass-sdl glass-mcclim glass-webrtc warp warren loom spool quill"),
     "Web & documents": ("#d95926", "weft shuttle scribe gesso stencil pigment folio webp-pure png-pure trellis"),
-    "Media & models": ("#199e70", "reed reel cassette mill chord stave webrtc-media"),
+    "Media & models": ("#199e70", "reed reel cassette mill chord stave webrtc-media illatio"),
     "Storage": ("#c98500", "cram zstd-pure brotli-pure json-simple pagetree cabinet cairn sqlite-pure fs-fat"),
     "Nostr & agents": ("#d55181", "cl-nostr beacon cl-marmot emissary operandi operandi-gui skep witness"),
     "Bitcoin": ("#008300", "cl-consensus cl-payments cl-deposits"),
@@ -141,7 +141,7 @@ def main():
             "elk.randomSeed": "1", "elk.partitioning.activate": "true", "elk.separateConnectedComponents": "false",
             "elk.layered.spacing.nodeNodeBetweenLayers": "46", "elk.spacing.nodeNode": "14",
             "elk.layered.spacing.edgeNodeBetweenLayers": "14", "elk.spacing.edgeEdge": "6",
-            "elk.layered.nodePlacement.strategy": "NETWORK_SIMPLEX",
+            "elk.layered.nodePlacement.strategy": "BRANDES_KOEPF",
             "elk.layered.thoroughness": "30", "trellis.candidates": "8",
             "elk.padding": f"[top=10,left={GUTTER},bottom=10,right=10]"},
         "children": [{"id": n, "width": wid(n), "height": H,
@@ -232,7 +232,7 @@ def main():
       <code>.asd</code> files with the ones implied by others taken out, read from each default
       branch. The six on the right are used from everywhere, so they list their users rather than
       draw them; hover anything to trace it. No sibling dependencies either way: {", ".join(iso)}.
-      Laid out by <a href="https://github.com/modus-lisp/trellis">trellis</a>, after Eclipse ELK&rsquo;s layered algorithm.</figcaption>
+      Laid out by <a href="https://github.com/modus-lisp/trellis">trellis</a>&rsquo;s layered algorithm.</figcaption>
     </figure>
     <script>
     (() => {{
