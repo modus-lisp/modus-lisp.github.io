@@ -25,6 +25,7 @@ explained.
 | `bin/siblings` | Which CI sibling lists (and kiln's `repos.lock`) have gone stale, computed from the `.asd` files. |
 | `bin/notes` | The author's nostr notes for a week, from several relays — the second source, when an issue needs one. |
 | `bin/mirror` | Regenerates the machine-readable half of the site from the site itself. `--check` fails if it is stale. |
+| `talks/` | Slide decks from talks about the project, as PDFs: `lisp-steading.pdf`, the ATL BitLab redux (*Lisp-steading: staying above water when everything is bugged or pwned*). |
 | `assets/crier.css` | The whole design system. Tokens, then chrome, then prose. There is no second stylesheet. |
 | `.nojekyll` | Tells Pages to serve the files as written rather than running Jekyll over them. |
 | `issues/*/index.md`, `feed.xml`, `llms.txt`, `index.json`, `sitemap.xml`, `robots.txt`, `assets/og/` | **Derived.** Written by `bin/mirror`; never edit them by hand. |
