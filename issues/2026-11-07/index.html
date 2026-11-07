@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Write it to a card — This Week in Modus №35</title>
+<meta name="description" content="This Week in Modus, 31 October – 6 November 2026: one kiln command builds an SD card that boots a Raspberry Pi Zero 2 W into a bare-metal Lisp machine, with an I/O core, an SSH shell and HTTPS. The gateway stack drops its last third-party crypto library, and secret keys get a fixed-memory arena on bare metal. illatio moves to NVIDIA. And the thesis behind it all becomes a talk.">
+<meta property="og:title" content="Write it to a card — This Week in Modus №35">
+<meta property="og:description" content="31 October – 6 November 2026: a Pi Zero SD card built by one command, a bare-metal Lisp machine with no Linux under it, and a talk called Lisp-steading.">
+<meta property="og:type" content="article">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..700&family=Newsreader:opsz,wght@6..72,300..600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../../assets/crier.css">
+  <link rel="alternate" type="application/atom+xml" title="This Week in Modus" href="https://modus-lisp.github.io/feed.xml">
+  <link rel="alternate" type="text/markdown" href="index.md">
+  <meta property="og:url" content="https://modus-lisp.github.io/issues/2026-11-07/">
+  <meta property="og:site_name" content="crier — This Week in Modus">
+  <meta property="og:locale" content="en_GB">
+  <meta property="og:image" content="https://modus-lisp.github.io/assets/og/card.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://modus-lisp.github.io/assets/og/card.png">
+  <meta property="article:published_time" content="2026-11-07T00:00:00Z">
+  <meta property="article:section" content="This Week in Modus">
+  <meta name="twitter:label1" content="Commits">
+  <meta name="twitter:data1" content="248">
+  <meta name="twitter:label2" content="Repositories">
+  <meta name="twitter:data2" content="18">
+</head>
+<body>
+<div class="page">
+
+  <div class="sitebar">
+    <a class="brand" href="../../">crier</a>
+    <nav><a href="../">Issues</a><a href="https://github.com/modus-lisp">GitHub</a></nav>
+  </div>
+
+  <header class="mast">
+    <div class="kicker">
+      <span>This Week in Modus &mdash; &#8470;&nbsp;35</span>
+      <span>&middot;</span>
+      <span>31 October &ndash; 6 November 2026</span>
+      <span>&middot;</span>
+      <span><b>248 commits</b> &middot; 18 of 62 repos</span>
+    </div>
+    <h1>Write it<br>to a <span class="lo">card</span></h1>
+    <hr class="rule-fire">
+    <p class="standfirst">On Monday the author posted three lines: clone kiln, run
+    <code>bin/kiln zero --sd-image</code>, and <code>dd</code> the result to an SD card. A
+    Raspberry Pi Zero 2 W booted from it is a Lisp machine, with no Linux and no C under the
+    REPL, and the boot loader is the one stock part left. This week that machine got a core for
+    I/O, an SSH shell that edits lines, a clock and HTTPS. The software around it dropped its last
+    third-party crypto library, and its secret keys moved into memory the collector cannot reach.
+    The thesis behind all of it became a talk.</p>
+
+    <div class="tally">
+      <div><span class="n">248</span><span class="l">Commits</span></div>
+      <div><span class="n">18</span><span class="l">Repositories</span></div>
+      <div><span class="n">0</span><span class="l">New this week</span></div>
+      <div><span class="n">1</span><span class="l">Talk</span></div>
+      <div><span class="n">43</span><span class="l">Green, of 63</span></div>
+    </div>
+  </header>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>modus</em>, <em>kiln</em> &nbsp;/&nbsp; 109 commits</span>
+      <h2>A Lisp machine on a card</h2>
+    </div>
+
+    <div class="console">
+      <span class="cap">the author, on nostr, 2 November</span>
+<pre>git clone https://github.com/modus-lisp/kiln &amp;&amp; cd kiln
+
+bin/kiln zero --sd-image=zero.img --ca-bundle=latest \
+    --owner=$npub \
+    --relay=wss://nos.lol \
+    --ssh-key=~/.ssh/id_ed25519.pub
+
+sudo dd if=zero.img of=/dev/sdX bs=4M conv=fsync status=progress</pre>
+    </div>
+
+    <p>kiln&rsquo;s README puts the build at about forty minutes, with no board needed to make
+    the image. Asked what was custom, the author listed it: <em>custom ssh. custom shell, custom
+    terminal, custom window manager, custom compositor, custom framebuffer, custom init, custom
+    threads, custom runtime, custom compiler &hellip; the pi bootloader is still stock, but
+    i&rsquo;m working on it</em>.</p>
+
+    <figure class="plate">
+      <img src="../../assets/img/zero-repl-2026-11-02.jpg" width="1400" height="945"
+           alt="A Dell monitor showing a window titled Terminal on a blue desktop. The text explains that Enter evaluates Lisp and that (ssh &quot;user@host:port&quot;) connects the window to a remote shell. At the prompt, (seal.http:get-string &quot;https://ynniv.com&quot;) has returned an HTML page whose meta refresh redirects to touchoflogic.com.">
+      <figcaption><b>HTTPS from a REPL, on a Pi Zero.</b> glass&rsquo;s terminal, seal&rsquo;s TLS
+      and HTTP, the network stack and the window around it are all Lisp, running on the board
+      with nothing underneath. The page it fetched redirects; that is the page, not a fault.
+      <span class="prov">photograph by the author, 2 November 2026</span></figcaption>
+    </figure>
+
+    <p>The Zero has four cores, and this week it stopped doing everything on one of them. Core 1
+    became an I/O core: one non-consing loop owns the USB controller, sees the bus as a tree with
+    hotplug anywhere, and runs the network stack. Core 0 is the Lisp system. Work crosses between
+    them as named jobs, run on the main thread blocking or detached. SSH became a client of the
+    network service, with a real shell: lines edited by quill, which learned to take its keys as
+    events pushed in rather than read from a terminal. The board sets its clock by SNTP, can send
+    its log off-board as syslog over UDP, sizes its heap from its own RAM, and keeps a FAT32 store
+    at the far end of its card.</p>
+
+    <p>kiln&rsquo;s fifty commits are mostly the other side of that: pinning each piece as it
+    landed, laying out the card&rsquo;s memory so the tarballs, fonts and code window stay clear of
+    each other, and putting the gateway on one event loop.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>seal</em>, <em>natrium</em>, <em>cl-transport</em>, <em>glass</em> &nbsp;/&nbsp; 4&ndash;6 November</span>
+      <h2>One layer fewer</h2>
+    </div>
+
+    <p>Until Wednesday the card&rsquo;s networking leaned on ironclad, the standard third-party
+    crypto library, through a fork that kiln could not even pin: <em>ironclad-zero, which has no
+    remote</em>. WebRTC needs old algorithms, MD5 and HMAC-SHA1 for STUN and TURN, so seal gained
+    them. natrium added SHA-1, RIPEMD-160 and SHA3-256. cl-transport&rsquo;s ICE, webrtc-data,
+    glass-webrtc and glass&rsquo;s Nostr login now take their hashes, MACs and random bytes from
+    those two. kiln&rsquo;s lock is now <em>the gateway stack without ironclad</em>.</p>
+
+    <p>And the keys found a home. Two issues ago, natrium&rsquo;s gossamer arena kept secrets in
+    memory the collector never moves, on SBCL and hosted Modus, and <em>bare metal has no backend
+    yet</em>. On Friday it got one. Modus reserves a static region of the board&rsquo;s memory,
+    gossamer takes its arena from there, and a restored core starts a fresh arena and a fresh
+    random generator rather than inheriting the old ones. secp256k1-fast&rsquo;s and
+    cl-nostr&rsquo;s keys now live in it on the Zero. kiln measured the cost on an emulated card:
+    a 20-second drag drew 58 frames against 65 on the old pins, and the login message arrived at
+    53 seconds against 57.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>illatio</em> &nbsp;/&nbsp; 44 commits</span>
+      <h2>Onto NVIDIA</h2>
+    </div>
+
+    <p>Last week illatio ran DeepSeek V4 Flash on a laptop. This week the <code>cuda</code>
+    branch merged, and the DeepSeek models and GLM-5.3 Flash run on NVIDIA cards: an RTX 3090
+    and a Tesla P40 in a two-socket EPYC with a terabyte of memory. The README&rsquo;s figures
+    for DeepSeek V4.1 Flash are about 20 tokens a second decoding, and a 129,211-token prompt
+    prefilled in six minutes, still decoding at 12 a second at that depth. GLM-5.3 Flash decodes
+    at about 22. V4.1 also sees pictures. They are decoded by pigment, the workspace&rsquo;s own
+    image library, rather than by a decoder of illatio&rsquo;s.</p>
+
+    <p>The most interesting commit is a negative result. <em>Judgment-first pretraining</em>
+    asked whether a small model trained first to judge whether a story hangs together, one token
+    of verdict per story, would absorb story structure faster than one trained on next-token
+    prediction. The pilot&rsquo;s answer, in its commit title: <em>no arm learns the verdict; a
+    probe says why</em>. No arm&rsquo;s held-out accuracy left 0.5. A label that is learnable
+    through the same batches trains at once, so the pipeline is sound. A linear probe found
+    coherence barely represented in the model at all: <em>at this scale one token of signal per
+    story is too thin</em>. The experiment is written up, not buried.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>talks</em> &nbsp;/&nbsp; 5 November</span>
+      <h2>Lisp-steading</h2>
+    </div>
+
+    <p>The site has a <code>talks/</code> directory now, with one deck in it:
+    <a href="../../talks/lisp-steading.pdf"><b>Lisp-steading</b>: staying above water when
+    everything is bugged or pwned</a>, the redux of a talk at ATL BitLab. It opens with a slide of
+    October&rsquo;s compromises: a Patch Tuesday of 1,413 flaws, an unauthenticated RCE in PHP,
+    a poisoned PyPI release, eight guessable CA keys. Then it makes the argument this archive has
+    been reporting piecemeal for eight months: <em>every layer below you is a place to
+    hide</em>.</p>
+
+    <div class="callout">
+      <p>Homesteading for computing. A stack small enough for one person to read, written in one
+      language you can inspect while it runs.</p>
+      <span class="src">Lisp-steading, slide 4</span>
+    </div>
+
+    <p>Its three principles read like a summary of this week: <em>fewer layers</em>, which is
+    ironclad leaving the card; <em>one language</em>, from the boot vector to the browser engine;
+    and <em>outside judges</em>, <em>every claim checked by something you didn&rsquo;t
+    write</em>. That last one is the suite of a thousand ELK layouts, the ANSI suite, ds4&rsquo;s
+    reference numbers, and the reason this archive quotes commits rather than summarising
+    them.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow">the rest &nbsp;/&nbsp; <em>cl-deposits</em>, <em>glass</em>, <em>operandi-gui</em>, <em>fs-fat</em></span>
+      <h2>Also this week</h2>
+    </div>
+
+    <p><b>cl-deposits</b>&rsquo; 61 commits are a red team at work. Its chaos log records
+    attacks it found against its own confiscation lottery, among them a colluding majority whose
+    lottery includes its own colluders, so nobody claims. The fixes land as <em>provisional</em>
+    rulings, collected in a new <code>REVIEW.md</code> to wait for review rather than being
+    declared settled. <b>glass</b>&rsquo;s terminal got a portable core that writes to any byte
+    sink, draws only changed cells, and promises what <code>xterm-256color</code>&rsquo;s terminfo
+    promises. <b>operandi-gui</b> shows reasoning and tool calls as one record, and reconnects
+    after a dropped link. <b>fs-fat</b> reads and writes a volume through functions, so a card is
+    just another block device.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow">the gates &nbsp;/&nbsp; 7 November</span>
+      <h2>Quiet</h2>
+    </div>
+
+    <p>Nothing to report: <b>63 repositories, 43 green, none failing, 20 without a
+    workflow</b>, the same as a week ago. kiln&rsquo;s image, which last week&rsquo;s lock fix
+    turned green, has stayed green through fifty more commits.</p>
+  </section>
+
+  <footer>
+    <p><strong>Method.</strong> Commits by <em>author</em> date, 31 October to 6 November 2026,
+    across the 62 repositories cloned from the modus-lisp organisation, counting each
+    repository&rsquo;s default branch as the union of the local branch and <code>origin/</code>.
+    Produced with <code>bin/week 2026-11-07 --log</code>. Thirty commits on branches that had not
+    merged are not counted, thirteen of them on modus&rsquo;s <code>core-from-card</code>. The
+    performance figures are the repositories&rsquo; own, from their READMEs and commit bodies. The
+    green and failing figures count the organisation&rsquo;s 63 repositories, which includes the
+    profile repository this ledger does not.</p>
+    <p><strong>Outside the log.</strong> The author&rsquo;s nostr notes were read with
+    <code>bin/notes 2026-11-07</code>. The SD-card recipe, the list of what is custom, the
+    photograph and the remark about the boot loader are from them. The talk is quoted from the
+    deck itself.</p>
+    <p><a href="../">&larr; All issues</a> &middot; <a href="../../">crier</a></p>
+  </footer>
+
+</div>
+</body>
+</html>

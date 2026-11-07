@@ -1,11 +1,12 @@
 # crier — This Week in Modus
 
-> A weekly dispatch on modus-lisp: a personal computer written from scratch in Common Lisp. Weekly, one issue per week that had commits, numbered from the project's first working week in March 2025. 34 issues covering 6,234 commits.
+> A weekly dispatch on modus-lisp: a personal computer written from scratch in Common Lisp. Weekly, one issue per week that had commits, numbered from the project's first working week in March 2025. 35 issues covering 6,482 commits.
 
 Every claim in an issue comes out of the git commit log of the modus-lisp repositories; where an issue uses anything else it says so in its own method footnote. Counts are counted, not estimated. Each issue below links to a Markdown mirror of the full text.
 
 ## Issues
 
+- [№35 — Write it to a card](https://modus-lisp.github.io/issues/2026-11-07/index.md): One kiln command builds an SD card that boots a Raspberry Pi Zero 2 W into a bare-metal Lisp machine, with an I/O core, an SSH shell and HTTPS. The gateway drops ironclad, and keys get a fixed-memory arena on bare metal. illatio moves to NVIDIA, and the thesis behind it all becomes a talk, Lisp-steading. 248 commits. (31 October – 6 November 2026)
 - [№34 — A 284B model, from Lisp](https://modus-lisp.github.io/issues/2026-10-31/index.md): illatio, language-model inference in Common Lisp, goes from its first commit to DeepSeek V4 Flash streamed from an SSD on a 48 GB laptop in under two days, then trains GPT-2. trellis is rewritten from the published papers. Modus moves its kernel out of CL-USER, gains a generational collector, and boots on a 486. 266 commits. (25–30 October 2026)
 - [№33 — Every last test](https://modus-lisp.github.io/issues/2026-10-24/index.md): The x86-64 build passes every test in the unmodified upstream ANSI suite, 21,681 of 21,681, 198 days after the first test ran and five days after the last thousand were still failing. trellis ports ELK’s layered layout to Lisp; secret keys move into memory the collector never touches; witness asks who says an enclave is what it claims. 278 commits. (17–24 October 2026)
 - [№32 — Attested, end to end](https://modus-lisp.github.io/issues/2026-10-17/index.md): Modus boots under SEV-SNP through measured boot, serves key-only SSH, and returns a report whose launch measurement equals the value computed offline — the half that was missing last week. The agent learns to refuse a route that is encrypted but not attested. And a nostr note explains, for the first time, what the whole campaign was for. 277 commits. (10–16 October 2026)
