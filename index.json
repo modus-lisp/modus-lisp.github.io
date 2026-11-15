@@ -4,7 +4,7 @@
   "home": "https://modus-lisp.github.io/",
   "feed": "https://modus-lisp.github.io/feed.xml",
   "generated_from": "the site's own HTML, by bin/mirror",
-  "count": 35,
+  "count": 36,
   "issues": [
     {
       "number": 1,
@@ -390,6 +390,17 @@
       "repos": 18,
       "url": "https://modus-lisp.github.io/issues/2026-11-07/",
       "markdown": "https://modus-lisp.github.io/issues/2026-11-07/index.md"
+    },
+    {
+      "number": 36,
+      "date": "2026-11-14",
+      "span": "7\u201313 November 2026",
+      "title": "Down to 68k",
+      "summary": "Modus fits a REPL in a floppy\u2019s worth of 68k, boots a Mac Classic in MAME from its own SCSI driver, and reaches a prompt on a 1 MB Mac Plus \u2014 and runs on an Apple Watch. ex-nihilo draws pictures from a diffusion model in Lisp, vessel takes what runs out of kiln, and seven red gates come back green. 354 commits.",
+      "commits": 354,
+      "repos": 25,
+      "url": "https://modus-lisp.github.io/issues/2026-11-14/",
+      "markdown": "https://modus-lisp.github.io/issues/2026-11-14/index.md"
     }
   ]
 }

@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Down to 68k — This Week in Modus №36</title>
+<meta name="description" content="This Week in Modus, 7–13 November 2026: Modus fits a Lisp REPL in a 1.44 MB floppy's worth of 68k code, then boots a Mac Classic in MAME from its own SCSI driver and reaches a prompt on a 1 MB Mac Plus. It also runs on an Apple Watch. ex-nihilo draws pictures from a diffusion model in Lisp, vessel takes everything that runs out of kiln, and seven red gates come back green.">
+<meta property="og:title" content="Down to 68k — This Week in Modus №36">
+<meta property="og:description" content="7–13 November 2026: a Lisp REPL on a Mac Classic from its own SCSI driver, on a 1 MB Mac Plus, and on an Apple Watch.">
+<meta property="og:type" content="article">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..700&family=Newsreader:opsz,wght@6..72,300..600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../../assets/crier.css">
+  <link rel="alternate" type="application/atom+xml" title="This Week in Modus" href="https://modus-lisp.github.io/feed.xml">
+  <link rel="alternate" type="text/markdown" href="index.md">
+  <meta property="og:url" content="https://modus-lisp.github.io/issues/2026-11-14/">
+  <meta property="og:site_name" content="crier — This Week in Modus">
+  <meta property="og:locale" content="en_GB">
+  <meta property="og:image" content="https://modus-lisp.github.io/assets/og/card.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://modus-lisp.github.io/assets/og/card.png">
+  <meta property="article:published_time" content="2026-11-14T00:00:00Z">
+  <meta property="article:section" content="This Week in Modus">
+  <meta name="twitter:label1" content="Commits">
+  <meta name="twitter:data1" content="354">
+  <meta name="twitter:label2" content="Repositories">
+  <meta name="twitter:data2" content="25">
+</head>
+<body>
+<div class="page">
+
+  <div class="sitebar">
+    <a class="brand" href="../../">crier</a>
+    <nav><a href="../">Issues</a><a href="https://github.com/modus-lisp">GitHub</a></nav>
+  </div>
+
+  <header class="mast">
+    <div class="kicker">
+      <span>This Week in Modus &mdash; &#8470;&nbsp;36</span>
+      <span>&middot;</span>
+      <span>7&ndash;13 November 2026</span>
+      <span>&middot;</span>
+      <span><b>354 commits</b> &middot; 25 of 64 repos</span>
+    </div>
+    <h1>Down<br>to <span class="lo">68k</span></h1>
+    <hr class="rule-fire">
+    <p class="standfirst">On Wednesday Modus fitted a Lisp REPL into 1,457,039 bytes, 625 short of a
+    1.44&nbsp;MB floppy. On Thursday, in MAME&rsquo;s emulation of a Mac Classic, the Classic&rsquo;s
+    own ROM loaded a SCSI driver Modus had written, booted from it, and answered
+    <code>(sq 12)</code> with 144 on a one-bit screen. By Friday it reached a prompt on a 1&nbsp;MB
+    Mac Plus. In between, the same week, it ran on an Apple Watch. The far ends of the hardware
+    this project targets are now a 1986 Macintosh and a 2020 wristwatch.</p>
+
+    <div class="tally">
+      <div><span class="n">354</span><span class="l">Commits</span></div>
+      <div><span class="n">25</span><span class="l">Repositories</span></div>
+      <div><span class="n">2</span><span class="l">New this week</span></div>
+      <div><span class="n">1&nbsp;MB</span><span class="l">Mac Plus REPL</span></div>
+      <div><span class="n">43</span><span class="l">Green, of 65</span></div>
+    </div>
+  </header>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>modus</em> &nbsp;/&nbsp; <code>mac68k-1mb</code> &nbsp;/&nbsp; 11&ndash;14 November</span>
+      <h2>A REPL on a Mac Classic</h2>
+    </div>
+
+    <p>It began with a floppy. Modus already ran on 68k Linux under QEMU; on Wednesday its REPL
+    image became self-unpacking: a raw LZMA decoder written in Lisp with no runtime, 14.3&nbsp;KB of
+    it, and an 88-byte copier in assembly. The whole thing is 1,457,039 bytes, and a FAT12 floppy
+    holds 1,457,664. That image is still a Linux program, so it fits on a floppy rather than
+    booting from one. The rest of the week made the second half true as well.</p>
+
+    <div class="callout">
+      <p>The ROM installs the driver (unit 38, drive 14, BootDrive 14), boots, the stream loader
+      reads through the driver, and the REPL answers on the Classic&rsquo;s 1-bit screen:
+      <code>(+ 1 2) =&gt; 3</code>, <code>(defun sq ...) =&gt; SQ</code>,
+      <code>(sq 12) =&gt; 144</code>.</p>
+      <span class="src">modus &mdash; 48c55bf9, 12 November, on MAME&rsquo;s <code>macclasc</code></span>
+    </div>
+
+    <p>A Classic boots from whatever SCSI disk carries a driver its ROM will load, so Modus wrote
+    one. It is 68k assembly that installs itself through the Toolbox, turns block reads into
+    SCSI commands, and keeps evidence of every call for a probe. The bug that held it up is a
+    period piece: <code>_SCSIDispatch</code> follows Pascal&rsquo;s calling convention and may
+    clobber D0&ndash;D2, so a driver that kept its error in D1 read garbage until the error moved
+    to D5. Then came a 2&nbsp;MB Classic map, a keyboard translator so a Mac Plus types without a
+    System, and an application: Modus as the startup program under System 6.0.8, with the Mac OS
+    left underneath it the way the ROM is under a disk boot.</p>
+
+    <p>On a 1&nbsp;MB Mac Plus the prompt arrives in 43 seconds and <code>(+ 1 2)</code> answers
+    seven seconds later. The first <code>DEFUN</code> ran out of heap. With the threaded JIT,
+    <code>(fib 20)</code> takes 18 seconds, but a <code>DEFUN</code> costs three to five minutes,
+    because the compiler pages through a 104&nbsp;KB code cache.</p>
+
+    <p>That is slow, and the repository measured exactly how slow. <code>SMALL.md</code> ran the
+    two Lisps of the period on the same emulated Classic. Both compile straight to resident 68k
+    code; Modus compiles to IR, then bytecode, then threaded 68k, with a compiler that pages in
+    from disk.</p>
+
+    <div class="ledger-wrap">
+      <table class="ledger">
+        <thead><tr><th>Mac Classic, 68000, 4 MB</th><th class="num">MCL 2.0</th><th class="num">Pearl 1.1</th><th class="num">modus</th></tr></thead>
+        <tbody>
+          <tr><td class="what"><code>defun fib</code></td><td class="num">0.74 s</td><td class="num">0.25 s</td><td class="num">70 s</td></tr>
+          <tr><td class="what"><code>(fib 20)</code></td><td class="num">1.26 s</td><td class="num">1.63 s</td><td class="num">17 s</td></tr>
+          <tr><td class="what"><code>defmacro</code></td><td class="num">0.50 s</td><td class="num">0.27 s</td><td class="num">69 s</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>The measurement also corrected the document&rsquo;s own note, which had listed MCL 2.0 as
+    needing a 68020: it runs on a 68000. It has 957 of ANSI&rsquo;s 978 symbols, and all 34
+    feature probes answer as they do on SBCL. The stated goal is <em>a true hosted REPL &mdash; reader, compiler, printer, the whole
+    language &mdash; on the LC040 inside MCL 2.0&rsquo;s budget</em>. All of this is on
+    branches that have not merged, so none of it is in the count above.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>modus</em>, <em>vessel</em>, <em>kiln</em> &nbsp;/&nbsp; bec24869 &nbsp;/&nbsp; 11 November</span>
+      <h2>And on the wrist</h2>
+    </div>
+
+    <figure class="plate inset">
+      <img src="../../assets/img/watch-2026-11-11.jpg" width="900" height="960"
+           alt="An Apple Watch screen reading: modus on the wrist; (+ 1 2) => 3; 2^100 = 126765060022822940149 followed by an ellipsis where the line is cut off; aarch64, 32-bit pointers; running 65 s, beside a 65-second ring.">
+      <figcaption><b>Modus on an Apple Watch SE.</b> The value of 2<sup>100</sup> is right, but
+      the watch&rsquo;s text view truncates it after 21 of its 31 digits.
+      <span class="prov">photograph by the author, 11 November 2026</span></figcaption>
+    </figure>
+
+    <p>A watch is an odd 64-bit machine: <code>arm64_32</code>, 64-bit registers with 32-bit
+    pointers. The commit that got Modus onto one, an Apple Watch SE on watchOS 10.6, made <em>no
+    compiler change</em>. The image is linked high and placed low, below 2&nbsp;GB, because
+    dyld sign-extends anything above that. The shim became clean for 32-bit pointers, thread-local slots shrank to four
+    bytes, and the fault handlers came out, because watchOS refuses to let an app catch a fatal
+    signal.</p>
+
+    <p>The phone side grew in step. Apps written in Lisp now get native UIKit, the platform&rsquo;s
+    speech synthesis and recognition, and the GPU through Metal behind calls shaped like
+    WebGPU&rsquo;s. All of that app code now lives in <b>vessel</b>, new this week. kiln
+    assembles images, and vessel is what runs inside them: the device app, the desktop and its
+    gateway, and the per-device glue. Two commits on the 7th moved about 6,500 lines out of kiln,
+    one titled <em>Nothing in an image comes from kiln</em>.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>ex-nihilo</em>, <em>illatio</em> &nbsp;/&nbsp; 6&ndash;12 November</span>
+      <h2>Pictures out of nothing</h2>
+    </div>
+
+    <p>illatio&rsquo;s sibling <b>ex-nihilo</b> runs Qwen-Image-2.1-Turbo in Common Lisp. Its
+    prompt encoder, diffusion transformer and decoder are driven by SBCL, with a few CUDA or Metal
+    kernels and no Python or PyTorch. Its README puts a 1024&times;1024 picture in eight steps at
+    about eleven seconds on an RTX 3090, and 88 on Apple silicon. It renders quoted text as
+    spelled, edits a picture from a prompt, and makes cut-outs with a real alpha channel. Its
+    design notes say how it was built: stable-diffusion.cpp&rsquo;s implementation was <em>the
+    specification, not a test oracle</em>. Each piece was written first as a numpy reference,
+    then the Lisp was checked against it.</p>
+
+    <p>It does not run alone. ex-nihilo sits inside illatio&rsquo;s server and shares its GPUs:
+    a chat model can lend out its memory while a picture is drawn and take it back after, on
+    NVIDIA and on a Mac. operandi learned to ask for pictures, and to edit one as the prompt
+    says.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow">the rest &nbsp;/&nbsp; <em>conch</em>, <em>cl-deposits</em>, <em>glass</em>, <em>seal</em></span>
+      <h2>Also this week</h2>
+    </div>
+
+    <p><b>conch</b>&rsquo;s SFTP became a serious client: multiplexed and pipelined, through jump
+    hosts, with several channels on a connection. Transfers got three to five times faster, with
+    128 chunks in flight. <b>cl-deposits</b>&rsquo; red team ran the new re-arm rounds against live
+    soaks, with signatures kept across passes and attacking actors woken and recycled mid-run.
+    <b>glass</b> and <b>glass-webrtc</b> spent the week measuring the Zero&rsquo;s desktop over
+    conditioned links and public relays, and choosing defaults from the numbers. On x86-64,
+    seal&rsquo;s AES-GCM now uses AES-NI and carry-less multiplication.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow">the gates &nbsp;/&nbsp; 15 November</span>
+      <h2>Seven red, two causes</h2>
+    </div>
+
+    <p>Seven gates were red when this issue was put together, from two causes.</p>
+
+    <p>Four were a real bug. On 9 November natrium began asking for
+    <code>(find-symbol "ADD-RESTORE-HOOK" "MODUS")</code> as it loaded, to register a hook that
+    only Modus has. On SBCL there is no <code>MODUS</code> package, and <code>FIND-SYMBOL</code>
+    given a package that does not exist signals an error rather than returning nothing. So
+    natrium stopped loading on SBCL, and seal, conch and cairn failed with it. The fix looks the
+    package up first, as the function beside it already did; natrium&rsquo;s suite passes 74 of
+    74 on SBCL again.</p>
+
+    <p>The other three were the problem of &#8470;&nbsp;32 again. natrium now needs cram, and
+    folio now needs natrium. The hand-kept lists of siblings that cl-tor and folio clone in CI
+    were not told, and neither was a job inside cl-deposits&rsquo; workflow that clones its own
+    siblings line by line, where <code>bin/siblings</code> cannot see. Four more lists were just
+    as stale and still green only because they had not run since; kiln&rsquo;s lock lacked
+    illatio and witness, which operandi now requires. All were corrected on the 15th, after the
+    span closed, so those commits belong to next week&rsquo;s ledger.</p>
+
+    <p>As of publication: <b>65 repositories, 43 green, none failing, 22 without a
+    workflow.</b></p>
+  </section>
+
+  <footer>
+    <p><strong>Method.</strong> Commits by <em>author</em> date, 7 to 13 November 2026, across the
+    64 published repositories cloned from the modus-lisp organisation, counting each
+    repository&rsquo;s default branch as the union of the local branch and <code>origin/</code>.
+    Produced with <code>bin/week 2026-11-14 --log</code>. The Mac Classic work sits on
+    modus&rsquo;s <code>mac68k-1mb</code> and <code>mac68k-vessel</code> branches, 68 commits in
+    this span, and is reported from there but not counted; <code>bin/week</code> lists 86
+    unmerged commits across all branches. Two clones in the workspace that have no published remote are not counted
+    either; <code>bin/week</code> now skips such clones itself and lists them. vessel carries
+    kiln&rsquo;s history back to March, and no commit of this week is counted in both. Performance
+    figures are the repositories&rsquo; own, from their READMEs, commit bodies and
+    <code>SMALL.md</code>. The green and failing figures count the organisation&rsquo;s 65
+    repositories, which includes the profile repository this ledger does not.</p>
+    <p><strong>Outside the log.</strong> The author&rsquo;s nostr notes were read with
+    <code>bin/notes 2026-11-14</code>, and the photograph of the watch is from them. The 68k
+    theme was suggested by the author, who noted that bitcoin and Modus had both reached 68k the
+    same week.</p>
+    <p><a href="../">&larr; All issues</a> &middot; <a href="../../">crier</a></p>
+  </footer>
+
+</div>
+</body>
+</html>

@@ -5,8 +5,16 @@
   <link href="https://modus-lisp.github.io/feed.xml" rel="self"/>
   <link href="https://modus-lisp.github.io/"/>
   <id>https://modus-lisp.github.io/</id>
-  <updated>2026-11-07T00:00:00Z</updated>
+  <updated>2026-11-14T00:00:00Z</updated>
   <author><name>ynniv</name></author>
+  <entry>
+    <title>№36 — Down to 68k</title>
+    <link href="https://modus-lisp.github.io/issues/2026-11-14/"/>
+    <id>https://modus-lisp.github.io/issues/2026-11-14/</id>
+    <updated>2026-11-14T00:00:00Z</updated>
+    <summary>Modus fits a REPL in a floppy’s worth of 68k, boots a Mac Classic in MAME from its own SCSI driver, and reaches a prompt on a 1 MB Mac Plus — and runs on an Apple Watch. ex-nihilo draws pictures from a diffusion model in Lisp, vessel takes what runs out of kiln, and seven red gates come back green. 354 commits.</summary>
+    <link rel="alternate" type="text/markdown" href="https://modus-lisp.github.io/issues/2026-11-14/index.md"/>
+  </entry>
   <entry>
     <title>№35 — Write it to a card</title>
     <link href="https://modus-lisp.github.io/issues/2026-11-07/"/>
