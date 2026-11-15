@@ -34,7 +34,16 @@ spec() { [ "$1" = "$SELF" ] || return 0; printf -- '-- . '; for p in "${CRIER_PA
 die()   { printf 'week: %s\n' "$*" >&2; exit 1; }
 usage() { awk 'NR>1 && /^#/ {sub(/^# ?/, ""); print; next} NR>1 {exit}' "${BASH_SOURCE[0]}"; exit "${1:-0}"; }
 
-repos() { for d in "$ROOT"/*/; do r=$(basename "$d"); [ -e "$d/.git" ] || continue; echo "$r"; done; }
+# Published repositories only: a clone with no origin is work the author has not
+# put anywhere yet (ferry and winnow, week of 2026-11-14), and a public ledger has
+# no business counting it.  unpublished() names them, so the omission is visible.
+repos() {
+  for d in "$ROOT"/*/; do
+    r=$(basename "$d"); [ -e "$d/.git" ] || continue
+    [ -n "$(git -C "$d" remote get-url origin 2>/dev/null)" ] || continue
+    echo "$r"
+  done
+}
 
 # The refs a week is counted on: the repository's default branch, as the union
 # of the local branch and its origin/ counterpart.  Not HEAD — a repo sitting
@@ -123,6 +132,7 @@ print(d-datetime.timedelta(days=7))") || exit 1
   behind
   offhead "$since" "$until"
   uncloned "$since" "$until"
+  unpublished
 
   [ -n "$log" ] || return 0
   for r in $(repos); do
@@ -201,6 +211,17 @@ uncloned() {
     printf '  %-16s %3d commit(s)   git clone git@github.com:modus-lisp/%s\n' "$r" "$n" "$r"
   done <<< "$listed"
   return 0
+}
+
+# Clones with no origin: skipped by repos(), listed here so nobody wonders why.
+unpublished() {
+  local any="" d r
+  for d in "$ROOT"/*/; do
+    r=$(basename "$d"); [ -e "$d/.git" ] || continue
+    [ -n "$(git -C "$d" remote get-url origin 2>/dev/null)" ] && continue
+    [ -n "$any" ] || { printf '\nNOT COUNTED ABOVE — cloned here, but unpublished (no origin):\n'; any=1; }
+    printf '  %s\n' "$r"
+  done
 }
 
 # --branches: the same week, read across every ref rather than the checkout.
