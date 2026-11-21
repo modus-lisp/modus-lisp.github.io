@@ -52,13 +52,13 @@ Then, on the 20th, DOS went. A boot sector and a 1.3 KB shim serve the seven DOS
 
 **chirp** is a client for bitchat, the Bluetooth mesh chat, in Common Lisp. It reads and writes the packet format byte for byte, checks every signed announce and message against the key the sender first announced, relays with TTL and dedup, and reassembles fragments. The radio is left to whatever hosts it. On the phone it talks to the App Store app. The author, on how it began: *“hey let’s prototype a bitchat client in the existing (ios) modus app” and ten minutes later claude’s like “verified it talks over bluetooth to the app store app. do you want me to publish the new repo?”*
 
-![The bitchat app on an iPhone at 20:02: the #mesh channel, 1 nearby, and a line reading user6143 is here, at 19:59.](https://modus-lisp.github.io/assets/img/bitchat-nearby-2026-11-17.png)
+![chirp's chat screen in the Modus app on an iPhone at 20:02: the #mesh channel, 1 nearby, and a line reading user6143 is here, at 19:59.](https://modus-lisp.github.io/assets/img/bitchat-nearby-2026-11-17.png)
 
-***The App Store app sees it.** bitchat’s own client, on the `#mesh` channel, announcing a new peer: chirp, under a generated name. screenshot by the author, 17 November 2026*
+***A peer, heard.** chirp’s chat in the Modus app, on the `#mesh` channel: one nearby, the App Store app on another device, announced under its generated name. The native look is SwiftUI, driven from Lisp through Modus’s bridge. screenshot by the author, 17 November 2026*
 
 ![A dark menu on the Modus desktop listing Media, Clock, Notes, Terminal, Actions, Speak, Listen, Storybook and Bitchat.](https://modus-lisp.github.io/assets/img/modus-desk-bitchat-2026-11-17.png)
 
-***The other end.** The Modus app’s desk menu, on the other device of the pair, where Bitchat sits beside Notes and the Terminal. screenshot by the author, 17 November 2026*
+***Where it lives.** The Modus desk’s menu on the same phone, where Bitchat sits beside Notes and the Terminal. screenshot by the author, 17 November 2026*
 
 **fs-apple** reads and writes Apple’s disk formats in place: the partition map and its driver descriptor, and PackBits. It was written to run anywhere Common Lisp does, including on a Macintosh, where no 32-bit field can be assumed to fit a fixnum. It exists because the Mac work needed it, and Modus’s boot disks are now laid out by it rather than by a Python script.
 
