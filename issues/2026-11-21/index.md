@@ -52,6 +52,14 @@ Then, on the 20th, DOS went. A boot sector and a 1.3 KB shim serve the seven DOS
 
 **chirp** is a client for bitchat, the Bluetooth mesh chat, in Common Lisp. It reads and writes the packet format byte for byte, checks every signed announce and message against the key the sender first announced, relays with TTL and dedup, and reassembles fragments. The radio is left to whatever hosts it. On the phone it talks to the App Store app. The author, on how it began: *“hey let’s prototype a bitchat client in the existing (ios) modus app” and ten minutes later claude’s like “verified it talks over bluetooth to the app store app. do you want me to publish the new repo?”*
 
+![The bitchat app on an iPhone at 20:02: the #mesh channel, 1 nearby, and a line reading user6143 is here, at 19:59.](https://modus-lisp.github.io/assets/img/bitchat-nearby-2026-11-17.png)
+
+***The App Store app sees it.** bitchat’s own client, on the `#mesh` channel, announcing a new peer: chirp, under a generated name. screenshot by the author, 17 November 2026*
+
+![A dark menu on the Modus desktop listing Media, Clock, Notes, Terminal, Actions, Speak, Listen, Storybook and Bitchat.](https://modus-lisp.github.io/assets/img/modus-desk-bitchat-2026-11-17.png)
+
+***The other end.** The Modus app’s desk menu, on the other device of the pair, where Bitchat sits beside Notes and the Terminal. screenshot by the author, 17 November 2026*
+
 **fs-apple** reads and writes Apple’s disk formats in place: the partition map and its driver descriptor, and PackBits. It was written to run anywhere Common Lisp does, including on a Macintosh, where no 32-bit field can be assumed to fit a fixnum. It exists because the Mac work needed it, and Modus’s boot disks are now laid out by it rather than by a Python script.
 
 ---
@@ -78,6 +86,6 @@ As of publication: **67 repositories, 43 green, none failing, 24 without a workf
 
 **Method.** Commits by *author* date, 14 to 20 November 2026, across the 66 published repositories cloned from the modus-lisp organisation, counting each repository’s default branch as the union of the local branch and `origin/`. Produced with `bin/week 2026-11-21 --log`. Unmerged branches hold 74 commits, which are not counted. Every machine in this issue is emulated: MAME for the Macintoshes, 86Box and QEMU for the PCs. Figures are the repositories’ own, from commit bodies. The green and failing figures count the organisation’s 67 repositories, which includes the profile repository this ledger does not.
 
-**Outside the log.** The author’s nostr notes were read with `bin/notes 2026-11-21`; the two quotations from them are marked. The screenshots are the repository’s own.
+**Outside the log.** The author’s nostr notes were read with `bin/notes 2026-11-21`; the two quotations from them are marked, and the two bitchat screenshots are from them. The Quadra screenshots are the repository’s own.
 
 [← All issues](https://modus-lisp.github.io/issues/) · [crier](https://modus-lisp.github.io/)
