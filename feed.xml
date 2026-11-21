@@ -5,8 +5,16 @@
   <link href="https://modus-lisp.github.io/feed.xml" rel="self"/>
   <link href="https://modus-lisp.github.io/"/>
   <id>https://modus-lisp.github.io/</id>
-  <updated>2026-11-14T00:00:00Z</updated>
+  <updated>2026-11-21T00:00:00Z</updated>
   <author><name>ynniv</name></author>
+  <entry>
+    <title>№37 — Twelve PCs, one Quadra</title>
+    <link href="https://modus-lisp.github.io/issues/2026-11-21/"/>
+    <id>https://modus-lisp.github.io/issues/2026-11-21/</id>
+    <updated>2026-11-21T00:00:00Z</updated>
+    <summary>Modus boots an emulated Quadra 950 from its own hard-disk driver with no Mac OS, and runs under System 7.5.3 in a partition squeezed from 16.5 MB to 6. A disk with no DOS boots it on twelve PC boards from a 386 to a Celeron. chirp speaks bitchat’s Bluetooth mesh. 389 commits.</summary>
+    <link rel="alternate" type="text/markdown" href="https://modus-lisp.github.io/issues/2026-11-21/index.md"/>
+  </entry>
   <entry>
     <title>№36 — Down to 68k</title>
     <link href="https://modus-lisp.github.io/issues/2026-11-14/"/>

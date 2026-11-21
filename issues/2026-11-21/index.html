@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Twelve PCs, one Quadra — This Week in Modus №37</title>
+<meta name="description" content="This Week in Modus, 14–20 November 2026: Modus boots a Quadra 950 from its own hard-disk driver with no Mac OS, and runs as an application under System 7.5.3 in 8,640K. A disk with no DOS on it boots Modus on twelve PC boards from a 386DX-33 to a Celeron. chirp speaks bitchat's Bluetooth mesh, and kiln's image passes its lock check again.">
+<meta property="og:title" content="Twelve PCs, one Quadra — This Week in Modus №37">
+<meta property="og:description" content="14–20 November 2026: a Lisp REPL on a Quadra 950 with no Mac OS, and on twelve emulated PCs from a 386 to a Celeron with no DOS.">
+<meta property="og:type" content="article">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..700&family=Newsreader:opsz,wght@6..72,300..600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../../assets/crier.css">
+  <link rel="alternate" type="application/atom+xml" title="This Week in Modus" href="https://modus-lisp.github.io/feed.xml">
+  <link rel="alternate" type="text/markdown" href="index.md">
+  <meta property="og:url" content="https://modus-lisp.github.io/issues/2026-11-21/">
+  <meta property="og:site_name" content="crier — This Week in Modus">
+  <meta property="og:locale" content="en_GB">
+  <meta property="og:image" content="https://modus-lisp.github.io/assets/og/card.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://modus-lisp.github.io/assets/og/card.png">
+  <meta property="article:published_time" content="2026-11-21T00:00:00Z">
+  <meta property="article:section" content="This Week in Modus">
+  <meta name="twitter:label1" content="Commits">
+  <meta name="twitter:data1" content="389">
+  <meta name="twitter:label2" content="Repositories">
+  <meta name="twitter:data2" content="34">
+</head>
+<body>
+<div class="page">
+
+  <div class="sitebar">
+    <a class="brand" href="../../">crier</a>
+    <nav><a href="../">Issues</a><a href="https://github.com/modus-lisp">GitHub</a></nav>
+  </div>
+
+  <header class="mast">
+    <div class="kicker">
+      <span>This Week in Modus &mdash; &#8470;&nbsp;37</span>
+      <span>&middot;</span>
+      <span>14&ndash;20 November 2026</span>
+      <span>&middot;</span>
+      <span><b>389 commits</b> &middot; 34 of 66 repos</span>
+    </div>
+    <h1>Twelve PCs,<br>one <span class="lo">Quadra</span></h1>
+    <hr class="rule-fire">
+    <p class="standfirst">Last week Modus reached a prompt on an emulated Mac Classic. This week it
+    booted an emulated Quadra 950 from its own hard-disk driver with no Mac OS at all, and ran as
+    an ordinary application under System 7.5.3, in a partition it squeezed from 16.5&nbsp;MB to
+    6 in two days. On the PC side, a disk with no DOS on it now boots Modus on twelve
+    emulated motherboards, from a 386DX-33 to a Celeron, each under its own period BIOS. The
+    author summed up the state of things on Friday: <em>all modus-lisp repos are said to work on
+    modus now. drivers are still almost non-existent</em>.</p>
+
+    <div class="tally">
+      <div><span class="n">389</span><span class="l">Commits</span></div>
+      <div><span class="n">34</span><span class="l">Repositories</span></div>
+      <div><span class="n">2</span><span class="l">New this week</span></div>
+      <div><span class="n">12</span><span class="l">PC boards</span></div>
+      <div><span class="n">43</span><span class="l">Green, of 67</span></div>
+    </div>
+  </header>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>modus</em> &nbsp;/&nbsp; 18&ndash;20 November</span>
+      <h2>A Quadra, with and without its System</h2>
+    </div>
+
+    <p>The Mac work from the branches of &#8470;&nbsp;36 merged into main, and moved up a decade
+    of hardware, to MAME&rsquo;s Quadra 950, a 68040. It runs two ways. With no Mac OS, the
+    Quadra&rsquo;s ROM loads Modus&rsquo;s SCSI driver and boot blocks from the hard disk, and
+    the REPL comes up on the bare screen. Under System 7.5.3, Modus is an application, and About
+    This Macintosh tells you what it costs.</p>
+
+    <div class="plates two">
+      <figure class="plate inset">
+        <img src="../../assets/img/quadra950-hd-boot-2026-11-20.png" width="640" height="480"
+             alt="A plain white screen of text: Modus CL REPL (bare metal). EVAL = MVM-EVAL. Then (+ 1 2) gives 3, a DEFUN of FIB gives FIB, a timed (fib 25) returns (&quot;Modus&quot; &quot;m68k&quot; 75025 1366667), and (format nil &quot;~R&quot; 1993) returns &quot;one thousand nine hundred ninety-three&quot;.">
+        <figcaption><b>No Mac OS.</b> The Quadra&rsquo;s ROM, Modus&rsquo;s SCSI driver and boot
+        blocks, and a REPL.
+        <span class="prov">MAME, from the repository&rsquo;s docs/img, 20 November 2026</span></figcaption>
+      </figure>
+      <figure class="plate inset">
+        <img src="../../assets/img/quadra950-about-2026-11-20.png" width="640" height="480"
+             alt="A System 7.5.3 desktop. A window titled Modus shows the same REPL session. Beside it, About This Macintosh lists Total Memory 32,768K, Modus at 8,640K and System Software at 1,572K.">
+        <figcaption><b>Under System 7.5.3.</b> The same REPL as an application, at 8,640K beside the
+        System&rsquo;s 1,572K.
+        <span class="prov">MAME, from the repository&rsquo;s docs/img, 20 November 2026</span></figcaption>
+      </figure>
+    </div>
+
+    <p>That 8,640K is the end of a descent the log records step by step. The first Quadra map
+    needed a 16,576&nbsp;KB partition. It fell to 15,040 when the map moved down over the boot
+    code&rsquo;s dead tail. It fell to 13,568 when the JIT took its code area from the partition,
+    10,112 when cold native code stayed on disk until its first call, 9,728 when the stack moved
+    over the boot tail, and 8,640 with a keep-list measured on the Mac itself, which is the
+    screenshot above. Then it went on: 7,424 once boot-only code stayed on the disk, and 6,016
+    with smaller semispaces.</p>
+
+    <p>The floppy got the same treatment. Rewriting its LZMA loader in 914 bytes of 68020
+    assembly cut unpacking from about eleven minutes to 42 seconds. Booting a saved core instead
+    of rebuilding the same tables each time brought the REPL to about 105 seconds on a 68040,
+    from 400. A profile on the emulated Quadra had found those four minutes spent rebuilding
+    symbol tables that never change. A second floppy now carries the cold code, formatted FAT12
+    by fs-fat, and leaves 646&nbsp;KB free for the user.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>modus</em> &nbsp;/&nbsp; dos386 &nbsp;/&nbsp; 18&ndash;20 November</span>
+      <h2>A 386 to a Celeron, no DOS</h2>
+    </div>
+
+    <p>The PC went the way the Mac did, one layer at a time. On the 18th came
+    <code>MODUS.COM</code>, a DOS program that loads Modus into extended memory through unreal
+    mode and starts it exactly as QEMU&rsquo;s <code>-kernel</code> would, so one image boots
+    both ways. It refuses, with a message, a CPU below a 386, a machine running EMM386, or an A20
+    line that will not open. On the 19th, an 86Box harness began booting FreeDOS on emulated
+    boards under their own BIOSes. Getting through their setup screens was a project of its own:
+    a 1993 AMI on an ALi chipset counts its memory differently at POST than in its own setup, and
+    stopped on every boot until the harness learned to reconcile the two.</p>
+
+    <div class="callout">
+      <p>MODUS.COM is unchanged: its CPU and FPU checks, memory sizing, A20, unreal-mode load and
+      multiboot entry all run as they do under DOS; the image never knew DOS was there.</p>
+      <span class="src">modus &mdash; dc1c6753, 20 November</span>
+    </div>
+
+    <p>Then, on the 20th, DOS went. A boot sector and a 1.3&nbsp;KB shim serve the seven DOS calls
+    <code>MODUS.COM</code> makes, from a file table on the disk. Under QEMU the REPL is on the VGA
+    screen four seconds from power-on. In 86Box all twelve boards pass: two 386DX-33s and two
+    486SX-25s on soft floats, four 486DX2-66 boards from AMI, Phoenix, ALi and Intel, two Pentiums,
+    a Pentium Pro and a Celeron. The same day, bare i386 learned to run in 6&nbsp;MB, by leaving its compiled
+    code on the disk and paging it in through the BIOS on first use.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow"><em>chirp</em>, <em>fs-apple</em> &nbsp;/&nbsp; new</span>
+      <h2>Two new repositories</h2>
+    </div>
+
+    <p><b>chirp</b> is a client for bitchat, the Bluetooth mesh chat, in Common Lisp. It reads and
+    writes the packet format byte for byte, checks every signed announce and message against the
+    key the sender first announced, relays with TTL and dedup, and reassembles fragments. The radio
+    is left to whatever hosts it. On the phone it talks to the App Store app. The author, on how it began: <em>&ldquo;hey let&rsquo;s
+    prototype a bitchat client in the existing (ios) modus app&rdquo; and ten minutes later
+    claude&rsquo;s like &ldquo;verified it talks over bluetooth to the app store app. do you
+    want me to publish the new repo?&rdquo;</em></p>
+
+    <p><b>fs-apple</b> reads and writes Apple&rsquo;s disk formats in place: the partition map
+    and its driver descriptor, and PackBits. It was written to run anywhere Common Lisp does,
+    including on a Macintosh, where no 32-bit field can be assumed to fit a fixnum. It exists
+    because the Mac work needed it, and Modus&rsquo;s boot disks are now laid out by it rather
+    than by a Python script.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow">the rest &nbsp;/&nbsp; <em>glass</em>, <em>glass-webrtc</em>, <em>vessel</em>, <em>illatio</em></span>
+      <h2>Also this week</h2>
+    </div>
+
+    <p><b>glass</b>&rsquo;s window manager got a rack, a tiling layout for a phone, plus a theater
+    mode that gives one film, picture or document a turned screen, and drawing at the
+    screen&rsquo;s real pixel density. <b>glass-webrtc</b> can now send the desktop as VP8 video
+    instead of RFB updates, and the viewer switches between the sharp and the fuzzy stream live,
+    per session, by what the link can carry. spool&rsquo;s radio gives each station a worker
+    that shares nothing with the others. <b>illatio</b> runs small 4-bit models on Metal, and
+    has begun a port of Inkling 2 Mini <em>from its documentation</em>. operandi now evaluates
+    small models running inside its own image.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-eyebrow">the gates &nbsp;/&nbsp; 21 November</span>
+      <h2>A branch the clone did not take</h2>
+    </div>
+
+    <p>One gate was red: kiln&rsquo;s image, since the 20th. The image built, and then failed its
+    last check, that every repository in it sits at the commit <code>repos.lock</code> names.
+    For operandi-gui, it did not appear to. The lock had begun naming a branch other than the
+    default for the first time, <code>operandi-on-ios</code>. kiln&rsquo;s cloner checked out the
+    right files and pointed that branch at the pinned commit, but left <code>HEAD</code> on the
+    default branch, so git reported master&rsquo;s older tip. The files were never wrong; the
+    repository was misreporting which commit they were. The cloner now points <code>HEAD</code>
+    at the locked branch, and the image passes.</p>
+
+    <p>The audit also found four lists of siblings that were stale and still green: glass has
+    grown subsystems that reach glass-webrtc and folio, and the gates of glass, loom, spool and
+    warren never loaded them. Those lists are complete again, and the fixes, dated the 21st,
+    belong to next week&rsquo;s ledger.</p>
+
+    <p>As of publication: <b>67 repositories, 43 green, none failing, 24 without a workflow.</b></p>
+  </section>
+
+  <footer>
+    <p><strong>Method.</strong> Commits by <em>author</em> date, 14 to 20 November 2026, across the
+    66 published repositories cloned from the modus-lisp organisation, counting each
+    repository&rsquo;s default branch as the union of the local branch and <code>origin/</code>.
+    Produced with <code>bin/week 2026-11-21 --log</code>. Unmerged branches hold 74 commits,
+    which are not counted. Every machine in this issue is emulated: MAME for the Macintoshes,
+    86Box and QEMU for the PCs. Figures are the repositories&rsquo; own, from commit bodies. The
+    green and failing figures count the organisation&rsquo;s 67 repositories, which includes the
+    profile repository this ledger does not.</p>
+    <p><strong>Outside the log.</strong> The author&rsquo;s nostr notes were read with
+    <code>bin/notes 2026-11-21</code>; the two quotations from them are marked. The screenshots
+    are the repository&rsquo;s own.</p>
+    <p><a href="../">&larr; All issues</a> &middot; <a href="../../">crier</a></p>
+  </footer>
+
+</div>
+</body>
+</html>
